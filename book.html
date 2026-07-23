@@ -36,6 +36,11 @@
   .page-head p{color:var(--slate-lt);max-width:560px;margin-top:10px;font-size:1.02rem}
 
   .sched{padding:26px 0 40px}
+  .spam-note{
+    background:#FBF6EA;border-left:3px solid var(--brass);border-radius:2px;
+    padding:14px 18px;margin-bottom:18px;font-size:14.5px;color:#6B5A2A;line-height:1.55;
+  }
+  .spam-note b{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8A6D1F;display:block;margin-bottom:3px}
   .sched-frame{background:#fff;border:1px solid var(--line-lt);border-radius:4px;overflow:hidden;box-shadow:0 10px 30px rgba(6,28,46,.06)}
   .sched-frame iframe{display:block;width:100%;border:0;height:clamp(620px, calc(100dvh - 250px), 1000px)}
   .sched-alt{margin-top:14px;font-size:14px;color:var(--slate)}
@@ -81,6 +86,10 @@
 
 <section class="sched">
   <div class="wrap">
+    <div class="spam-note">
+      <b>After you book — check spam</b>
+      Your confirmation comes from Google Calendar, and spam filters sometimes grab it. If it isn't in your inbox within a couple of minutes, check your junk folder and mark it "Not spam" so the Google Meet link and reminders reach you.
+    </div>
     <div class="sched-frame">
       <iframe
         src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ2xDnn22KuDTpJVm7l-oCN0e9VkGCh-2wJ7UTDD-aAqpYa2SeM2bTtq62_k0ialuTOPsvLKNDdP?gv=true"
