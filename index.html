@@ -273,6 +273,22 @@
   .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease, transform .7s ease}
   .reveal.in{opacity:1;transform:none}
 
+  /* ---------- method / compass ---------- */
+  .method-sec{background:var(--paper-2)}
+  .compass-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .bearing{
+    background:var(--ink);color:var(--paper);border:1px solid rgba(180,134,43,.24);
+    border-radius:3px;padding:30px 24px 26px;display:flex;flex-direction:column;
+    transition:transform .25s ease, border-color .25s ease;
+  }
+  .bearing:hover{transform:translateY(-5px);border-color:var(--brass)}
+  .bearing .bk{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.13em;color:var(--brass-2);margin-bottom:16px;display:block}
+  .bearing h3{font-size:1.32rem;color:var(--paper);margin-bottom:11px}
+  .bearing p{color:var(--slate-lt);font-size:14.5px;flex:1}
+  .bearing .tie{margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--brass-2);border-top:1px solid rgba(180,134,43,.2);padding-top:13px}
+  .compass-path{margin-top:32px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.03em;color:var(--slate)}
+  .compass-path b{color:var(--brass);font-weight:500}
+
   /* ---------- responsive ---------- */
   @media(max-width:900px){
     .nav-links{
@@ -285,6 +301,7 @@
     .nav-links .nav-cta{margin-top:14px;width:100%;justify-content:center;border-bottom:none}
     .menu-btn{display:flex}
     .regs,.tiers,.diff-grid{grid-template-columns:1fr}
+    .compass-grid{grid-template-columns:repeat(2,1fr)}
     .diff:not(:last-child){border-right:none}
     .mismatch .grid2,.audit .grid2,.about-grid,.contact-grid,.sector-feature,.faq-grid{grid-template-columns:1fr}
     .sector-feature .art{min-height:200px}
@@ -293,6 +310,7 @@
   }
   @media(max-width:560px){
     .frow{grid-template-columns:1fr}
+    .compass-grid{grid-template-columns:1fr}
     .stamp span+span{border-left:none;padding-left:0}
     section{padding:64px 0}
     .hero-inner{padding:64px 28px 72px}
@@ -323,6 +341,7 @@
     <nav class="nav-links" id="navLinks">
       <a href="#demand">Why now</a>
       <a href="#difference">The difference</a>
+      <a href="#method">How we work</a>
       <a href="#services">Engagements</a>
       <a href="#sectors">Sectors</a>
       <a href="#about">Principal</a>
@@ -440,6 +459,44 @@
         <p>Built for this state's law, not adapted to it. The compliance calendar is owned and executed — not outsourced to a template.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ============ METHOD / COMPASS ============ -->
+<section class="method-sec" id="method">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">How we work</span>
+      <h2>The California Compass.</h2>
+      <p class="intro">One method, four bearings — from knowing exactly where you stand to running an HR function that scales. You move at your own pace, and every step stands on the one before it.</p>
+    </div>
+    <div class="compass-grid reveal">
+      <div class="bearing">
+        <span class="bk">BEARING 01 · DIAGNOSE</span>
+        <h3>See where you stand</h3>
+        <p>A fixed-fee audit maps your California exposure and traces every gap to the law. You finish with a clear picture and a ranked plan — not a stack of maybes.</p>
+        <span class="tie">→ THE COMPLIANCE AUDIT</span>
+      </div>
+      <div class="bearing">
+        <span class="bk">BEARING 02 · STABILIZE</span>
+        <h3>Reach safe ground</h3>
+        <p>We close what's urgent and put the required plans in place — workplace violence, pay transparency, your handbook — before they become demand letters.</p>
+        <span class="tie">→ THE FIRST 90 DAYS</span>
+      </div>
+      <div class="bearing">
+        <span class="bk">BEARING 03 · SYSTEMATIZE</span>
+        <h3>Build the machine</h3>
+        <p>Your managers get playbooks and an owned compliance calendar, so routine HR runs itself instead of landing on your desk.</p>
+        <span class="tie">→ THE RETAINER</span>
+      </div>
+      <div class="bearing">
+        <span class="bk">BEARING 04 · ELEVATE</span>
+        <h3>Chart forward</h3>
+        <p>Org design, people strategy, and an executive scoreboard — CHRO-level guidance that turns a compliant company into a stronger one.</p>
+        <span class="tie">→ FRACTIONAL CHRO</span>
+      </div>
+    </div>
+    <p class="compass-path reveal">know where you stand &nbsp;<b>→</b>&nbsp; reach safe ground &nbsp;<b>→</b>&nbsp; build the machine &nbsp;<b>→</b>&nbsp; chart forward</p>
   </div>
 </section>
 
