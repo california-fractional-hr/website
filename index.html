@@ -224,6 +224,8 @@
   .portrait .cap{background:rgba(8,40,61,.78);color:#E8E4D6;padding:4px 8px;border-radius:3px}
   .portrait .chart{position:absolute;inset:0;opacity:.55}
   .portrait .cap{position:absolute;bottom:16px;left:18px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--slate-lt);letter-spacing:.1em;z-index:2}
+  .portrait .seal{position:relative;z-index:3;width:66%;max-width:290px;height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.4))}
+  .portrait .seal .brg{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;fill:var(--brass-2);opacity:.75}
   .about-txt .eyebrow{margin-bottom:18px}
   .about-txt h2{font-size:clamp(1.8rem,3.5vw,2.6rem);margin-bottom:8px}
   .about-txt .role{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.1em;color:var(--brass);text-transform:uppercase;margin-bottom:24px}
@@ -653,6 +655,27 @@
             <path d="M-20,180 C80,140 160,210 240,180 C300,158 330,190 340,172"/>
             <path d="M-20,270 C90,230 170,300 250,270 C310,248 330,278 340,262"/>
           </g>
+        </svg>
+        <svg class="seal" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+          <circle cx="100" cy="100" r="94" stroke="#B4862B" stroke-width="1.4" opacity=".9"/>
+          <circle cx="100" cy="100" r="86" stroke="#B4862B" stroke-width="1" stroke-dasharray="1 5.55" opacity=".8"/>
+          <circle cx="100" cy="100" r="72" stroke="#B4862B" stroke-width=".75" opacity=".4"/>
+          <!-- intercardinal points (dim) -->
+          <path d="M144 56 L108.5 91.5 L56 144 L91.5 108.5 Z" fill="#B4862B" opacity=".38"/>
+          <path d="M56 56 L108.5 91.5 L144 144 L91.5 108.5 Z" fill="#B4862B" opacity=".38"/>
+          <!-- cardinal star: E-W and S-N -->
+          <path d="M22 100 L100 88 L178 100 L100 112 Z" fill="#B4862B"/>
+          <path d="M100 178 L112 100 L100 22 L88 100 Z" fill="#B4862B"/>
+          <!-- north point highlighted -->
+          <path d="M100 22 L112 100 L88 100 Z" fill="#D8AC4E"/>
+          <!-- hub -->
+          <circle cx="100" cy="100" r="6.5" fill="#0A2C44" stroke="#B4862B" stroke-width="1"/>
+          <circle cx="100" cy="100" r="2.4" fill="#D8AC4E"/>
+          <!-- bearings -->
+          <text class="brg" x="100" y="47" text-anchor="middle" dominant-baseline="middle">N</text>
+          <text class="brg" x="153" y="101" text-anchor="middle" dominant-baseline="middle">E</text>
+          <text class="brg" x="100" y="155" text-anchor="middle" dominant-baseline="middle">S</text>
+          <text class="brg" x="47" y="101" text-anchor="middle" dominant-baseline="middle">W</text>
         </svg>
         <div class="cap">VENTURA COUNTY, CA · EST. 2026</div>
       </div>
