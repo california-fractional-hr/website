@@ -59,8 +59,12 @@
   .q{margin-bottom:26px}
   .q .qid{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;color:var(--brass);margin-right:8px}
   .q label.qt{font-size:15px;font-weight:500;display:block;margin-bottom:9px;line-height:1.5}
-  textarea,input[type=text],input[type=email],input[type=tel]{width:100%;border:1px solid var(--line-lt);border-radius:3px;background:#FDFCF8;padding:11px 13px;font-family:'Public Sans',sans-serif;font-size:14.5px;color:var(--ink);resize:vertical;transition:border-color .15s,box-shadow .15s}
-  textarea:focus,input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(180,134,43,.12)}
+  textarea,input[type=text],input[type=email],input[type=tel],input[type=number],select{width:100%;border:1px solid var(--line-lt);border-radius:3px;background:#FDFCF8;padding:11px 13px;font-family:'Public Sans',sans-serif;font-size:14.5px;color:var(--ink);resize:vertical;transition:border-color .15s,box-shadow .15s}
+  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(180,134,43,.12)}
+  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23B4862B' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer}
+  .selwrap{display:flex;flex-direction:column;gap:9px;margin-bottom:10px}
+  .numgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+  .numgrid label{display:block;font-size:12.5px;color:var(--slate);margin-bottom:5px}
   textarea{min-height:64px}
   textarea.long{min-height:120px}
   .yn{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
@@ -80,9 +84,15 @@
   .filelist .sz{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--slate-lt);margin-left:auto}
   .filelist .rm{background:none;border:0;color:var(--slate);cursor:pointer;font-size:15px;padding:2px 6px}
   .filelist .rm:hover{color:#A33}
-  .kchecklist{columns:2;gap:26px;font-size:13.5px;color:var(--slate);margin:14px 0 4px}
+  .kchecklist{columns:2;gap:26px;font-size:13.5px;color:var(--slate);margin:14px 0 4px;list-style:none}
   @media (max-width:640px){.kchecklist{columns:1}}
-  .kchecklist li{margin:0 0 7px 16px;break-inside:avoid}
+  .kchecklist li{margin:0 0 8px;break-inside:avoid}
+  .kcheck{display:flex;align-items:flex-start;gap:9px;cursor:pointer;line-height:1.45;padding:4px 6px;border-radius:3px;transition:background .15s}
+  .kcheck:hover{background:#FBF6EA}
+  .kcheck input{accent-color:var(--brass);margin-top:3px;flex:none;cursor:pointer}
+  .kcheck input:checked + span{color:var(--ink)}
+  .kprogress{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;color:var(--slate);margin-top:10px}
+  .kprogress b{color:var(--brass)}
 
   /* buttons */
   .btnrow{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:30px}
@@ -160,9 +170,13 @@ const ENDPOINT = "https://script.google.com/macros/s/AKfycbxvD_IyGgKoxJ4LZzyOL6i
 const SECTIONS = [
  {k:"A", t:"Scoping: Company, Headcount, Locations, Industry",
   why:"California obligations switch on at 5, 15, 25, 26, 50, and 100 employees, and change by city and industry. These answers decide which rules apply to you — every later section is read through this one.",
-  qs:[["A1","Legal name of the company, entity type, and any related entities (shared owners, shared managers, or employees who work across entities)."],
-      ["A2","Current total headcount: full-time, part-time, and temporary/seasonal — split between California and elsewhere."],
-      ["A3","Highest headcount at any point in the last 12 months (count everyone on payroll, however briefly)."],
+  qs:[["A1","Entity type — then the legal name and any related entities (shared owners, shared managers, or employees who work across entities).","sel",
+        {opts:["California C-corporation","S-corporation","LLC","LLP / Partnership","Sole proprietorship","Nonprofit 501(c)(3)","Other / not sure"],
+         explain:"Legal name, plus any related entities:"}],
+      ["A2","Current headcount — split it for us (count everyone on payroll).","num",
+        {fields:["California — full-time","California — part-time / temp / seasonal","Outside California"]}],
+      ["A3","Highest headcount at any point in the last 12 months (count everyone on payroll, however briefly).","num",
+        {fields:["Peak headcount, last 12 months"]}],
       ["A4","Every location where anyone works, by city and county — including the home cities of remote employees."],
       ["A5","What does the company do, and what do most employees physically do all day? (This determines which Wage Order governs you.)"],
       ["A6","Any union representation, collective bargaining agreements, or organizing activity?","yn"],
@@ -177,12 +191,16 @@ const SECTIONS = [
       ["B5","Anyone under 18, on a work visa, or placed through a staffing agency?","yn"]]},
  {k:"C", t:"Wage & Hour Mechanics",
   why:"This is where the money is. California wage-hour rules are mechanical, which means violations are provable — and so is compliance. We verify your answers here against actual payroll records (Section K).",
-  qs:[["C1","What timekeeping system do you use? Does it round punches? Who can edit time entries, and when do they?"],
+  qs:[["C1","What timekeeping system do you use?","sel",
+        {opts:["None / paper timecards","Spreadsheet","QuickBooks Time (TSheets)","ADP","Paychex","Gusto","Homebase / When I Work","Through our PEO","Other"],
+         explain:"Does it round punches? Who can edit time entries, and when do they?"}],
       ["C2","Walk through lunch on a busy day: when do people take meal breaks, are they ever interrupted or skipped, and is that recorded anywhere?","long"],
       ["C3","When a meal period is missed, short, or late — is the one-hour premium paid automatically, sometimes, or never?"],
       ["C4","Are rest breaks (10 minutes per 4 hours) actually taken? What gets in the way?"],
       ["C5","How is overtime calculated when someone also earned a bonus or commission that period?"],
-      ["C6","Pay schedule and method. Do you know the nine items California requires on a wage statement?","yn"],
+      ["C6","How often do people get paid?","sel",
+        {opts:["Weekly","Biweekly (every 2 weeks)","Semi-monthly (e.g. 1st & 15th)","Monthly","Mixed / varies by group","Other"],
+         explain:"Pay method (check / direct deposit) — and do you know the nine items California requires on every wage statement?"}],
       ["C7","Someone quits or is terminated: describe exactly when and how they receive their final pay, including unused vacation."],
       ["C8","Vacation/PTO policy: accrual, caps, and what happens to unused balances. Any “use it or lose it” language anywhere?"],
       ["C9","Sick leave: how much, how tracked, and does it meet the current California minimum (40 hours / 5 days)?"],
@@ -220,7 +238,9 @@ const SECTIONS = [
   qs:[["H1","Injury & Illness Prevention Program (IIPP): exists in writing, current, and someone owns it?","yn"],
       ["H2","Workplace Violence Prevention Plan (SB 553): written plan, violent-incident log, and annual training — in place?","yn"],
       ["H3","Harassment-prevention training: has every supervisor (2 hrs) and employee (1 hr) been trained on the 2-year cycle, with records?","yn"],
-      ["H4","Workers' compensation carrier and policy status; any open claims?"],
+      ["H4","Who carries your workers' compensation coverage?","sel",
+        {opts:["State Compensation Insurance Fund","Zenith","ICW Group","Travelers","The Hartford","Employers","Through a PEO","Not sure","Other"],
+         explain:"Policy status, and any open claims?"}],
       ["H5","Are the current-year required posters up at every location — and how do remote employees receive them?","yn"]]},
  {k:"I", t:"Records & Personnel Files",
   why:"In a wage or termination dispute, the employer without records loses by default — California presumes against the party that should have kept them. Retention is now four years across most categories.",
@@ -253,7 +273,7 @@ const K_ITEMS = [
 /* ============ state ============ */
 const token = new URLSearchParams(location.search).get("t") || "";
 const LS_KEY = "cfhr-intake-" + token;
-let state = { contact:{}, answers:{}, files:[], step:0 };
+let state = { contact:{}, answers:{}, kchecks:{}, files:[], step:0 };
 let uploadQueue = []; // File objects held in memory
 let saveTimer = null;
 
@@ -261,7 +281,7 @@ const steps = ["start", ...SECTIONS.map(s=>s.k), "K", "review"];
 
 function loadState(){ try{ const s = localStorage.getItem(LS_KEY); if(s) state = Object.assign(state, JSON.parse(s)); }catch(e){} }
 function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({contact:state.contact, answers:state.answers, step:state.step})); }catch(e){}
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({contact:state.contact, answers:state.answers, kchecks:state.kchecks, step:state.step})); }catch(e){}
   const chip = document.getElementById("saveChip");
   chip.textContent = "SAVED ✓"; chip.classList.add("saved");
   clearTimeout(saveTimer); saveTimer = setTimeout(()=>{ chip.textContent="AUTOSAVE ON"; chip.classList.remove("saved"); }, 1600);
@@ -279,7 +299,8 @@ const rail = document.getElementById("rail");
 
 function sectionAnswered(k){
   const sec = SECTIONS.find(s=>s.k===k); if(!sec) return [0,0];
-  let a=0; sec.qs.forEach(q=>{ const v=state.answers[q[0]]; if(v && ((v.text&&v.text.trim())||v.choice)) a++; });
+  let a=0; sec.qs.forEach(q=>{ const v=state.answers[q[0]];
+    if(v && ((v.text&&v.text.trim())||v.choice||(v.parts&&Object.values(v.parts).some(x=>String(x).trim())))) a++; });
   return [a, sec.qs.length];
 }
 
@@ -299,13 +320,21 @@ function renderRail(){
 }
 
 function qBlock(q){
-  const [id, text, type] = q;
+  const [id, text, type, cfg] = q;
   const v = state.answers[id] || {};
   let inner = "";
   if(type==="yn"){
     inner += `<div class="yn">` + ["Yes","No","Partly / it depends"].map(c=>
       `<label><input type="radio" name="yn-${id}" value="${c}" ${v.choice===c?"checked":""}> ${c}</label>`).join("") + `</div>`;
     inner += `<textarea data-q="${id}" placeholder="Explain — what actually happens:">${v.text||""}</textarea>`;
+  } else if(type==="sel"){
+    inner += `<div class="selwrap"><select data-qsel="${id}"><option value="">Select one…</option>` +
+      cfg.opts.map(o=>`<option ${v.choice===o?"selected":""}>${o}</option>`).join("") + `</select>` +
+      `<input type="text" data-qother="${id}" class="${/^(Other|Not sure)/.test(v.choice||"")?"":"hidden"}" placeholder="Tell us more —" value="${(v.other||"").replace(/"/g,"&quot;")}">` +
+      (cfg.explain ? `<textarea data-q="${id}" placeholder="${cfg.explain}">${v.text||""}</textarea>` : "") + `</div>`;
+  } else if(type==="num"){
+    inner += `<div class="numgrid">` + cfg.fields.map((f,i)=>
+      `<div><label>${f}</label><input type="number" min="0" inputmode="numeric" data-qnum="${id}:${i}" value="${(v.parts||{})[i]??""}"></div>`).join("") + `</div>`;
   } else {
     inner += `<textarea data-q="${id}" class="${type==="long"?"long":""}" placeholder="${type==="long"?"Take your time — detail helps here.":"Your answer…"}">${v.text||""}</textarea>`;
   }
@@ -326,7 +355,11 @@ function render(){
       <div class="why" style="margin-top:18px"><b>Confidential</b>Your answers are confidential client records used solely to perform the audit. This form gathers facts; it does not render legal advice.</div>
       <div class="grid2">
         <div class="q"><label class="qt">Company</label><input type="text" id="f-company" value="${c.company||""}"></div>
-        <div class="q"><label class="qt">Your name & role</label><input type="text" id="f-contact" value="${c.contact||""}"></div>
+        <div class="q"><label class="qt">Your name</label><input type="text" id="f-contact" value="${c.contact||""}"></div>
+        <div class="q"><label class="qt">Your role</label><select id="f-role">` +
+          ["","Owner","CEO / President","Executive Director","CFO / COO","HR Director / Manager","Office Manager","Controller / Payroll","Other"].map(o=>
+            `<option value="${o}" ${c.role===o?"selected":""}>${o||"Select one…"}</option>`).join("") + `</select>
+          <input type="text" id="f-roleOther" class="${c.role==="Other"?"":"hidden"}" style="margin-top:9px" placeholder="Your title —" value="${c.roleOther||""}"></div>
         <div class="q"><label class="qt">Email</label><input type="email" id="f-email" value="${c.email||""}"></div>
         <div class="q"><label class="qt">Phone</label><input type="tel" id="f-phone" value="${c.phone||""}"></div>
       </div>
@@ -337,8 +370,9 @@ function render(){
     stage.innerHTML = `<div class="card">
       <div class="eyebrow" style="color:var(--brass)">Section K</div>
       <h2>Document Request — the Evidence</h2>
-      <div class="why"><b>Why we ask</b>Answers are claims; documents are evidence. Provide what exists — a missing item is itself a scoping fact, not a failure.</div>
-      <ul class="kchecklist">${K_ITEMS.map(i=>`<li>${i}</li>`).join("")}</ul>
+      <div class="why"><b>Why we ask</b>Answers are claims; documents are evidence. Provide what exists — a missing item is itself a scoping fact, not a failure. Check off each item as you upload it; anything unchecked we'll cover in the scoping call.</div>
+      <ul class="kchecklist">${K_ITEMS.map((item,i)=>`<li><label class="kcheck"><input type="checkbox" data-k="${i}" ${state.kchecks&&state.kchecks[i]?"checked":""}><span>${item}</span></label></li>`).join("")}</ul>
+      <p class="kprogress" id="kprog"></p>
       <div class="drop" id="drop"><b>Drag files here</b> or click to choose<br><span style="font-size:12.5px">PDF, Word, Excel, images · up to 25 MB per file · you can add more later</span>
         <input type="file" id="fileInput" multiple style="display:none"></div>
       <ul class="filelist" id="fileList"></ul>
@@ -346,6 +380,7 @@ function render(){
       <div class="btnrow"><button class="btn" onclick="prev()">← Back</button><button class="btn primary" onclick="next()">Review & submit →</button></div>
     </div>`;
     wireDropzone();
+    updateKProgress();
   }
   else if(key==="review"){
     let total=0, done=0;
@@ -371,7 +406,17 @@ function render(){
       <div class="btnrow"><button class="btn" onclick="prev()">← Back</button><button class="btn primary" onclick="next()">Continue →</button></div>
     </div>`;
   }
-  stage.querySelectorAll("textarea,input").forEach(el=>{ el.addEventListener("input", ()=>{ collectCurrent(); saveState(); if(el.closest(".q")) renderRailSoon(); }); });
+  stage.querySelectorAll("textarea,input,select").forEach(el=>{
+    const fire = ()=>{
+      if(el.tagName==="SELECT"){
+        const other = el.id==="f-role" ? document.getElementById("f-roleOther")
+                    : stage.querySelector(`input[data-qother="${el.dataset.qsel}"]`);
+        if(other) other.classList.toggle("hidden", !/^(Other|Not sure)/.test(el.value));
+      }
+      collectCurrent(); saveState(); if(el.closest(".q")) renderRailSoon();
+    };
+    el.addEventListener("input", fire); el.addEventListener("change", fire);
+  });
 }
 let railTimer=null;
 function renderRailSoon(){ clearTimeout(railTimer); railTimer=setTimeout(renderRail, 400); }
@@ -379,7 +424,12 @@ function renderRailSoon(){ clearTimeout(railTimer); railTimer=setTimeout(renderR
 function collectCurrent(){
   const key = steps[state.step];
   if(key==="start"){
-    ["company","contact","email","phone"].forEach(f=>{ const el=document.getElementById("f-"+f); if(el) state.contact[f]=el.value; });
+    ["company","contact","email","phone","role","roleOther"].forEach(f=>{ const el=document.getElementById("f-"+f); if(el) state.contact[f]=el.value; });
+    return;
+  }
+  if(key==="K"){
+    stage.querySelectorAll('input[data-k]').forEach(cb=>{ state.kchecks[cb.dataset.k] = cb.checked; });
+    updateKProgress();
     return;
   }
   const sec = SECTIONS.find(s=>s.k===key); if(!sec) return;
@@ -387,6 +437,11 @@ function collectCurrent(){
     const id=q[0]; const v = state.answers[id] || {};
     const ta = stage.querySelector(`textarea[data-q="${id}"]`); if(ta) v.text = ta.value;
     const r = stage.querySelector(`input[name="yn-${id}"]:checked`); if(r) v.choice = r.value;
+    const sel = stage.querySelector(`select[data-qsel="${id}"]`); if(sel) v.choice = sel.value;
+    const oth = stage.querySelector(`input[data-qother="${id}"]`); if(oth) v.other = oth.value;
+    stage.querySelectorAll(`input[data-qnum^="${id}:"]`).forEach(inp=>{
+      v.parts = v.parts || {}; v.parts[inp.dataset.qnum.split(":")[1]] = inp.value;
+    });
     state.answers[id]=v;
   });
 }
@@ -416,6 +471,11 @@ function renderFiles(){
   ul.innerHTML = uploadQueue.map((f,i)=>`<li>📄 ${f.name}<span class="sz">${(f.size/1024/1024).toFixed(1)} MB</span><button class="rm" onclick="rmFile(${i})" title="Remove">✕</button></li>`).join("");
 }
 function rmFile(i){ uploadQueue.splice(i,1); renderFiles(); }
+function updateKProgress(){
+  const el=document.getElementById("kprog"); if(!el) return;
+  const n=Object.values(state.kchecks||{}).filter(Boolean).length;
+  el.innerHTML = `<b>${n}</b> OF ${K_ITEMS.length} DOCUMENTS CHECKED OFF`;
+}
 
 /* ============ submit ============ */
 function b64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file); }); }
@@ -428,16 +488,30 @@ async function submitAll(){
 
   const answers=[];
   SECTIONS.forEach(s=>s.qs.forEach(q=>{
-    const v=state.answers[q[0]]||{};
-    let a = v.choice ? v.choice + (v.text?" — "+v.text:"") : (v.text||"");
-    answers.push({section:s.k, id:q[0], question:q[1], answer:a});
+    const [id, question, type, cfg] = q;
+    const v = state.answers[id]||{};
+    let a;
+    if(type==="num"){
+      a = (cfg.fields||[]).map((f,i)=>{ const val=(v.parts||{})[i]; return String(val||"").trim() ? f+": "+val : null; }).filter(Boolean).join(" · ");
+    } else {
+      a = v.choice||"";
+      if(/^(Other|Not sure)/.test(a) && (v.other||"").trim()) a += " ("+v.other.trim()+")";
+      if((v.text||"").trim()) a += (a?" — ":"")+v.text.trim();
+    }
+    answers.push({section:s.k, id, question, answer:a});
   }));
+  const kDone = K_ITEMS.filter((_,i)=>state.kchecks&&state.kchecks[i]);
+  const kMissing = K_ITEMS.filter((_,i)=>!(state.kchecks&&state.kchecks[i]));
+  answers.push({section:"K", id:"K", question:"Document checklist ("+K_ITEMS.length+" items)",
+    answer:"Checked off "+kDone.length+"/"+K_ITEMS.length+"."+(kMissing.length?" Not yet provided: "+kMissing.join("; "):" Complete.")});
+  const roleStr = state.contact.role==="Other" ? (state.contact.roleOther||"Other") : (state.contact.role||"");
+  const contactStr = (state.contact.contact||"") + (roleStr?" — "+roleStr:"");
 
   try{
     pnote.textContent="Sending your answers…"; pfill.style.width="8%";
-    const sub = await api({action:"submit", token, company:state.contact.company, contact:state.contact.contact,
+    const sub = await api({action:"submit", token, company:state.contact.company, contact:contactStr,
       email:state.contact.email, phone:state.contact.phone,
-      caHeadcount: (state.answers["A2"]||{}).text||"", totalHeadcount:(state.answers["A3"]||{}).text||"",
+      caHeadcount: (answers.find(a=>a.id==="A2")||{}).answer||"", totalHeadcount:(answers.find(a=>a.id==="A3")||{}).answer||"",
       sectionsComplete: SECTIONS.map(s=>{const [a,t]=sectionAnswered(s.k);return s.k+":"+a+"/"+t;}).join(" "),
       answers });
     if(!sub.ok) throw new Error(sub.error||"submit failed");
