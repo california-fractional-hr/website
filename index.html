@@ -76,11 +76,11 @@
     border-bottom:1px solid var(--line-lt);
   }
   .nav-inner{display:flex;align-items:center;justify-content:space-between;height:70px}
-  .brand{display:flex;align-items:center;gap:12px;font-family:'Spectral',serif;font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.05}
+  .brand{display:flex;align-items:center;gap:12px;font-family:'Spectral',serif;font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.05;white-space:nowrap}
   .brand .rose{width:26px;height:26px;flex:none}
   .brand small{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:var(--slate);display:block;font-weight:400;margin-top:1px}
   .nav-links{display:flex;align-items:center;gap:30px}
-  .nav-links a{font-size:14.5px;font-weight:500;color:var(--ink);opacity:.82;transition:opacity .15s}
+  .nav-links a{font-size:14.5px;font-weight:500;color:var(--ink);opacity:.82;transition:opacity .15s;white-space:nowrap}
   .nav-links a.btn-dark{color:var(--paper);opacity:1}
   .nav-links a:hover{opacity:1;color:var(--brass)}
   .nav-cta{padding:10px 18px;font-size:13.5px}
@@ -292,16 +292,24 @@
   .compass-path b{color:var(--brass);font-weight:500}
 
   /* ---------- responsive ---------- */
-  @media(max-width:900px){
+  @media(max-width:1420px) and (min-width:1201px){
+    .nav-links{gap:18px}
+    .brand{font-size:18px}
+    .nav-links a{font-size:13.5px}
+    .nav-cta{padding:9px 14px;font-size:12.5px}
+  }
+  @media(max-width:1200px){
     .nav-links{
       position:fixed;inset:70px 0 auto 0;background:var(--paper);flex-direction:column;
       align-items:flex-start;gap:0;padding:8px 28px 24px;border-bottom:1px solid var(--line-lt);
       transform:translateY(-120%);transition:transform .3s ease;box-shadow:0 20px 30px -20px rgba(0,0,0,.3)
     }
     .nav-links.open{transform:none}
-    .nav-links a{padding:14px 0;width:100%;border-bottom:1px solid var(--line-lt);font-size:16px}
+    .nav-links a{padding:14px 0;width:100%;border-bottom:1px solid var(--line-lt);font-size:16px;white-space:normal}
     .nav-links .nav-cta{margin-top:14px;width:100%;justify-content:center;border-bottom:none}
     .menu-btn{display:flex}
+  }
+  @media(max-width:900px){
     .regs,.tiers,.diff-grid{grid-template-columns:1fr}
     .compass-grid{grid-template-columns:repeat(2,1fr)}
     .diff:not(:last-child){border-right:none}
