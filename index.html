@@ -260,6 +260,26 @@
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brass)}
   textarea{resize:vertical;min-height:96px}
   .form-note{font-size:12.5px;color:var(--slate);margin-top:2px}
+  /* three ways to begin */
+  .start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:60px}
+  .start-card{background:var(--paper);border:1px solid var(--line-lt);border-radius:3px;padding:32px 28px;display:flex;flex-direction:column;transition:transform .25s, box-shadow .25s, border-color .25s}
+  .start-card:hover{transform:translateY(-5px);box-shadow:0 18px 40px -22px rgba(10,38,35,.4)}
+  .start-card.feature{border-color:var(--brass)}
+  .start-card .sc-n{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--brass);margin-bottom:16px}
+  .start-card h3{font-size:1.4rem;margin-bottom:10px}
+  .start-card>p{font-size:14.5px;color:var(--slate);margin-bottom:22px;flex:1}
+  .start-card .btn{align-self:flex-start;margin-top:auto}
+  .start-card form{display:grid;gap:12px;margin-top:auto}
+  .start-card form .btn{align-self:stretch;justify-content:center;margin-top:4px}
+  .start-grid.two{grid-template-columns:repeat(2,1fr);margin-bottom:22px}
+  .audit-box{display:block;padding:38px 34px}
+  .audit-box:hover{transform:none;box-shadow:none}
+  .audit-box h3{font-size:1.6rem}
+  .audit-box-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:44px;align-items:start;margin-top:18px}
+  .audit-box-intro p{font-size:1.02rem;color:var(--slate);margin-bottom:0}
+  .audit-box-intro .detail{margin-top:22px}
+  .contact-line{margin-top:40px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.03em;color:var(--slate)}
+  .contact-line .brass{color:var(--brass)}
 
   /* ---------- footer ---------- */
   footer{background:var(--deep);color:var(--slate-lt);padding:56px 0 34px}
@@ -291,6 +311,18 @@
   .bearing .tie{margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--brass-2);border-top:1px solid rgba(180,134,43,.2);padding-top:13px}
   .compass-path{margin-top:32px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:.03em;color:var(--slate)}
   .compass-path b{color:var(--brass);font-weight:500}
+  .bearing.start{border-color:var(--brass)}
+  .bearing .tie b{display:block;color:var(--paper);font-size:12.5px;letter-spacing:.05em;margin-bottom:5px}
+  .bearing .tie .pr{display:block;color:var(--brass-2);font-style:normal;font-size:11.5px;letter-spacing:.05em}
+
+  /* ---------- audit spotlight (entry point, inside the offer) ---------- */
+  .audit-spot{margin-top:60px;background:var(--deep);border:1px solid var(--brass);border-radius:4px;padding:48px 44px;display:grid;grid-template-columns:1.1fr .9fr;gap:52px;align-items:center}
+  .audit-spot .eyebrow{margin-bottom:16px}
+  .audit-spot h3{font-size:clamp(1.6rem,3vw,2.3rem);color:var(--paper);margin-bottom:18px;letter-spacing:-.02em;line-height:1.12}
+  .audit-spot h3 em{font-style:italic;color:var(--brass-2)}
+  .audit-spot p{color:var(--slate-lt);font-size:1.06rem;margin-bottom:22px}
+  .audit-spot .cap{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--brass-2);border:1px solid rgba(216,172,78,.4);border-radius:2px;padding:8px 14px;margin-bottom:26px}
+  .audit-spot .spot-cta{margin-top:2px}
 
   /* ---------- responsive ---------- */
   @media(max-width:1420px) and (min-width:1201px){
@@ -311,10 +343,11 @@
     .menu-btn{display:flex}
   }
   @media(max-width:900px){
-    .regs,.tiers,.diff-grid{grid-template-columns:1fr}
+    .regs,.tiers,.diff-grid,.start-grid,.start-grid.two,.audit-box-grid{grid-template-columns:1fr}
+    .audit-box{padding:30px 24px}
     .compass-grid{grid-template-columns:repeat(2,1fr)}
     .diff:not(:last-child){border-right:none}
-    .mismatch .grid2,.audit .grid2,.about-grid,.contact-grid,.sector-feature,.faq-grid{grid-template-columns:1fr}
+    .mismatch .grid2,.audit-spot,.about-grid,.contact-grid,.sector-feature,.faq-grid{grid-template-columns:1fr}
     .sector-feature .art{min-height:200px}
     .sectors-more{grid-template-columns:repeat(2,1fr)}
     .faq:nth-child(odd){border-right:none}
@@ -322,6 +355,7 @@
   @media(max-width:560px){
     .frow{grid-template-columns:1fr}
     .compass-grid{grid-template-columns:1fr}
+    .audit-spot{padding:32px 22px;gap:32px}
     .stamp span+span{border-left:none;padding-left:0}
     section{padding:64px 0}
     .hero-inner{padding:64px 28px 72px}
@@ -350,13 +384,10 @@
       <span>California Fractional HR<small>COMPLIANCE-FIRST · STATEWIDE</small></span>
     </a>
     <nav class="nav-links" id="navLinks">
-      <a href="#demand">Why now</a>
-      <a href="#difference">The difference</a>
-      <a href="#method">How we work</a>
-      <a href="#services">Engagements</a>
+      <a href="#method">What we do</a>
       <a href="#sectors">Sectors</a>
       <a href="#about">The Practice</a>
-      <a href="#contact" class="btn btn-dark nav-cta">Book a compliance audit</a>
+      <a href="/book.html" class="btn btn-dark nav-cta">Book a 15-min call</a>
     </nav>
     <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
@@ -386,8 +417,8 @@
     <h1>The HR executives California companies keep <em>on their side of the table.</em></h1>
     <p class="lede">Senior, compliance-first HR leadership for companies of 20 to 100 employees — the judgment of a Chief HR Officer, without the full-time hire.</p>
     <div class="hero-actions">
-      <a href="#contact" class="btn btn-primary">Book a compliance audit <span class="arr">→</span></a>
-      <a href="/book.html" class="btn btn-ghost">Or talk first — free 15-min call</a>
+      <a href="/book.html" class="btn btn-primary">Book a 15-min call <span class="arr">→</span></a>
+      <a href="#contact" class="btn btn-ghost">Or request more information</a>
     </div>
     <div class="stamp">
       <span><b>SHRM-SCP</b> certified</span>
@@ -398,188 +429,50 @@
   </div>
 </section>
 
-<!-- ============ DEMAND / MISMATCH ============ -->
-<section class="mismatch" id="demand">
-  <div class="wrap">
-    <div class="grid2 reveal">
-      <div>
-        <span class="eyebrow">The mismatch</span>
-        <h2 style="font-size:clamp(1.9rem,4vw,3rem);margin:20px 0 18px;">Enterprise-grade legal exposure on a small-business budget.</h2>
-        <p style="color:var(--slate);font-size:1.08rem;">At 15 employees, California's pay-scale posting rules attach. By 100, every major state obligation applies. A full-time HR director rarely pencils out below ~150 people — so companies in the middle carry the risk of a large employer with none of the infrastructure. That gap is the entire reason this practice exists.</p>
-      </div>
-      <div>
-        <div class="bignum">20<span class="brass">–</span>100</div>
-        <p class="mono" style="font-size:13px;color:var(--slate);letter-spacing:.06em;margin-top:6px;">EMPLOYEES — THE REGULATED-BUT-UNSTAFFED BAND</p>
-        <div class="headroom">
-          <div class="row"><span class="lab">Full-time HR director, coastal CA</span><span class="val">$150K+ loaded</span></div>
-          <div class="row"><span class="lab">Fractional CHRO market rate</span><span class="val">$125–$250/hr</span></div>
-          <div class="row"><span class="lab">PAGA penalty cap, "reasonable steps"</span><span class="val">15–30%</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div style="margin-top:64px;" class="reveal">
-      <span class="eyebrow">The demand engine</span>
-      <h2 style="font-size:clamp(1.6rem,3vw,2.2rem);margin:18px 0 34px;max-width:640px;">Three California rules that make HR help non-optional.</h2>
-      <div class="regs">
-        <div class="reg">
-          <span class="code">SB 553 · LABOR CODE 6401.9</span>
-          <h3>Workplace violence prevention</h3>
-          <p>A written plan, plus training at rollout, every year after, and on every change. A recurring, auditable obligation — the structural basis for a retainer.</p>
-          <div class="pen">RECURS ANNUALLY</div>
-        </div>
-        <div class="reg">
-          <span class="code">SB 1162 · LABOR CODE 432.3</span>
-          <h3>Pay-scale transparency</h3>
-          <p>Employers with 15+ staff must publish salary ranges in every job posting. Every routine hire is now a compliance event.</p>
-          <div class="pen">$100–$10,000 PER VIOLATION</div>
-        </div>
-        <div class="reg">
-          <span class="code">PAGA · 2024 REFORM</span>
-          <h3>Reasonable-steps discount</h3>
-          <p>Take "all reasonable steps" — audits, training, written policies — and qualify for penalty caps. Compliance stopped being hygiene; it's now a documented asset.</p>
-          <div class="pen">CAPS OF 15–30%</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ DIFFERENCE ============ -->
-<section id="difference">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">The difference</span>
-      <h2>Not junior. Not remote-only. Not a co-employment bundle.</h2>
-      <p class="intro">Most HR help for companies this size is priced like software or delivered from three states away. This is the tier above all of it.</p>
-    </div>
-    <div class="diff-grid reveal">
-      <div class="diff">
-        <div class="no">01 / LOCAL</div>
-        <h3>On your side of the table</h3>
-        <p>In the room for the hard conversations — the investigation, the reorg, the termination. At the chamber and the EDC event, not a call center.</p>
-      </div>
-      <div class="diff">
-        <div class="no">02 / SENIOR</div>
-        <h3>Executive judgment, not a help desk</h3>
-        <p>Senior Director–level decisions and the calls that don't fit a script. The person you'd hire full-time at 150 employees, available now at 40.</p>
-      </div>
-      <div class="diff">
-        <div class="no">03 / CALIFORNIA</div>
-        <h3>California-fluent by default</h3>
-        <p>Built for this state's law, not adapted to it. The compliance calendar is owned and executed — not outsourced to a template.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ METHOD / COMPASS ============ -->
+<!-- ============ THE OFFER — Compass · Engagements · Entry point (merged) ============ -->
 <section class="method-sec" id="method">
   <div class="wrap">
     <div class="sec-head reveal">
-      <span class="eyebrow">How we work</span>
+      <span class="eyebrow">What we do</span>
       <h2>The California Compass.</h2>
-      <p class="intro">One method, four bearings — from knowing exactly where you stand to running an HR function that scales. You move at your own pace, and every step stands on the one before it.</p>
+      <p class="intro">One method, four bearings — and one clear place to start. Each bearing is a way to work together, priced and scoped. You move at your own pace, and every step stands on the one before it.</p>
     </div>
     <div class="compass-grid reveal">
-      <div class="bearing">
+      <div class="bearing start">
         <span class="bk">BEARING 01 · DIAGNOSE</span>
         <h3>See where you stand</h3>
-        <p>A fixed-fee audit maps your California exposure and traces every gap to the law. You finish with a clear picture and a ranked plan — not a stack of maybes.</p>
-        <span class="tie">→ THE COMPLIANCE AUDIT</span>
+        <p>A fixed-fee audit maps your California exposure and traces every gap to the law — a clear picture and a ranked plan, not a stack of maybes.</p>
+        <span class="tie"><b>Compliance Audit</b><em class="pr">Fixed fee · from $4,500 · start here</em></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 02 · STABILIZE</span>
         <h3>Reach safe ground</h3>
-        <p>We close what's urgent and put the required plans in place — workplace violence, pay transparency, your handbook — before they become demand letters.</p>
-        <span class="tie">→ THE FIRST 90 DAYS</span>
+        <p>We put the required plans in place — workplace violence, pay transparency, your handbook — before they become demand letters.</p>
+        <span class="tie"><b>The First 90 Days</b><em class="pr">Retainer · from $3,500/mo</em></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 03 · SYSTEMATIZE</span>
         <h3>Build the machine</h3>
         <p>Your managers get playbooks and an owned compliance calendar, so routine HR runs itself instead of landing on your desk.</p>
-        <span class="tie">→ THE RETAINER</span>
+        <span class="tie"><b>Fractional HR Director</b><em class="pr">Retainer · from $3,500/mo</em></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 04 · ELEVATE</span>
         <h3>Chart forward</h3>
         <p>Org design, people strategy, and an executive scoreboard — CHRO-level guidance that turns a compliant company into a stronger one.</p>
-        <span class="tie">→ FRACTIONAL CHRO</span>
+        <span class="tie"><b>Fractional CHRO</b><em class="pr">Scoped to the engagement</em></span>
       </div>
     </div>
     <p class="compass-path reveal">see where you stand &nbsp;<b>→</b>&nbsp; reach safe ground &nbsp;<b>→</b>&nbsp; build the machine &nbsp;<b>→</b>&nbsp; chart forward</p>
-  </div>
-</section>
 
-<!-- ============ SERVICES / TIERS ============ -->
-<section class="dark" id="services">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow on-dark">Engagements</span>
-      <h2>Three ways to work together.</h2>
-      <p class="intro">Start with a fixed-fee audit. Grow into a retainer. Bring in a fractional CHRO when the stakes call for it.</p>
-    </div>
-    <div class="tiers reveal">
-      <div class="tier feature">
-        <div class="kicker">Start here</div>
-        <h3>California Compliance Audit</h3>
-        <div class="price">Fixed fee · from $4,500</div>
-        <p>The "reasonable steps" audit. A documented file that reduces PAGA exposure and shows you exactly where you stand.</p>
-        <ul>
-          <li>Wage-hour &amp; pay-transparency review</li>
-          <li>Workplace-violence plan check</li>
-          <li>Written reasonable-steps record</li>
-          <li>12-month compliance calendar</li>
-        </ul>
-        <span class="tag">→ CONVERTS TO A RETAINER</span>
-      </div>
-      <div class="tier">
-        <div class="kicker">Ongoing</div>
-        <h3>Fractional HR Director</h3>
-        <div class="price">Retainer · from $3,500/mo</div>
-        <p>Your HR department, part-time. Someone senior owning the day-to-day so you can run the company.</p>
-        <ul>
-          <li>Compliance calendar ownership</li>
-          <li>Manager coaching &amp; hiring support</li>
-          <li>SB 553 / SB 1162 execution</li>
-          <li>Policy &amp; handbook maintenance</li>
-        </ul>
-        <span class="tag">15–25 HRS / MONTH</span>
-      </div>
-      <div class="tier">
-        <div class="kicker">Executive</div>
-        <h3>Fractional CHRO &amp; Vertical</h3>
-        <div class="price">Scoped to the engagement</div>
-        <p>Top-of-table HR for growth events, M&amp;A, and specialized defense-contractor and biotech work.</p>
-        <ul>
-          <li>Org design &amp; leadership advisory</li>
-          <li>M&amp;A and growth-event HR</li>
-          <li>Defense / SDVOSB compliance</li>
-          <li>Investigations &amp; risk events</li>
-        </ul>
-        <span class="tag">PROJECT OR RETAINER</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ AUDIT WEDGE ============ -->
-<section class="audit">
-  <svg class="chart" viewBox="0 0 1440 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <g fill="none" stroke="#B4862B" stroke-width="1" opacity="0.5">
-      <path d="M-50,140 C300,90 560,210 820,175 C1080,140 1300,220 1500,180"/>
-      <path d="M-50,250 C320,200 580,310 840,280 C1100,250 1320,320 1500,290"/>
-      <path d="M-50,370 C340,320 600,410 860,385 C1120,360 1340,420 1500,400"/>
-    </g>
-  </svg>
-  <div class="wrap">
-    <div class="grid2 reveal">
+    <!-- entry point, folded in -->
+    <div class="audit-spot reveal">
       <div>
-        <span class="eyebrow on-dark">The entry point</span>
-        <h2 style="margin-top:20px;">Turn compliance from a liability into a <em>discount.</em></h2>
-        <p class="body">California's 2024 PAGA reform rewards employers who take "all reasonable steps" with penalty caps of 15–30%. The Compliance Audit produces the documented proof — the file your attorney wants to see, and the litigation-value asset most providers never mention.</p>
-        <span class="cap">PENALTY EXPOSURE ↓ 15–30% WITH DOCUMENTED STEPS</span>
-        <div style="margin-top:26px;"><a href="#contact" class="btn btn-primary">Request the audit <span class="arr">→</span></a></div>
+        <span class="eyebrow on-dark">Start here · The entry point</span>
+        <h3>Turn compliance from a liability into a <em>discount.</em></h3>
+        <p>California's 2024 PAGA reform rewards employers who take "all reasonable steps" — documented steps can cap PAGA penalties at 15% of the statutory amount, and, paired with a cure, potentially eliminate them. The Compliance Audit produces the documented proof — the file your attorney wants to see, and the litigation-value asset most providers never mention.</p>
+        <span class="cap">DOCUMENTED STEPS CAN CAP PAGA PENALTIES AT 15%</span>
+        <div class="spot-cta"><a href="/audit-overview.pdf" class="btn btn-primary" download>Learn more <span class="arr">→</span></a></div>
       </div>
       <div class="checklist">
         <div class="ct">What the audit delivers</div>
@@ -736,48 +629,35 @@
 <!-- ============ CONTACT ============ -->
 <section class="contact" id="contact">
   <div class="wrap">
-    <div class="contact-grid reveal">
-      <div>
-        <span class="eyebrow">Start here</span>
-        <h2 style="margin-top:18px;">Book a compliance audit.</h2>
-        <p class="sub">Tell me your headcount and what's keeping you up at night. I'll come back with a fixed-fee audit scope and a first available date.</p>
-        <div class="detail">
-          <span class="brass">EMAIL</span>&nbsp;&nbsp;connect@calfractionalhr.com<br>
-          <span class="brass">AREA</span>&nbsp;&nbsp;&nbsp;Ventura · Santa Barbara · Statewide CA<br>
-          <span class="brass">RESP</span>&nbsp;&nbsp;&nbsp;Within one business day
-        </div>
-        <div class="call-cta" style="margin-top:32px;padding-top:26px;border-top:1px solid rgba(10,44,68,.14);">
-          <p style="font-size:1rem;color:var(--slate);margin-bottom:16px;">Prefer to talk first? Book a free 15-minute video call — no prep, no pitch.</p>
-          <a href="/book.html" class="btn btn-primary">Book a free 15-minute call <span class="arr">→</span></a>
-        </div>
-      </div>
-      <form id="auditForm" name="audit-request" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
-        <input type="hidden" name="form-name" value="audit-request">
-        <p style="display:none"><label>Leave this empty: <input name="bot-field"></label></p>
-        <div class="frow">
-          <div><label>Name</label><input type="text" id="f-name" name="name" required></div>
-          <div><label>Company</label><input type="text" id="f-co" name="company" required></div>
-        </div>
-        <div class="frow">
-          <div><label>Email</label><input type="email" id="f-email" name="email" required></div>
-          <div>
-            <label>Headcount</label>
-            <select id="f-size" name="headcount">
-              <option>Under 20</option>
-              <option selected>20–50</option>
-              <option>50–100</option>
-              <option>100+</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label>What's the situation?</label>
-          <textarea id="f-msg" name="situation" placeholder="A recent hire, an investigation, a PAGA letter, or just getting ahead of it…"></textarea>
-        </div>
-        <button type="submit" class="btn btn-dark" style="justify-content:center;">Request the audit <span class="arr">→</span></button>
-        <p class="form-note">Goes straight to my desk. I reply within one business day.</p>
-      </form>
+    <div class="sec-head reveal" style="max-width:720px;margin-bottom:44px;">
+      <span class="eyebrow">Start here</span>
+      <h2>Let's talk.</h2>
+      <p class="intro">Two easy ways to begin — book a quick call, or have me send the overview. No prep, no pitch.</p>
     </div>
+
+    <div class="start-grid two reveal">
+      <div class="start-card feature">
+        <div class="sc-n">BOOK A CALL</div>
+        <h3>Book a 15-minute call</h3>
+        <p>A free 15-minute video call — no prep, no pitch. Bring one question and we'll figure out the right next step together.</p>
+        <a href="/book.html" class="btn btn-primary">Book a 15-min call <span class="arr">→</span></a>
+      </div>
+      <div class="start-card">
+        <div class="sc-n">GOT A QUESTION?</div>
+        <h3>Contact us</h3>
+        <p>Send a message and I'll get back to you personally — usually within one business day.</p>
+        <form name="contact" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="contact">
+          <p style="display:none"><label>Leave this empty: <input name="bot-field"></label></p>
+          <div><label>Name</label><input type="text" name="name" required></div>
+          <div><label>Email</label><input type="email" name="email" required></div>
+          <div><label>Message</label><textarea name="message" placeholder="Your question, or a bit about your situation…"></textarea></div>
+          <button type="submit" class="btn btn-primary">Send message <span class="arr">→</span></button>
+        </form>
+      </div>
+    </div>
+
+    <p class="contact-line reveal"><span class="brass">EMAIL</span>&nbsp;&nbsp;connect@calfractionalhr.com&nbsp;&nbsp;·&nbsp;&nbsp;<span class="brass">AREA</span>&nbsp;&nbsp;Ventura · Santa Barbara · Statewide CA&nbsp;&nbsp;·&nbsp;&nbsp;<span class="brass">RESP</span>&nbsp;&nbsp;Within one business day</p>
   </div>
 </section>
 
@@ -799,8 +679,7 @@
       </div>
       <div class="foot-col">
         <h5>Practice</h5>
-        <a href="#difference">The difference</a>
-        <a href="#services">Engagements</a>
+        <a href="#method">What we do</a>
         <a href="#sectors">Sectors served</a>
         <a href="#about">The Practice</a>
       </div>
@@ -812,7 +691,7 @@
       </div>
       <div class="foot-col">
         <h5>Contact</h5>
-        <a href="#contact">Book an audit</a>
+        <a href="/book.html">Book a call</a>
         <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a>
         
       </div>
