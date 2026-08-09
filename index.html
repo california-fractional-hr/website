@@ -314,6 +314,23 @@
   .bearing.start{border-color:var(--brass)}
   .bearing .tie b{display:block;color:var(--paper);font-size:12.5px;letter-spacing:.05em;margin-bottom:5px}
   .bearing .tie .pr{display:block;color:var(--brass-2);font-style:normal;font-size:11.5px;letter-spacing:.05em}
+  /* clickable video trigger on the Compliance Audit label */
+  .video-trigger{cursor:pointer;transition:color .15s;outline:none}
+  .video-trigger:hover,.video-trigger:focus-visible{color:var(--brass-2)}
+  .video-trigger .vt-play{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-left:5px;border-radius:50%;background:var(--brass);color:var(--ink);font-size:7px;line-height:1;padding-left:1px;vertical-align:middle;transition:background .15s,transform .15s}
+  .video-trigger:hover .vt-play,.video-trigger:focus-visible .vt-play{background:var(--brass-2);transform:scale(1.08)}
+  /* video lightbox */
+  .video-modal[hidden]{display:none}
+  .video-modal{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:5vmin;opacity:0;transition:opacity .22s ease}
+  .video-modal.open{opacity:1}
+  .vm-backdrop{position:absolute;inset:0;background:rgba(6,20,32,.88);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  .vm-frame{position:relative;width:min(1120px,92vw);max-height:88vh;aspect-ratio:16/9;transform:scale(.98);transition:transform .22s ease}
+  .video-modal.open .vm-frame{transform:scale(1)}
+  .vm-video{width:100%;height:100%;border-radius:6px;background:#000;box-shadow:0 30px 90px -30px rgba(0,0,0,.75)}
+  .vm-close{position:absolute;top:-46px;right:-2px;width:38px;height:38px;border:0;border-radius:50%;background:transparent;color:var(--paper);font-size:30px;line-height:1;cursor:pointer;opacity:.8;transition:opacity .15s,color .15s}
+  .vm-close:hover,.vm-close:focus-visible{opacity:1;color:var(--brass-2);outline:none}
+  @media (max-width:640px){.vm-close{top:-44px}}
+  @media (prefers-reduced-motion:reduce){.video-modal,.vm-frame{transition:none}}
 
   /* ---------- audit spotlight (entry point, inside the offer) ---------- */
   .audit-spot{margin-top:60px;background:var(--deep);border:1px solid var(--brass);border-radius:4px;padding:48px 44px;display:grid;grid-template-columns:1.1fr .9fr;gap:52px;align-items:center}
@@ -442,7 +459,7 @@
         <span class="bk">BEARING 01 · DIAGNOSE</span>
         <h3>See where you stand</h3>
         <p>A fixed-fee audit maps your California exposure and traces every gap to the law — a clear picture and a ranked plan, not a stack of maybes.</p>
-        <span class="tie"><b>Compliance Audit</b><em class="pr">Fixed fee · from $4,500 · start here</em></span>
+        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Compliance Audit video">Compliance Audit <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Fixed fee · from $4,500 · start here</em></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 02 · STABILIZE</span>
@@ -704,6 +721,17 @@
   </div>
 </footer>
 
+<!-- Compliance Audit video lightbox -->
+<div class="video-modal" id="auditVideoModal" role="dialog" aria-modal="true" aria-label="The Compliance Audit — video" hidden>
+  <div class="vm-backdrop" data-close></div>
+  <div class="vm-frame">
+    <button class="vm-close" type="button" data-close aria-label="Close video">×</button>
+    <video id="auditVideo" class="vm-video" controls playsinline preload="none" poster="compliance-audit-poster.jpg">
+      <source src="compliance-audit-ad.mp4" type="video/mp4">
+    </video>
+  </div>
+</div>
+
 <script>
   // mobile menu
   const menuBtn=document.getElementById('menuBtn');
@@ -724,6 +752,35 @@
 
   // audit form -> mailto
   // form posts to Netlify (data-netlify) — no JS handler needed
+
+  // Compliance Audit video lightbox
+  const vModal=document.getElementById('auditVideoModal');
+  const vVideo=document.getElementById('auditVideo');
+  let vLastFocus=null;
+  function openVideo(trigger){
+    vLastFocus=trigger||document.activeElement;
+    vModal.hidden=false;
+    void vModal.offsetWidth; // commit opacity:0 start state, then transition to .open
+    vModal.classList.add('open');
+    document.body.style.overflow='hidden';
+    try{vVideo.currentTime=0;}catch(e){}
+    const p=vVideo.play();
+    if(p&&p.catch)p.catch(()=>{}); // autoplay-with-sound may be blocked; controls remain
+  }
+  function closeVideo(){
+    vModal.classList.remove('open');
+    vVideo.pause();
+    document.body.style.overflow='';
+    const done=()=>{vModal.hidden=true;vModal.removeEventListener('transitionend',done);if(vLastFocus)vLastFocus.focus();};
+    vModal.addEventListener('transitionend',done);
+    setTimeout(done,300); // fallback if transitionend doesn't fire (reduced motion)
+  }
+  document.querySelectorAll('.video-trigger').forEach(t=>{
+    t.addEventListener('click',()=>openVideo(t));
+    t.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openVideo(t);}});
+  });
+  vModal.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',closeVideo));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!vModal.hidden)closeVideo();});
 
 </script>
 
