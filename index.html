@@ -459,13 +459,13 @@
         <span class="bk">BEARING 01 · DIAGNOSE</span>
         <h3>See where you stand</h3>
         <p>A fixed-fee audit maps your California exposure and traces every gap to the law — a clear picture and a ranked plan, not a stack of maybes.</p>
-        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Compliance Audit video">Compliance Audit <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Fixed fee · from $4,500 · start here</em></span>
+        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Compliance Audit video" data-video="compliance-audit-ad.mp4" data-poster="compliance-audit-poster.jpg">Compliance Audit <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Fixed fee · from $4,500 · start here</em></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 02 · STABILIZE</span>
         <h3>Reach safe ground</h3>
         <p>We put the required plans in place — workplace violence, pay transparency, your handbook — before they become demand letters.</p>
-        <span class="tie"><b>The First 90 Days</b><em class="pr">Retainer · from $3,500/mo</em></span>
+        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the First 90 Days video" data-video="first-90-days-ad.mp4" data-poster="first-90-days-poster.jpg">The First 90 Days <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Retainer · from $3,500/mo</em></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 03 · SYSTEMATIZE</span>
@@ -722,13 +722,11 @@
 </footer>
 
 <!-- Compliance Audit video lightbox -->
-<div class="video-modal" id="auditVideoModal" role="dialog" aria-modal="true" aria-label="The Compliance Audit — video" hidden>
+<div class="video-modal" id="auditVideoModal" role="dialog" aria-modal="true" aria-label="California Fractional HR — video" hidden>
   <div class="vm-backdrop" data-close></div>
   <div class="vm-frame">
     <button class="vm-close" type="button" data-close aria-label="Close video">×</button>
-    <video id="auditVideo" class="vm-video" controls playsinline preload="none" poster="compliance-audit-poster.jpg">
-      <source src="compliance-audit-ad.mp4" type="video/mp4">
-    </video>
+    <video id="auditVideo" class="vm-video" controls playsinline preload="none"></video>
   </div>
 </div>
 
@@ -759,6 +757,14 @@
   let vLastFocus=null;
   function openVideo(trigger){
     vLastFocus=trigger||document.activeElement;
+    // each trigger names its own video + poster; load only when it changes
+    const src=trigger&&trigger.dataset?trigger.dataset.video:null;
+    const poster=trigger&&trigger.dataset?trigger.dataset.poster:null;
+    if(src&&vVideo.getAttribute('src')!==src){
+      vVideo.setAttribute('src',src);
+      if(poster)vVideo.setAttribute('poster',poster);
+      vVideo.load();
+    }
     vModal.hidden=false;
     void vModal.offsetWidth; // commit opacity:0 start state, then transition to .open
     vModal.classList.add('open');
