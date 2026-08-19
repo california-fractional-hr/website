@@ -206,10 +206,13 @@ function renderRequests(){
     const drop = waived ? "" : done
       ? `<div class="drop compact" data-req="${r.id}" data-title="${esc(r.title)}">Add another file to this request — drop here, or <b>browse</b></div>`
       : `<div class="drop" data-req="${r.id}" data-title="${esc(r.title)}">Drop <b>${esc(r.title)}</b> here, or <b>browse</b></div>`;
+    const onRecord = (r.files_list || []).map(f =>
+      `<li>📄 ${esc(f.name)}<span class="sz">FILED ${esc(String(f.date || "")).toUpperCase()}</span></li>`).join("");
     return `<div class="req ${cls}" id="req-${r.id}">
       <div class="req-top"><h3>${esc(r.title)}</h3>${chip}</div>
       ${r.note ? `<p class="req-note">${esc(r.note)}</p>` : ""}
       ${meta ? `<p class="req-meta">${meta}</p>` : ""}
+      ${onRecord ? `<ul class="filelist">${onRecord}</ul>` : ""}
       ${drop}
       <ul class="filelist" data-list="${r.id}"></ul>
     </div>`;
@@ -298,7 +301,7 @@ function queueNotify(title, names){
   if(PREVIEW){
     company = "Sample Client Co.";
     requests = [
-      {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing against wage statements is where misclassification, overtime, and regular-rate findings actually surface.", status:"received", requested:"Aug 12", received:"Aug 15", files:2},
+      {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing against wage statements is where misclassification, overtime, and regular-rate findings actually surface.", status:"received", requested:"Aug 12", received:"Aug 15", files:2, files_list:[{name:"payroll-register-jun.pdf", date:"Aug 14"},{name:"payroll-register-jul.pdf", date:"Aug 15"}]},
       {id:"R-02", title:"Wage statements (pay stubs) for 3–5 employees", note:"We test the nine required Labor Code §226 line items against real stubs, not the payroll company's promise.", status:"open", requested:"Aug 12"},
       {id:"R-03", title:"Current employee handbook", note:"Whatever version employees actually received — including the one nobody has updated.", status:"open", requested:"Aug 12"},
       {id:"R-04", title:"Timekeeping export — 2 weeks, non-exempt staff", note:"Meal-period timing lives here. Missing punches are a finding, not a formatting problem.", status:"reviewed", requested:"Aug 12", received:"Aug 14", files:1},
