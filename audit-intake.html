@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Audit Intake — California Fractional HR</title>
-<meta name="description" content="Secure client intake for the California Compliance Audit.">
+<title>Audit Workspace — California Fractional HR</title>
+<meta name="description" content="Secure client workspace for the California Compliance Audit.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%2308283D%22/%3E%3Cpath d=%22M20 4 L23 20 L20 36 L17 20 Z%22 fill=%22%23B4862B%22/%3E%3Cpath d=%22M4 20 L20 17 L36 20 L20 23 Z%22 fill=%22%23B4862B%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Public Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
-  h1,h2{font-family:'Spectral',Georgia,serif;font-weight:500;line-height:1.12;letter-spacing:-.02em}
+  h1,h2,h3{font-family:'Spectral',Georgia,serif;font-weight:500;line-height:1.12;letter-spacing:-.02em}
   a{color:inherit;text-decoration:none}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
 
@@ -35,12 +35,10 @@
   .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass-2);display:inline-flex;align-items:center;gap:10px;margin-bottom:12px}
   .eyebrow::before{content:"";width:26px;height:1px;background:var(--brass-2);opacity:.7;display:inline-block}
   .page-head h1{font-size:clamp(1.6rem,4vw,2.3rem);color:var(--paper)}
-  .page-head p{color:#C9D6D1;max-width:640px;margin-top:8px;font-size:1.02rem}
+  .page-head p{color:#C9D6D1;max-width:680px;margin-top:8px;font-size:1.02rem}
 
   .layout{display:grid;grid-template-columns:230px 1fr;gap:36px;padding:34px 0 70px}
   @media (max-width:860px){.layout{grid-template-columns:1fr;gap:20px}}
-
-  /* progress rail */
   .rail{position:sticky;top:92px;align-self:start}
   @media (max-width:860px){.rail{position:static;display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}}
   .rail button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-left:2px solid var(--line-lt);padding:9px 12px;font-family:'Public Sans',sans-serif;font-size:13.5px;color:var(--slate);cursor:pointer;transition:color .15s,border-color .15s;white-space:nowrap}
@@ -50,7 +48,6 @@
   .rail .tick{width:14px;height:14px;flex:none;opacity:.18}
   .rail .cnt{font-family:'IBM Plex Mono',monospace;font-size:10.5px;margin-left:auto;color:var(--slate-lt)}
 
-  /* cards */
   .card{background:#fff;border:1px solid var(--line-lt);border-radius:4px;box-shadow:0 12px 32px rgba(6,28,46,.10);padding:34px 38px}
   @media (max-width:640px){.card{padding:24px 20px}}
   .card h2{font-size:clamp(1.3rem,3vw,1.7rem);margin-bottom:6px}
@@ -72,30 +69,33 @@
   .yn label{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-lt);border-radius:3px;padding:8px 14px;font-size:14px;cursor:pointer;background:#FFFFFF;transition:border-color .15s,background .15s}
   .yn input{accent-color:var(--brass)}
   .yn label:has(input:checked){border-color:var(--brass);background:#FBF6EA;font-weight:600}
-
+  .attrib{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:var(--slate-lt);margin-top:6px}
+  .attrib b{color:var(--ok);font-weight:500}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
 
-  /* upload */
-  .drop{border:2px dashed rgba(180,134,43,.45);border-radius:4px;background:#FFFFFF;padding:36px 20px;text-align:center;color:#31424A;cursor:pointer;transition:border-color .15s,background .15s;margin:18px 0}
+  /* section documents (the merged Document Center) */
+  .docblock{margin-top:34px;border-top:1px solid var(--line-lt);padding-top:22px}
+  .docblock .dhead{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;color:#8A6D1F;text-transform:uppercase;margin-bottom:14px}
+  .req{border:1px solid var(--line-lt);border-radius:4px;padding:16px 18px;margin-bottom:12px;background:#fff}
+  .req.is-done{border-left:3px solid var(--ok)}
+  .req.is-open{border-left:3px solid var(--brass)}
+  .req-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .req-top h3{font-size:1.02rem;flex:1;min-width:180px}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;border-radius:2px;padding:4px 10px;white-space:nowrap}
+  .chip.open{color:#fff;background:var(--brass);border:1px solid var(--brass);font-weight:500}
+  .chip.done{color:#fff;background:var(--ok);border:1px solid var(--ok);font-weight:500}
+  .req-note{font-size:13.5px;color:#31424A;margin-top:4px;line-height:1.55}
+  .req-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--slate);margin-top:6px}
+  .drop{border:2px dashed rgba(180,134,43,.45);border-radius:4px;background:#FFFFFF;padding:12px 16px;text-align:center;color:#31424A;cursor:pointer;transition:border-color .15s,background .15s;margin-top:12px;font-size:13.5px}
   .drop.hot{border-color:var(--brass);background:#FBF6EA}
-  .drop b{color:var(--ink)}
-  .filelist{list-style:none;margin:0 0 8px}
-  .filelist li{display:flex;align-items:center;gap:10px;border:1px solid var(--line-lt);border-radius:3px;background:#FFFFFF;padding:9px 13px;margin-bottom:7px;font-size:13.5px}
-  .filelist .sz{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--slate-lt);margin-left:auto}
-  .filelist .rm{background:none;border:0;color:var(--slate);cursor:pointer;font-size:15px;padding:2px 6px}
-  .filelist .rm:hover{color:#A33}
-  .kchecklist{columns:2;gap:26px;font-size:14px;color:#31424A;margin:14px 0 4px;list-style:none}
-  @media (max-width:640px){.kchecklist{columns:1}}
-  .kchecklist li{margin:0 0 8px;break-inside:avoid}
-  .kcheck{display:flex;align-items:flex-start;gap:9px;cursor:pointer;line-height:1.45;padding:4px 6px;border-radius:3px;transition:background .15s}
-  .kcheck:hover{background:#FBF6EA}
-  .kcheck input{accent-color:var(--brass);margin-top:3px;flex:none;cursor:pointer}
-  .kcheck input:checked + span{color:var(--ink)}
-  .kprogress{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;color:var(--slate);margin-top:10px}
-  .kprogress b{color:var(--brass)}
+  .drop b{color:var(--brass)}
+  .filelist{list-style:none;margin:10px 0 0}
+  .filelist li{display:flex;align-items:center;gap:10px;border:1px solid var(--line-lt);border-radius:3px;background:#FFFFFF;padding:8px 13px;margin-bottom:6px;font-size:13px}
+  .filelist .sz{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--slate);margin-left:auto;white-space:nowrap}
+  .filelist .st{font-family:'IBM Plex Mono',monospace;font-size:10.5px;white-space:nowrap}
+  .st.up{color:var(--brass)} .st.ok{color:var(--ok)} .st.err{color:#A33;cursor:pointer;text-decoration:underline}
 
-  /* buttons */
   .btnrow{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:30px}
   .btn{display:inline-flex;align-items:center;gap:9px;border-radius:2px;padding:12px 22px;font-size:14.5px;font-weight:600;cursor:pointer;border:1px solid var(--line-lt);background:#fff;color:var(--ink);transition:all .15s}
   .btn:hover{border-color:var(--brass);color:var(--brass)}
@@ -107,10 +107,11 @@
   .gate{max-width:560px;margin:70px auto;text-align:center}
   .gate .card{padding:44px 40px}
   .gate a{color:var(--brass);font-weight:600}
-
   .done-seal{width:64px;height:64px;margin:0 auto 18px}
-  .progressbar{height:4px;background:var(--line-lt);border-radius:2px;overflow:hidden;margin:16px 0}
+  .progressbar{height:5px;background:rgba(10,38,35,.16);border-radius:2px;overflow:hidden;margin:16px 0}
   .progressbar i{display:block;height:100%;background:var(--brass);width:0;transition:width .3s}
+  .banner{background:#EFF5F0;border:1px solid rgba(62,125,91,.4);border-left:3px solid var(--ok);border-radius:3px;padding:14px 18px;margin-bottom:22px;font-size:14px;color:#2B4A3A}
+  .banner b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--ok)}
 
   footer{background:var(--deep);color:#9DB2AD;padding:24px 0;margin-top:40px}
   .foot-bottom{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em}
@@ -137,17 +138,16 @@
 
 <section class="page-head">
   <div class="wrap">
-    <div class="eyebrow">California Compliance Audit · Client Intake</div>
-    <h1>The Official Audit Form</h1>
-    <p>Answer with what actually happens, not what policy says should happen. "Don't know" is a useful answer. Your progress saves automatically on this device — leave and come back anytime.</p>
+    <div class="eyebrow">California Compliance Audit · Client Workspace</div>
+    <h1>Your Audit Workspace</h1>
+    <p>Answer with what actually happens, not what policy says should happen — "don't know" is a useful answer. Everything saves the moment you type it, from any device. Share this link with whoever knows each section best; documents attach right where the questions live.</p>
   </div>
 </section>
 
-<!-- token gate -->
 <div class="gate" id="gate">
   <div class="card">
-    <h2>This page needs your intake link</h2>
-    <p style="margin:12px 0 0;color:var(--slate);font-size:14.5px">The audit intake form is private to each engagement. Use the personal link from your engagement email, or write to <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a> and we'll send it over.</p>
+    <h2>This page needs your engagement link</h2>
+    <p style="margin:12px 0 0;color:var(--slate);font-size:14.5px">The audit workspace is private to each engagement. Use the personal link from your engagement email, or write to <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a> and we'll send it over.</p>
   </div>
 </div>
 
@@ -159,17 +159,23 @@
 <footer>
   <div class="wrap foot-bottom">
     <span>© 2026 CALIFORNIA FRACTIONAL HR · VETERAN-OWNED</span>
-    <span>CONFIDENTIAL CLIENT INTAKE · <a href="mailto:connect@calfractionalhr.com">CONNECT@CALFRACTIONALHR.COM</a></span>
+    <span>CONFIDENTIAL CLIENT WORKSPACE · <a href="mailto:connect@calfractionalhr.com">CONNECT@CALFRACTIONALHR.COM</a></span>
   </div>
 </footer>
+
+<input type="file" id="fileInput" multiple class="hidden">
 
 <script>
 /* ============ config ============ */
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbxvD_IyGgKoxJ4LZzyOL6ilPxXdkz9FR1vZm2fPyHaUcIpb-WjuTeoZ7ZWkrC4PF7ZZ5w/exec";
+const PREVIEW = location.hash === "#preview";
+const token = new URLSearchParams(location.search).get("t") || "";
+const MAX = 25*1024*1024;
+const SCALE = ["Yes","No","Sometimes / varies","Don't know","Not applicable"];
 
-/* ============ the question set — mirrors build-audit-form.js v1.0 ============ */
+/* ============ the question set — v2.0 (dropdown enumeration approved 2026-08-18) ============ */
 const SECTIONS = [
- {k:"A", t:"Scoping: Company, Headcount, Locations, Industry",
+ {k:"A", t:"Scoping: Company, Locations, Industry & Systems",
   why:"California obligations switch on at 5, 15, 25, 26, 50, and 100 employees, and change by city and industry. These answers decide which rules apply to you — every later section is read through this one.",
   qs:[["A1","Entity type — then the legal name and any related entities (shared owners, shared managers, or employees who work across entities).","sel",
         {opts:["California C-corporation","S-corporation","LLC","LLP / Partnership","Sole proprietorship","Nonprofit 501(c)(3)","Other / not sure"],
@@ -179,30 +185,48 @@ const SECTIONS = [
       ["A3","Highest headcount at any point in the last 12 months (count everyone on payroll, however briefly).","num",
         {fields:["Peak headcount, last 12 months"]}],
       ["A4","Every location where anyone works, by city and county — including the home cities of remote employees."],
-      ["A5","What does the company do, and what do most employees physically do all day? (This determines which Wage Order governs you.)"],
+      ["A4b","Any work locations (or remote employees) inside these cities? They carry their own minimum-wage and sick-leave rules.","multi",
+        {opts:["Los Angeles","San Francisco","San Diego","San José","Oakland","Berkeley","Emeryville","Santa Monica","West Hollywood","Pasadena","Fremont","Sunnyvale / Mountain View","None of these"]}],
+      ["A5","Which of these best describes what most employees physically do all day? (This selects the Wage Order that governs you.)","sel",
+        {opts:["Office / professional / technical / clerical","Retail / wholesale sales","Restaurant, hotel, hospital, or care facility","Manufacturing / fabrication / assembly","Construction, drilling, logging, or mining","Transportation / trucking / delivery","Personal services (salon, spa, gym, mortuary)","Agriculture — field work","Post-harvest handling / packing","Food & beverage canning or preserving","Laundry / dry cleaning","Amusement & recreation","Broadcasting (radio/TV)","Motion picture","On-farm product prep","Household occupations","None of these fits — describe"],
+         explain:"In a sentence: what does the company do?"}],
       ["A6","Any union representation, collective bargaining agreements, or organizing activity?","yn"],
       ["A7","Any government contracts or subcontracts — federal, state, or local (including defense work)?","yn"],
-      ["A8","In the last 2 years, or planned in the next 12 months: acquisition, merger, layoff, rapid hiring, or new locations?","yn"]]},
+      ["A8","In the last 2 years, or planned in the next 12 months: acquisition, merger, layoff, rapid hiring, or new locations?","yn"],
+      ["A9","Who runs payroll, on what system?","sel",
+        {opts:["Gusto","ADP RUN","Paychex Flex","QuickBooks Payroll","Rippling","Paylocity","Paycom","Paycor","OnPay","Square Payroll","Patriot","Deel","Our accountant / bookkeeper runs it","In-house (spreadsheet / manual)","Through our PEO","Other"],
+         explain:"Who has admin access?"}],
+      ["A10","Any PEO or co-employment arrangement?","sel",
+        {opts:["No PEO — we employ everyone directly","TriNet","Justworks","ADP TotalSource","Insperity","Paychex PEO","Rippling PEO","Other PEO","Staffing-agency workforce (not a PEO)"]}],
+      ["A11","Accounting system?","sel",
+        {opts:["QuickBooks Online","QuickBooks Desktop","Xero","FreshBooks","Sage / Intacct","NetSuite","Wave","Spreadsheets","Outside bookkeeper handles everything","Other"]}],
+      ["A12","Where do HR records live?","sel",
+        {opts:["Paper files","Spreadsheets + shared drive","BambooHR","Gusto HR","Rippling","Paylocity","Paycom","HiBob","TriNet HR platform","Through our PEO","No system yet","Other"]}]]},
  {k:"B", t:"Workforce Composition & Classification",
   why:"Misclassification — exempt vs. non-exempt, and employee vs. contractor — is the most expensive category of California employment liability. It is tested with facts about duties and pay, never with job titles.",
-  qs:[["B1","How many employees are salaried-exempt (no overtime), and what are their job titles?"],
+  qs:[["B0","Which of these does your workforce include? Select all that apply — each one changes which rules we test.","multi",
+        {opts:["Salaried exempt staff","Hourly full-time","Hourly part-time","Commissioned salespeople","Piece-rate workers","Tipped employees","1099 independent contractors","Temp-agency workers","Minors (under 18)","Out-of-state remote employees","Seasonal workers","Union-represented employees"]}],
+      ["B1","How many employees are salaried-exempt (no overtime), and what are their job titles?"],
       ["B2","For each exempt role: what does that person actually spend most of their day doing, and what is their annual salary?","long"],
       ["B3","How many independent contractors (1099) do you use, doing what work, for how long — and do they have other clients?","long"],
-      ["B4","Beyond hourly wages or salary, how else do people earn: commissions, production or safety bonuses, piece rates, shift differentials, tips?"],
-      ["B5","Anyone under 18, on a work visa, or placed through a staffing agency?","yn"]]},
+      ["B4","Beyond hourly wages or salary, how else do people earn: commissions, production or safety bonuses, piece rates, shift differentials, tips?"]]},
  {k:"C", t:"Wage & Hour Mechanics",
-  why:"This is where the money is. California wage-hour rules are mechanical, which means violations are provable — and so is compliance. We verify your answers here against actual payroll records (Section K).",
+  why:"This is where the money is. California wage-hour rules are mechanical, which means violations are provable — and so is compliance. We verify your answers here against your actual payroll documents, attached below.",
   qs:[["C1","What timekeeping system do you use?","sel",
-        {opts:["None / paper timecards","Spreadsheet","QuickBooks Time (TSheets)","ADP","Paychex","Gusto","Homebase / When I Work","Through our PEO","Other"],
+        {opts:["No records kept","Paper timecards","Spreadsheet","QuickBooks Time","ADP time module","Paychex time module","Gusto time","Homebase","When I Work","Deputy","POS-integrated (Toast / Square)","Biometric clock","Through our PEO","Other"],
          explain:"Does it round punches? Who can edit time entries, and when do they?"}],
-      ["C2","Walk through lunch on a busy day: when do people take meal breaks, are they ever interrupted or skipped, and is that recorded anywhere?","long"],
+      ["C2","Which best describes meal periods here?","sel",
+        {opts:["Everyone punches out and back in for meals","System auto-deducts 30 minutes","Honor system — no meal records","Paid working lunches are common","Varies by role or shift","Don't know"],
+         explain:"Walk through lunch on a busy day: when do people actually take meal breaks, and are they ever interrupted or skipped?"}],
       ["C3","When a meal period is missed, short, or late — is the one-hour premium paid automatically, sometimes, or never?"],
       ["C4","Are rest breaks (10 minutes per 4 hours) actually taken? What gets in the way?"],
       ["C5","How is overtime calculated when someone also earned a bonus or commission that period?"],
       ["C6","How often do people get paid?","sel",
-        {opts:["Weekly","Biweekly (every 2 weeks)","Semi-monthly (e.g. 1st & 15th)","Monthly","Mixed / varies by group","Other"],
+        {opts:["Weekly","Every two weeks (biweekly)","Twice a month (semi-monthly)","Monthly","Mixed — varies by group"],
          explain:"Pay method (check / direct deposit) — and do you know the nine items California requires on every wage statement?"}],
-      ["C7","Someone quits or is terminated: describe exactly when and how they receive their final pay, including unused vacation."],
+      ["C7","When someone quits or is terminated, when do they receive their final pay?","sel",
+        {opts:["Final check handed over the same day at termination","Within 72 hours","With the next regular payroll","Mailed after they leave","Varies","Don't know"],
+         explain:"Including unused vacation? Describe the last one:"}],
       ["C8","Vacation/PTO policy: accrual, caps, and what happens to unused balances. Any “use it or lose it” language anywhere?"],
       ["C9","Sick leave: how much, how tracked, and does it meet the current California minimum (40 hours / 5 days)?"],
       ["C10","Who works remotely or uses a personal phone/vehicle for work — and what does the company reimburse (phone, internet, mileage)?"],
@@ -223,26 +247,35 @@ const SECTIONS = [
       ["E6","Are separation or severance agreements used? When were they last reviewed by counsel?","yn"]]},
  {k:"F", t:"Policies & Handbook",
   why:"A generic or stale handbook is itself a finding: California has amended required policies every single year, and a 50-state template misses the state-specific mandates that examiners and plaintiffs' counsel check first.",
-  qs:[["F1","Is there an employee handbook? When was it last revised, and was it written for California specifically?","yn"],
+  qs:[["F1","The employee handbook —","sel",
+        {opts:["No handbook","Last revised 2024 or later","Revised 2020–2023","Older than 2020","Being revised right now","There's one, but nobody can find it"],
+         explain:"Was it written for California specifically, or is it a 50-state template?"}],
       ["F2","Which of these written policies exist: harassment prevention (5+ EEs), lactation accommodation, paid sick leave, CFRA family leave (5+ EEs), workplace violence prevention?","long"],
       ["F3","Are signed handbook acknowledgments on file for every current employee?","yn"],
       ["F4","Any non-compete, non-solicit, or broad confidentiality language in offers, agreements, or the handbook?","yn"],
-      ["F5","Are arbitration agreements used? For everyone or some? When were they last reviewed?","yn"]]},
+      ["F5","Arbitration agreements —","sel",
+        {opts:["No arbitration agreements","All employees sign at hire","Some employees / roles sign","Don't know"],
+         explain:"If any: when were they last reviewed by counsel (2024+, 2020–2023, before 2020, never)?"}]]},
  {k:"G", t:"Leaves & Accommodation",
   why:"Leave and accommodation disputes carry the highest per-incident litigation risk of anything in this form — and the defense is always the documented process, not the outcome.",
   qs:[["G1","An employee tells their manager they're pregnant, injured, or need to care for a sick parent. Walk through exactly what happens next: who is told, who decides, what is written down.","long"],
       ["G2","Which leave types have come up in the last 2 years (pregnancy, family/medical, bereavement, jury duty, military, other) — and how were they handled?"],
       ["G3","When someone asks for a change because of a medical condition or disability, is there a documented back-and-forth (the “interactive process”), or is it handled informally?"],
       ["G4","Do managers know they must route these requests to one place rather than deciding themselves?","yn"]]},
- {k:"H", t:"Safety, Training & Postings",
-  why:"These items are binary, inspected, and currently enforcement priorities — SB 553 workplace-violence plans in particular are new, mandatory for nearly all employers, and widely missing.",
+ {k:"H", t:"Safety, Training, Benefits & Postings",
+  why:"These items are binary, inspected, and currently enforcement priorities — SB 553 workplace-violence plans and the now-universal CalSavers retirement mandate are new, mandatory, and widely missing.",
   qs:[["H1","Injury & Illness Prevention Program (IIPP): exists in writing, current, and someone owns it?","yn"],
       ["H2","Workplace Violence Prevention Plan (SB 553): written plan, violent-incident log, and annual training — in place?","yn"],
-      ["H3","Harassment-prevention training: has every supervisor (2 hrs) and employee (1 hr) been trained on the 2-year cycle, with records?","yn"],
-      ["H4","Who carries your workers' compensation coverage?","sel",
-        {opts:["State Compensation Insurance Fund","Zenith","ICW Group","Travelers","The Hartford","Employers","Through a PEO","Not sure","Other"],
-         explain:"Policy status, and any open claims?"}],
-      ["H5","Are the current-year required posters up at every location — and how do remote employees receive them?","yn"]]},
+      ["H3","Harassment-prevention training —","sel",
+        {opts:["Done within 2 years, records kept","Done within 2 years, no records","Done, but more than 2 years ago","Supervisors only","Never conducted","Don't know"]}],
+      ["H4","Workers' compensation coverage —","sel",
+        {opts:["State Fund (SCIF)","Private carrier","Through our PEO","Not sure who the carrier is","No coverage currently","Don't know"],
+         explain:"Carrier name, policy status, any open claims?"}],
+      ["H5","Are the current-year required posters up at every location — and how do remote employees receive them?","yn"],
+      ["H6","Retirement program — California now requires every employer with even one employee to offer a plan or certify exemption with CalSavers.","sel",
+        {opts:["CalSavers — registered and remitting","401(k) / 403(b) or other qualified plan","SEP / SIMPLE IRA","Certified exempt with CalSavers","Nothing in place yet","Don't know"]}],
+      ["H7","Health benefits —","sel",
+        {opts:["None offered","Small-group plan through a broker","ICHRA","QSEHRA","PEO master plan","Covered California for Small Business","Union / Taft-Hartley plan","Other"]}]]},
  {k:"I", t:"Records & Personnel Files",
   why:"In a wage or termination dispute, the employer without records loses by default — California presumes against the party that should have kept them. Retention is now four years across most categories.",
   qs:[["I1","Where do personnel files live (paper/system), and are medical records and I-9s kept separate?"],
@@ -256,306 +289,381 @@ const SECTIONS = [
       ["J4","Any internal complaints (harassment, discrimination, retaliation, safety) in the last 2 years, and how were they handled?"],
       ["J5","What people-issue keeps you up at night that we haven't asked about?","long"]]},
 ];
-const K_ITEMS = [
- "Payroll registers for 2–3 recent pay periods, with matching timecards",
- "One redacted sample wage statement (pay stub) per pay group",
- "Employee handbook (current) and standalone policies",
- "Offer letter template + a recent signed example; wage notice (§2810.5) sample",
- "Job descriptions for each salaried-exempt role",
- "Independent contractor agreement(s) in use",
- "Harassment-prevention training roster or certificates",
- "IIPP and Workplace Violence Prevention Plan, with logs",
- "Photos of posting boards at each location",
- "A recent termination packet (redacted)",
- "PTO/sick-leave ledger export for 3–5 employees",
- "Current org chart or roster with titles, classifications, pay rates",
-];
 
 /* ============ state ============ */
-const token = new URLSearchParams(location.search).get("t") || "";
-const LS_KEY = "cfhr-intake-" + token;
-let state = { contact:{}, answers:{}, kchecks:{}, files:[], step:0 };
-let uploadQueue = []; // File objects held in memory
-let saveTimer = null;
+const LSK = "cfhr-ws-" + token;
+let me = null;                       // {name, role}
+let state = { answers:{}, meta:{} }; // answers[qid] = structured value; meta[qid] = {by, at}
+let requests = [];                   // server requests incl. section + files_list
+let submitted = null;                // {id, at} once complete
+let company = "", contactSeed = "";
+let step = 0;
+const steps = ["start", ...SECTIONS.map(s=>s.k), "review"];
+let dirty = {}, saveTimer = null, activeDropReq = null, pendingNotify = [], notifyTimer = null;
 
-const steps = ["start", ...SECTIONS.map(s=>s.k), "K", "review"];
-
-function loadState(){ try{ const s = localStorage.getItem(LS_KEY); if(s) state = Object.assign(state, JSON.parse(s)); }catch(e){} }
-function saveState(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({contact:state.contact, answers:state.answers, kchecks:state.kchecks, step:state.step})); }catch(e){}
-  const chip = document.getElementById("saveChip");
-  chip.textContent = "SAVED ✓"; chip.classList.add("saved");
-  clearTimeout(saveTimer); saveTimer = setTimeout(()=>{ chip.textContent="AUTOSAVE ON"; chip.classList.remove("saved"); }, 1600);
-}
+try { const l = JSON.parse(localStorage.getItem(LSK) || "{}"); me = l.me || null; step = l.step || 0; } catch(e){}
+function remember(){ try{ localStorage.setItem(LSK, JSON.stringify({me, step})); }catch(e){} }
 
 /* ============ api ============ */
 async function api(payload){
   const res = await fetch(ENDPOINT, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) });
   return res.json();
 }
+function b64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file); }); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function chipMsg(text, calm){ const c=document.getElementById("saveChip"); c.textContent=text; c.classList.toggle("saved", !calm); }
 
-/* ============ render ============ */
-const stage = document.getElementById("stage");
-const rail = document.getElementById("rail");
+/* ============ autosave ============ */
+function queueSave(qid, section){
+  dirty[qid] = section;
+  chipMsg("SAVING…", false);
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSaves, 900);
+}
+async function flushSaves(){
+  const batch = Object.entries(dirty).map(([qid, section]) => ({ qid, section, v: JSON.stringify(state.answers[qid] || {}) }));
+  dirty = {};
+  if (!batch.length) return;
+  const by = me ? `${me.name} — ${me.role}` : "";
+  try{
+    if (!PREVIEW) { const r = await api({action:"saveAnswers", token, by, answers: batch}); if(!r.ok) throw new Error(r.error||"save failed"); }
+    batch.forEach(b => { state.meta[b.qid] = { by, at: "just now" }; });
+    chipMsg("SAVED ✓", false); setTimeout(()=>chipMsg("AUTOSAVE ON", true), 1600);
+  }catch(e){
+    chipMsg("OFFLINE — RETRYING", false);
+    batch.forEach(b => dirty[b.qid] = b.section);
+    setTimeout(flushSaves, 5000);
+  }
+}
 
+/* ============ answered logic ============ */
+function isAnswered(v){
+  if (!v) return false;
+  if (v.choice || (v.multi && v.multi.length)) return true;
+  if ((v.text||"").trim() || (v.other||"").trim()) return true;
+  if (v.parts && Object.values(v.parts).some(x=>String(x||"").trim())) return true;
+  return false;
+}
 function sectionAnswered(k){
-  const sec = SECTIONS.find(s=>s.k===k); if(!sec) return [0,0];
-  let a=0; sec.qs.forEach(q=>{ const v=state.answers[q[0]];
-    if(v && ((v.text&&v.text.trim())||v.choice||(v.parts&&Object.values(v.parts).some(x=>String(x).trim())))) a++; });
+  const sec = SECTIONS.find(s=>s.k===k);
+  let a=0; sec.qs.forEach(q=>{ if(isAnswered(state.answers[q[0]])) a++; });
   return [a, sec.qs.length];
 }
 
+/* ============ render: rail ============ */
+const stage = document.getElementById("stage");
+const rail = document.getElementById("rail");
 function renderRail(){
-  rail.innerHTML = "";
-  const items = [["start","Your details"], ...SECTIONS.map(s=>[s.k, "Section "+s.k]), ["K","Documents"], ["review","Review & submit"]];
-  items.forEach(([key,label])=>{
-    const idx = steps.indexOf(key);
-    const b = document.createElement("button");
+  const items = [{key:"start", label: submitted ? "Overview" : "Start here"},
+    ...SECTIONS.map(s=>({key:s.k, label:`${s.k} · ${s.t.split(":")[0].split("&")[0].trim()}`})),
+    {key:"review", label: submitted ? "Documents" : "Review & complete"}];
+  rail.innerHTML = items.map((it,i)=>{
     let cnt = "";
-    if(key!=="start" && key!=="K" && key!=="review"){ const [a,t]=sectionAnswered(key); cnt = a+"/"+t; if(a===t) b.classList.add("done"); }
-    b.innerHTML = `<svg class="tick" viewBox="0 0 16 16" fill="none"><path d="M3 8.5 L6.5 12 L13 4.5" stroke="#3E7D5B" stroke-width="2" fill="none"/></svg><span>${label}</span><span class="cnt">${cnt}</span>`;
-    if(idx===state.step) b.classList.add("active");
-    b.onclick = ()=>{ collectCurrent(); state.step = idx; saveState(); render(); window.scrollTo({top:0}); };
-    rail.appendChild(b);
-  });
+    if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
+    const done = it.key.length===1 && sectionAnswered(it.key)[0]===sectionAnswered(it.key)[1];
+    return `<button class="${i===step?"active":""} ${done?"done":""}" onclick="go(${i})">
+      <svg class="tick" viewBox="0 0 14 14" fill="none"><path d="M2 7.5 L5.5 11 L12 3.5" stroke="#3E7D5B" stroke-width="2"/></svg>
+      ${esc(it.label)}${cnt}</button>`;
+  }).join("");
 }
+function go(i){ step=i; remember(); render(); window.scrollTo({top:0}); }
 
-function qBlock(q){
-  const [id, text, type, cfg] = q;
+/* ============ render: questions ============ */
+function attribLine(qid){
+  const m = state.meta[qid];
+  return m && m.by ? `<p class="attrib">answered by <b>${esc(m.by)}</b>${m.at?" · "+esc(m.at):""}</p>` : "";
+}
+function qHtml(q){
+  const [id, question, type, cfg] = q;
   const v = state.answers[id] || {};
-  let inner = "";
-  if(type==="yn"){
-    inner += `<div class="yn">` + ["Yes","No","Partly / it depends"].map(c=>
-      `<label><input type="radio" name="yn-${id}" value="${c}" ${v.choice===c?"checked":""}> ${c}</label>`).join("") + `</div>`;
-    inner += `<textarea data-q="${id}" placeholder="Explain — what actually happens:">${v.text||""}</textarea>`;
-  } else if(type==="sel"){
-    inner += `<div class="selwrap"><select data-qsel="${id}"><option value="">Select one…</option>` +
-      cfg.opts.map(o=>`<option ${v.choice===o?"selected":""}>${o}</option>`).join("") + `</select>` +
-      `<input type="text" data-qother="${id}" class="${/^(Other|Not sure)/.test(v.choice||"")?"":"hidden"}" placeholder="Tell us more —" value="${(v.other||"").replace(/"/g,"&quot;")}">` +
-      (cfg.explain ? `<textarea data-q="${id}" placeholder="${cfg.explain}">${v.text||""}</textarea>` : "") + `</div>`;
-  } else if(type==="num"){
-    inner += `<div class="numgrid">` + cfg.fields.map((f,i)=>
-      `<div><label>${f}</label><input type="number" min="0" inputmode="numeric" data-qnum="${id}:${i}" value="${(v.parts||{})[i]??""}"></div>`).join("") + `</div>`;
+  const dis = submitted ? "disabled" : "";
+  let control = "";
+  if (type === "sel"){
+    control = `<div class="selwrap"><select data-qsel="${id}" ${dis}>
+      <option value=""></option>${cfg.opts.map(o=>`<option ${v.choice===o?"selected":""}>${esc(o)}</option>`).join("")}</select>
+      ${cfg.explain?`<textarea data-qtext="${id}" placeholder="${esc(cfg.explain)}" ${dis}>${esc(v.text||"")}</textarea>`:""}</div>`;
+  } else if (type === "num"){
+    control = `<div class="numgrid">${cfg.fields.map((f,i)=>`<div><label>${esc(f)}</label>
+      <input type="text" inputmode="numeric" data-qnum="${id}:${i}" value="${esc((v.parts||{})[i]||"")}" ${dis}></div>`).join("")}</div>`;
+  } else if (type === "yn"){
+    control = `<div class="yn">${SCALE.map(o=>`<label><input type="radio" name="yn-${id}" value="${esc(o)}" ${v.choice===o?"checked":""} ${dis}>${esc(o)}</label>`).join("")}</div>
+      <textarea data-qtext="${id}" placeholder="Anything worth adding?" ${dis}>${esc(v.text||"")}</textarea>`;
+  } else if (type === "multi"){
+    const sel = v.multi || [];
+    control = `<div class="yn">${cfg.opts.map(o=>`<label><input type="checkbox" data-qmulti="${id}" value="${esc(o)}" ${sel.includes(o)?"checked":""} ${dis}>${esc(o)}</label>`).join("")}</div>`;
   } else {
-    inner += `<textarea data-q="${id}" class="${type==="long"?"long":""}" placeholder="${type==="long"?"Take your time — detail helps here.":"Your answer…"}">${v.text||""}</textarea>`;
+    control = `<textarea data-qtext="${id}" class="${type==="long"?"long":""}" ${dis}>${esc(v.text||"")}</textarea>`;
   }
-  return `<div class="q"><label class="qt"><span class="qid">${id}</span>${text}</label>${inner}</div>`;
+  return `<div class="q" data-q="${id}"><label class="qt"><span class="qid">${id}</span>${esc(question)}</label>${control}${attribLine(id)}</div>`;
 }
 
+/* ============ render: section documents ============ */
+function reqCard(r){
+  const done = r.status==="received"||r.status==="reviewed";
+  const cls = r.status==="waived" ? "" : done ? "is-done" : "is-open";
+  const chip = r.status==="waived" ? "" : done ? `<span class="chip done">RECEIVED ✓</span>` : `<span class="chip open">OUTSTANDING</span>`;
+  const meta = [r.requested?"REQUESTED "+String(r.requested).toUpperCase():"", done&&r.received?"RECEIVED "+String(r.received).toUpperCase():""].filter(Boolean).join(" · ");
+  const onRecord = (r.files_list||[]).map(f=>`<li>📄 ${esc(f.name)}<span class="sz">FILED ${esc(String(f.date||"")).toUpperCase()}</span></li>`).join("");
+  const drop = r.status==="waived" ? "" :
+    `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${done?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
+  return `<div class="req ${cls}">
+    <div class="req-top"><h3>${esc(r.title)}</h3>${chip}</div>
+    ${r.note?`<p class="req-note">${esc(r.note)}</p>`:""}
+    ${meta?`<p class="req-meta">${meta}</p>`:""}
+    ${onRecord?`<ul class="filelist">${onRecord}</ul>`:""}
+    ${drop}<ul class="filelist" data-list="${esc(r.id)}"></ul></div>`;
+}
+function docBlock(sectionKey){
+  const list = requests.filter(r=>r.section===sectionKey && r.status!=="waived");
+  if (!list.length) return "";
+  return `<div class="docblock"><div class="dhead">Documents for this section · ${list.filter(r=>r.status!=="open").length} of ${list.length} in</div>
+    ${list.map(reqCard).join("")}</div>`;
+}
+
+/* ============ render: steps ============ */
 function render(){
   renderRail();
-  const key = steps[state.step];
-  const last = state.step === steps.length-1;
-
-  if(key==="start"){
-    const c = state.contact;
-    stage.innerHTML = `<div class="card">
-      <div class="eyebrow" style="color:var(--brass)">Before we begin</div>
-      <h2>Who's completing this?</h2>
-      <p style="color:var(--slate);font-size:14.5px;margin-top:6px">Best answered by the owner/CEO plus whoever runs payroll and HR day-to-day. Expect 60–90 minutes — your answers save on this device as you type, so you can stop and resume anytime.</p>
-      <div class="why" style="margin-top:18px"><b>Confidential</b>Your answers are confidential client records used solely to perform the audit. This form gathers facts; it does not render legal advice.</div>
-      <div class="grid2">
-        <div class="q"><label class="qt">Company</label><input type="text" id="f-company" value="${c.company||""}"></div>
-        <div class="q"><label class="qt">Your name</label><input type="text" id="f-contact" value="${c.contact||""}"></div>
-        <div class="q"><label class="qt">Your role</label><select id="f-role">` +
-          ["","Owner","CEO / President","Executive Director","CFO / COO","HR Director / Manager","Office Manager","Controller / Payroll","Other"].map(o=>
-            `<option value="${o}" ${c.role===o?"selected":""}>${o||"Select one…"}</option>`).join("") + `</select>
-          <input type="text" id="f-roleOther" class="${c.role==="Other"?"":"hidden"}" style="margin-top:9px" placeholder="Your title —" value="${c.roleOther||""}"></div>
-        <div class="q"><label class="qt">Email</label><input type="email" id="f-email" value="${c.email||""}"></div>
-        <div class="q"><label class="qt">Phone</label><input type="tel" id="f-phone" value="${c.phone||""}"></div>
-      </div>
-      <div class="btnrow"><span></span><button class="btn primary" onclick="next()">Begin Section A →</button></div>
-    </div>`;
-  }
-  else if(key==="K"){
-    stage.innerHTML = `<div class="card">
-      <div class="eyebrow" style="color:var(--brass)">Section K</div>
-      <h2>Document Request — the Evidence</h2>
-      <div class="why"><b>Why we ask</b>Answers are claims; documents are evidence. Provide what exists — a missing item is itself a scoping fact, not a failure. Check off each item as you upload it; anything unchecked we'll cover in the scoping call.</div>
-      <ul class="kchecklist">${K_ITEMS.map((item,i)=>`<li><label class="kcheck"><input type="checkbox" data-k="${i}" ${state.kchecks&&state.kchecks[i]?"checked":""}><span>${item}</span></label></li>`).join("")}</ul>
-      <p class="kprogress" id="kprog"></p>
-      <div class="drop" id="drop"><b>Drag files here</b> or click to choose<br><span style="font-size:12.5px">PDF, Word, Excel, images · up to 25 MB per file · you can add more later</span>
-        <input type="file" id="fileInput" multiple style="display:none"></div>
-      <ul class="filelist" id="fileList"></ul>
-      <p class="note">Files upload securely when you submit. Redact Social Security numbers and bank details where you can — we need the employment facts, not the identifiers.</p>
-      <div class="btnrow"><button class="btn" onclick="prev()">← Back</button><button class="btn primary" onclick="next()">Review & submit →</button></div>
-    </div>`;
-    wireDropzone();
-    updateKProgress();
-  }
-  else if(key==="review"){
-    let total=0, done=0;
-    const rows = SECTIONS.map(s=>{ const [a,t]=sectionAnswered(s.k); total+=t; done+=a;
-      return `<tr><td style="padding:6px 14px 6px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--brass)">${s.k}</td><td style="padding:6px 0">${s.t}</td><td style="padding:6px 0;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px;color:${a===t?"var(--ok)":"var(--slate)"}">${a}/${t}</td></tr>`; }).join("");
-    stage.innerHTML = `<div class="card">
-      <div class="eyebrow" style="color:var(--brass)">Last step</div>
-      <h2>Review & submit</h2>
-      <p style="color:var(--slate);font-size:14.5px;margin:8px 0 18px">${done} of ${total} questions answered · ${uploadQueue.length} document${uploadQueue.length===1?"":"s"} attached. Unanswered questions are fine — "don't know" is a finding too. You can revisit any section from the left rail before submitting.</p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px">${rows}</table>
-      <div class="progressbar hidden" id="pbar"><i id="pfill"></i></div>
-      <p class="note hidden" id="pnote"></p>
-      <div class="btnrow"><button class="btn" onclick="prev()">← Back</button><button class="btn primary" id="submitBtn" onclick="submitAll()">Submit intake</button></div>
-    </div>`;
-  }
-  else {
-    const sec = SECTIONS.find(s=>s.k===key);
-    stage.innerHTML = `<div class="card">
-      <div class="eyebrow" style="color:var(--brass)">Section ${sec.k} of J</div>
-      <h2>${sec.t}</h2>
-      <div class="why"><b>Why we ask</b>${sec.why}</div>
-      ${sec.qs.map(qBlock).join("")}
-      <div class="btnrow"><button class="btn" onclick="prev()">← Back</button><button class="btn primary" onclick="next()">Continue →</button></div>
-    </div>`;
-  }
-  stage.querySelectorAll("textarea,input,select").forEach(el=>{
-    const fire = ()=>{
-      if(el.tagName==="SELECT"){
-        const other = el.id==="f-role" ? document.getElementById("f-roleOther")
-                    : stage.querySelector(`input[data-qother="${el.dataset.qsel}"]`);
-        if(other) other.classList.toggle("hidden", !/^(Other|Not sure)/.test(el.value));
-      }
-      collectCurrent(); saveState(); if(el.closest(".q")) renderRailSoon();
-    };
-    el.addEventListener("input", fire); el.addEventListener("change", fire);
-  });
+  const key = steps[step];
+  if (key === "start") return renderStart();
+  if (key === "review") return renderReview();
+  const sec = SECTIONS.find(s=>s.k===key);
+  const [a,t] = sectionAnswered(key);
+  stage.innerHTML = `<div class="card">
+    ${submitted?`<div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)} — answers are read-only. Document requests below stay live.</div>`:""}
+    <h2>Section ${sec.k} — ${esc(sec.t)}</h2>
+    <div class="why"><b>Why we ask</b>${esc(sec.why)}</div>
+    ${sec.qs.map(qHtml).join("")}
+    ${docBlock(key)}
+    <div class="btnrow">
+      <button class="btn" onclick="go(${step-1})">← Back</button>
+      <button class="btn primary" onclick="go(${step+1})">${step===steps.length-2?"Review →":"Next section →"}</button>
+    </div></div>`;
+  wireInputs(sec); wireDrops();
 }
-let railTimer=null;
-function renderRailSoon(){ clearTimeout(railTimer); railTimer=setTimeout(renderRail, 400); }
 
-function collectCurrent(){
-  const key = steps[state.step];
-  if(key==="start"){
-    ["company","contact","email","phone","role","roleOther"].forEach(f=>{ const el=document.getElementById("f-"+f); if(el) state.contact[f]=el.value; });
-    return;
-  }
-  if(key==="K"){
-    stage.querySelectorAll('input[data-k]').forEach(cb=>{ state.kchecks[cb.dataset.k] = cb.checked; });
-    updateKProgress();
-    return;
-  }
-  const sec = SECTIONS.find(s=>s.k===key); if(!sec) return;
-  sec.qs.forEach(q=>{
-    const id=q[0]; const v = state.answers[id] || {};
-    const ta = stage.querySelector(`textarea[data-q="${id}"]`); if(ta) v.text = ta.value;
-    const r = stage.querySelector(`input[name="yn-${id}"]:checked`); if(r) v.choice = r.value;
-    const sel = stage.querySelector(`select[data-qsel="${id}"]`); if(sel) v.choice = sel.value;
-    const oth = stage.querySelector(`input[data-qother="${id}"]`); if(oth) v.other = oth.value;
-    stage.querySelectorAll(`input[data-qnum^="${id}:"]`).forEach(inp=>{
-      v.parts = v.parts || {}; v.parts[inp.dataset.qnum.split(":")[1]] = inp.value;
+function renderStart(){
+  const total = SECTIONS.reduce((n,s)=>n+s.qs.length,0);
+  const done = SECTIONS.reduce((n,s)=>n+sectionAnswered(s.k)[0],0);
+  const pct = Math.round(100*done/total);
+  stage.innerHTML = `<div class="card">
+    ${submitted?`<div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. This workspace stays open for document requests — see the Documents view, or any section below.</div>`:""}
+    <h2>${esc(company||"Welcome")} — your audit workspace</h2>
+    <p style="color:var(--slate);font-size:14.5px;margin-top:6px">Ten short sections. Everything saves as you type, from any device — and this link can be shared: forward it to whoever runs payroll, HR, or operations day-to-day, and each of you can fill in the sections you know best.</p>
+    <div class="progressbar"><i style="width:${pct}%"></i></div>
+    <p class="note"><b>${done}</b> of ${total} questions answered · every answer is stamped with who gave it</p>
+    <div class="why" style="margin-top:18px"><b>Confidential</b>Your answers are confidential client records used solely to perform the audit. This form gathers facts; it does not render legal advice.</div>
+    <h2 style="font-size:1.15rem;margin-top:26px">Who's filling this out right now?</h2>
+    <div class="grid2" style="margin-top:12px">
+      <div><label class="qt" style="font-size:13px">Your name</label><input type="text" id="meName" value="${esc(me?me.name:"")}" ${submitted?"":""}></div>
+      <div><label class="qt" style="font-size:13px">Your role</label>
+        <select id="meRole">${["","Owner","CEO / President","Executive Director","CFO / COO","HR Director / Manager","Office Manager","Controller / Payroll","Other"].map(o=>`<option ${me&&me.role===o?"selected":""}>${esc(o)}</option>`).join("")}</select></div>
+    </div>
+    <div class="btnrow"><span></span><button class="btn primary" onclick="startGo()">${submitted?"View sections →":"Begin — Section A →"}</button></div>
+  </div>`;
+}
+function startGo(){
+  const name = document.getElementById("meName").value.trim();
+  const role = document.getElementById("meRole").value.trim();
+  if (!submitted && !name){ alert("Tell us your name first — every answer is stamped with who gave it."); return; }
+  if (name) me = { name, role: role||"Team" };
+  remember(); go(1);
+}
+
+function renderReview(){
+  if (submitted) return renderDocsView();
+  const missing = [];
+  SECTIONS.forEach(s=>s.qs.forEach(q=>{ if(!isAnswered(state.answers[q[0]])) missing.push(q[0]); }));
+  const openReqs = requests.filter(r=>r.status==="open").length;
+  stage.innerHTML = `<div class="card">
+    <h2>Review & complete</h2>
+    <p style="color:var(--slate);font-size:14.5px;margin-top:6px">Completing the intake tells us to begin analysis. You can still upload documents here afterward — this workspace stays open for the life of the audit.</p>
+    <div class="why" style="margin-top:16px"><b>Where you stand</b>${missing.length?`${missing.length} unanswered: ${missing.slice(0,20).join(", ")}${missing.length>20?"…":""}. Partial is allowed — "don't know" beats blank.`:"Every question answered."} ${openReqs?`· ${openReqs} document request${openReqs===1?"":"s"} still open (fine to send later).`:""}</div>
+    <h2 style="font-size:1.15rem;margin-top:22px">Confirm your contact details</h2>
+    <div class="grid2" style="margin-top:12px">
+      <div><label class="qt" style="font-size:13px">Company</label><input type="text" id="cCompany" value="${esc((state.answers.CT1||{}).text||company||"")}"></div>
+      <div><label class="qt" style="font-size:13px">Primary contact</label><input type="text" id="cName" value="${esc((state.answers.CT2||{}).text||(me?me.name:""))}"></div>
+      <div><label class="qt" style="font-size:13px">Email</label><input type="email" id="cEmail" value="${esc((state.answers.CT3||{}).text||"")}"></div>
+      <div><label class="qt" style="font-size:13px">Phone</label><input type="tel" id="cPhone" value="${esc((state.answers.CT4||{}).text||"")}"></div>
+    </div>
+    <div class="progressbar hidden" id="pbar"><i id="pfill"></i></div>
+    <p class="note hidden" id="pnote"></p>
+    <div class="btnrow">
+      <button class="btn" onclick="go(${step-1})">← Back</button>
+      <button class="btn primary" id="submitBtn" onclick="completeAll()">Mark complete & submit</button>
+    </div></div>`;
+  ["cCompany","cName","cEmail","cPhone"].forEach((id,i)=>{
+    document.getElementById(id).addEventListener("blur", e=>{
+      state.answers["CT"+(i+1)] = { text: e.target.value }; queueSave("CT"+(i+1), "CT");
     });
-    state.answers[id]=v;
   });
 }
 
-function next(){ collectCurrent(); saveState(); if(state.step<steps.length-1){ state.step++; saveState(); render(); window.scrollTo({top:0}); } }
-function prev(){ collectCurrent(); saveState(); if(state.step>0){ state.step--; saveState(); render(); window.scrollTo({top:0}); } }
-
-/* ============ files ============ */
-function wireDropzone(){
-  const drop=document.getElementById("drop"), input=document.getElementById("fileInput");
-  drop.onclick=()=>input.click();
-  input.onchange=()=>{ addFiles(input.files); input.value=""; };
-  ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("hot");}));
-  ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("hot");}));
-  drop.addEventListener("drop",e=>addFiles(e.dataTransfer.files));
-  renderFiles();
+function renderDocsView(){
+  const bySec = {};
+  requests.forEach(r=>{ (bySec[r.section||"—"] = bySec[r.section||"—"]||[]).push(r); });
+  stage.innerHTML = `<div class="card">
+    <div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. New document requests appear here — same link, any device.</div>
+    <h2>Documents</h2>
+    ${Object.entries(bySec).map(([k,list])=>`<div class="docblock"><div class="dhead">${k==="—"?"General":"Section "+esc(k)}</div>${list.map(reqCard).join("")}</div>`).join("") || "<p class='note'>Nothing requested right now.</p>"}
+    <div class="drop" data-req="MISC" data-title="Additional documents" style="margin-top:20px">Something we didn't ask for? Drop it here, or <b>browse</b></div>
+    <ul class="filelist" data-list="MISC"></ul>
+    <p class="note">Prefer email? Attachments to <a href="mailto:connect@calfractionalhr.com" style="color:var(--brass);font-weight:600">connect@calfractionalhr.com</a> work just as well.</p>
+  </div>`;
+  wireDrops();
 }
-function addFiles(list){
-  for(const f of list){
-    if(f.size > 25*1024*1024){ alert(f.name+" is over 25 MB — email it to connect@calfractionalhr.com instead."); continue; }
-    if(!uploadQueue.some(x=>x.name===f.name && x.size===f.size)) uploadQueue.push(f);
+
+/* ============ input wiring ============ */
+function wireInputs(sec){
+  sec.qs.forEach(q=>{
+    const id = q[0];
+    const upd = ()=>{ collectQ(id); queueSave(id, sec.k); };
+    stage.querySelectorAll(`[data-qtext="${id}"]`).forEach(el=>el.addEventListener("blur", upd));
+    stage.querySelectorAll(`[data-qsel="${id}"]`).forEach(el=>el.addEventListener("change", upd));
+    stage.querySelectorAll(`input[name="yn-${id}"]`).forEach(el=>el.addEventListener("change", upd));
+    stage.querySelectorAll(`[data-qmulti="${id}"]`).forEach(el=>el.addEventListener("change", upd));
+    stage.querySelectorAll(`input[data-qnum^="${id}:"]`).forEach(el=>el.addEventListener("blur", upd));
+  });
+}
+function collectQ(id){
+  const v = {};
+  const txt = stage.querySelector(`[data-qtext="${id}"]`); if(txt) v.text = txt.value;
+  const sel = stage.querySelector(`[data-qsel="${id}"]`); if(sel) v.choice = sel.value;
+  const r = stage.querySelector(`input[name="yn-${id}"]:checked`); if(r) v.choice = r.value;
+  const multi = [...stage.querySelectorAll(`[data-qmulti="${id}"]:checked`)].map(x=>x.value); if(multi.length) v.multi = multi;
+  stage.querySelectorAll(`input[data-qnum^="${id}:"]`).forEach(inp=>{ v.parts=v.parts||{}; v.parts[inp.dataset.qnum.split(":")[1]]=inp.value; });
+  state.answers[id] = v;
+}
+
+/* ============ uploads (ported from the Document Center) ============ */
+function wireDrops(){
+  stage.querySelectorAll(".drop").forEach(d=>{
+    d.onclick = ()=>{ activeDropReq=d; document.getElementById("fileInput").click(); };
+    ["dragover","dragenter"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add("hot");}));
+    ["dragleave","drop"].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove("hot");}));
+    d.addEventListener("drop",e=>handleFiles(d,e.dataTransfer.files));
+  });
+}
+document.getElementById("fileInput").onchange = function(){ if(activeDropReq) handleFiles(activeDropReq,this.files); this.value=""; };
+async function handleFiles(dropEl, fileList){
+  const reqId = dropEl.dataset.req, title = dropEl.dataset.title;
+  const ul = stage.querySelector(`.filelist[data-list="${reqId}"]`) || dropEl.nextElementSibling;
+  const files = [...fileList].filter(f=>{ if(f.size>MAX){ alert(f.name+" is over 25 MB — email it instead."); return false; } return true; });
+  if(!files.length) return;
+  chipMsg("UPLOADING…", false);
+  const sent = [];
+  for(const f of files){
+    const li=document.createElement("li");
+    li.innerHTML = `📄 ${esc(f.name)}<span class="sz">${(f.size/1024/1024).toFixed(1)} MB</span><span class="st up">FILING…</span>`;
+    ul.appendChild(li);
+    try{
+      if(PREVIEW){ await new Promise(r=>setTimeout(r,600)); }
+      else{
+        const data = await b64(f);
+        const up = await api({action:"fulfill", token, requestId:reqId, requestTitle:title, filename:f.name, mimeType:f.type||"application/octet-stream", data});
+        if(!up.ok) throw new Error(up.error||"upload failed");
+      }
+      li.querySelector(".st").outerHTML = `<span class="st ok">FILED ✓</span>`;
+      sent.push(f.name);
+    }catch(err){
+      const st=li.querySelector(".st"); st.className="st err"; st.textContent="FAILED — TAP TO RETRY";
+      st.onclick=()=>{ li.remove(); handleFiles(dropEl,[f]); };
+    }
   }
-  renderFiles();
+  if(sent.length){
+    const r = requests.find(x=>x.id===reqId);
+    if(r){ if(r.status==="open") r.status="received"; (r.files_list=r.files_list||[]).push(...sent.map(n=>({name:n,date:"today"}))); }
+    queueNotify(title, sent);
+  }
+  chipMsg("AUTOSAVE ON", true);
 }
-function renderFiles(){
-  const ul=document.getElementById("fileList"); if(!ul) return;
-  ul.innerHTML = uploadQueue.map((f,i)=>`<li>📄 ${f.name}<span class="sz">${(f.size/1024/1024).toFixed(1)} MB</span><button class="rm" onclick="rmFile(${i})" title="Remove">✕</button></li>`).join("");
-}
-function rmFile(i){ uploadQueue.splice(i,1); renderFiles(); }
-function updateKProgress(){
-  const el=document.getElementById("kprog"); if(!el) return;
-  const n=Object.values(state.kchecks||{}).filter(Boolean).length;
-  el.innerHTML = `<b>${n}</b> OF ${K_ITEMS.length} DOCUMENTS CHECKED OFF`;
+function queueNotify(title, names){
+  const hit = pendingNotify.find(p=>p.request===title);
+  if(hit) hit.files.push(...names); else pendingNotify.push({request:title, files:[...names]});
+  clearTimeout(notifyTimer);
+  notifyTimer = setTimeout(async ()=>{
+    const items = pendingNotify.splice(0);
+    if(!items.length || PREVIEW) return;
+    try{ await api({action:"notifyDrop", token, items}); }catch(e){}
+  }, 4000);
 }
 
-/* ============ submit ============ */
-function b64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file); }); }
-
-async function submitAll(){
-  collectCurrent(); saveState();
-  const btn=document.getElementById("submitBtn"); btn.disabled=true; btn.textContent="Submitting…";
-  const pbar=document.getElementById("pbar"), pfill=document.getElementById("pfill"), pnote=document.getElementById("pnote");
-  pbar.classList.remove("hidden"); pnote.classList.remove("hidden");
-
+/* ============ completion (reuses the proven v1 submit) ============ */
+function assembleAnswers(){
   const answers=[];
   SECTIONS.forEach(s=>s.qs.forEach(q=>{
     const [id, question, type, cfg] = q;
     const v = state.answers[id]||{};
     let a;
-    if(type==="num"){
-      a = (cfg.fields||[]).map((f,i)=>{ const val=(v.parts||{})[i]; return String(val||"").trim() ? f+": "+val : null; }).filter(Boolean).join(" · ");
-    } else {
-      a = v.choice||"";
-      if(/^(Other|Not sure)/.test(a) && (v.other||"").trim()) a += " ("+v.other.trim()+")";
-      if((v.text||"").trim()) a += (a?" — ":"")+v.text.trim();
-    }
-    answers.push({section:s.k, id, question, answer:a});
+    if(type==="num"){ a=(cfg.fields||[]).map((f,i)=>{const val=(v.parts||{})[i];return String(val||"").trim()?f+": "+val:null;}).filter(Boolean).join(" · "); }
+    else if(type==="multi"){ a=(v.multi||[]).join("; "); }
+    else { a=v.choice||""; if((v.text||"").trim()) a+=(a?" — ":"")+v.text.trim(); }
+    const by = (state.meta[id]||{}).by;
+    answers.push({section:s.k, id, question, answer:a + (by?`  [by ${by}]`:"")});
   }));
-  const kDone = K_ITEMS.filter((_,i)=>state.kchecks&&state.kchecks[i]);
-  const kMissing = K_ITEMS.filter((_,i)=>!(state.kchecks&&state.kchecks[i]));
-  answers.push({section:"K", id:"K", question:"Document checklist ("+K_ITEMS.length+" items)",
-    answer:"Checked off "+kDone.length+"/"+K_ITEMS.length+"."+(kMissing.length?" Not yet provided: "+kMissing.join("; "):" Complete.")});
-  const roleStr = state.contact.role==="Other" ? (state.contact.roleOther||"Other") : (state.contact.role||"");
-  const contactStr = (state.contact.contact||"") + (roleStr?" — "+roleStr:"");
-
+  return answers;
+}
+async function completeAll(){
+  await flushSaves();
+  const btn=document.getElementById("submitBtn"); btn.disabled=true; btn.textContent="Submitting…";
+  const pbar=document.getElementById("pbar"), pfill=document.getElementById("pfill"), pnote=document.getElementById("pnote");
+  pbar.classList.remove("hidden"); pnote.classList.remove("hidden");
   try{
-    pnote.textContent="Sending your answers…"; pfill.style.width="8%";
-    const sub = await api({action:"submit", token, company:state.contact.company, contact:contactStr,
-      email:state.contact.email, phone:state.contact.phone,
-      caHeadcount: (answers.find(a=>a.id==="A2")||{}).answer||"", totalHeadcount:(answers.find(a=>a.id==="A3")||{}).answer||"",
+    pnote.textContent="Filing your intake…"; pfill.style.width="30%";
+    const payload = {action:"submit", token,
+      company:document.getElementById("cCompany").value, contact:document.getElementById("cName").value+(me?" — "+me.role:""),
+      email:document.getElementById("cEmail").value, phone:document.getElementById("cPhone").value,
+      caHeadcount:((state.answers.A2||{}).parts||{})[0]||"", totalHeadcount:((state.answers.A3||{}).parts||{})[0]||"",
       sectionsComplete: SECTIONS.map(s=>{const [a,t]=sectionAnswered(s.k);return s.k+":"+a+"/"+t;}).join(" "),
-      answers });
+      answers: assembleAnswers()};
+    const sub = PREVIEW ? {ok:true, submissionId:"AI-PREVIEW"} : await api(payload);
     if(!sub.ok) throw new Error(sub.error||"submit failed");
-
-    for(let i=0;i<uploadQueue.length;i++){
-      const f=uploadQueue[i];
-      pnote.textContent=`Uploading document ${i+1} of ${uploadQueue.length} — ${f.name}`;
-      pfill.style.width = (10 + 88*(i/Math.max(uploadQueue.length,1)))+"%";
-      const data = await b64(f);
-      const up = await api({action:"upload", token, submissionId:sub.submissionId, filename:f.name, mimeType:f.type||"application/octet-stream", data});
-      if(!up.ok) throw new Error("Upload failed: "+f.name+" ("+(up.error||"")+")");
-    }
     pfill.style.width="100%";
-    localStorage.removeItem(LS_KEY);
+    submitted = { id: sub.submissionId, at: "just now" };
     stage.innerHTML = `<div class="card" style="text-align:center;padding:56px 40px">
       <svg class="done-seal" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.5" stroke="#B4862B" stroke-width="1.4"/><path d="M12 20.5 L17.5 26 L28 14" stroke="#3E7D5B" stroke-width="2.4" fill="none"/></svg>
       <h2>Received — thank you.</h2>
-      <p style="color:var(--slate);font-size:15px;max-width:480px;margin:12px auto 0">Your intake and ${uploadQueue.length} document${uploadQueue.length===1?"":"s"} are filed securely. Next: we review your answers together in a scoping call, confirm the audit period, and begin document testing. Findings arrive as the rule, your practice, the exposure, and the fix — prioritized by risk per dollar.</p>
-      <p class="note" style="margin-top:20px">Forgot a document? Reply to your engagement email or write to <a href="mailto:connect@calfractionalhr.com" style="color:var(--brass);font-weight:600">connect@calfractionalhr.com</a>.</p>
+      <p style="color:var(--slate);font-size:15px;max-width:480px;margin:12px auto 0">Your intake is filed. This workspace stays open: any documents still outstanding — and anything we request during the audit — upload right here, same link. Next: we review your answers together in a scoping call, then document testing begins. Findings arrive as the rule, your practice, the exposure, and the fix — prioritized by risk per dollar.</p>
     </div>`;
-    rail.classList.add("hidden");
-    window.scrollTo({top:0});
+    renderRail();
   }catch(err){
-    pnote.textContent = "Something didn't go through: "+err.message+" — your answers are still saved on this device. Try again, or email connect@calfractionalhr.com.";
+    pnote.textContent="Something didn't go through: "+err.message+" — your answers are all saved. Try again, or email connect@calfractionalhr.com.";
     btn.disabled=false; btn.textContent="Try again";
   }
 }
 
 /* ============ boot ============ */
 (async function(){
-  if(!token){ return; } // gate stays
-  document.getElementById("gate").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  loadState();
-  render();
-  // soft-validate: prefill company from the token record; invalid token re-gates.
-  if(ENDPOINT.indexOf("http")===0){
-    try{
-      const v = await api({action:"validate", token});
-      if(!v.ok){ document.getElementById("app").classList.add("hidden"); document.getElementById("gate").classList.remove("hidden"); return; }
-      if(v.company && !state.contact.company){ state.contact.company=v.company; if(steps[state.step]==="start") render(); }
-    }catch(e){ /* offline validate failure — form still usable; token is re-checked at submit */ }
+  if(PREVIEW){
+    company="Sample Client Co."; me = me || {name:"Preview User", role:"Owner"};
+    state.answers = { A1:{choice:"LLC", text:"Sample Client Co, LLC"}, C2:{choice:"System auto-deducts 30 minutes", text:"Lunch gets skipped on delivery days."} };
+    state.meta = { A1:{by:"Jordan — Owner", at:"Aug 18 10:02"}, C2:{by:"Sam — Controller", at:"Aug 18 11:40"} };
+    requests = [
+      {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing is where the expensive findings surface.", status:"received", requested:"Aug 12", received:"Aug 15", section:"C", files_list:[{name:"register-jul.pdf", date:"Aug 15"}]},
+      {id:"R-02", title:"Wage statements (3–5 employees)", note:"We test the nine §226 line items against real stubs.", status:"open", requested:"Aug 12", section:"C"},
+      {id:"R-03", title:"Current employee handbook", note:"Whatever version employees actually received.", status:"open", requested:"Aug 12", section:"F"},
+    ];
+    document.getElementById("gate").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    render(); return;
   }
+  if(!token) return;
+  try{
+    const st = await api({action:"state", token});
+    if(!st.ok) return; // gate stays
+    company = st.company||""; submitted = st.submitted||null; requests = st.requests||[];
+    Object.entries(st.answers||{}).forEach(([qid,rec])=>{
+      try{ state.answers[qid]=JSON.parse(rec.v||"{}"); }catch(e){ state.answers[qid]={text:String(rec.v||"")}; }
+      state.meta[qid]={by:rec.by, at:rec.at};
+    });
+    document.getElementById("gate").classList.add("hidden");
+    document.getElementById("app").classList.remove("hidden");
+    if(submitted && steps[step]==="start") step=0;
+    render();
+    // refresh on focus so simultaneous editors converge
+    window.addEventListener("focus", async ()=>{
+      try{ const f=await api({action:"state", token}); if(f.ok){ requests=f.requests||requests; } }catch(e){}
+    });
+  }catch(e){ /* endpoint unreachable — gate stays */ }
 })();
 </script>
 </body>
