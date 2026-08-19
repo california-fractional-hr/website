@@ -85,6 +85,8 @@
   .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;border-radius:2px;padding:4px 10px;white-space:nowrap}
   .chip.open{color:#fff;background:var(--brass);border:1px solid var(--brass);font-weight:500}
   .chip.done{color:#fff;background:var(--ok);border:1px solid var(--ok);font-weight:500}
+  .chip.replace{color:#7A2E1D;background:#F6E3DC;border:1px solid #B4552B;font-weight:500}
+  .req.is-replace{border-left:3px solid #B4552B}
   .req-note{font-size:13.5px;color:#31424A;margin-top:4px;line-height:1.55}
   .req-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--slate);margin-top:6px}
   .drop{border:2px dashed rgba(180,134,43,.45);border-radius:4px;background:#FFFFFF;padding:12px 16px;text-align:center;color:#31424A;cursor:pointer;transition:border-color .15s,background .15s;margin-top:12px;font-size:13.5px}
@@ -400,12 +402,13 @@ function qHtml(q){
 /* ============ render: section documents ============ */
 function reqCard(r){
   const done = r.status==="received"||r.status==="reviewed";
-  const cls = r.status==="waived" ? "" : done ? "is-done" : "is-open";
-  const chip = r.status==="waived" ? "" : done ? `<span class="chip done">RECEIVED ✓</span>` : `<span class="chip open">OUTSTANDING</span>`;
+  const repl = r.status==="replace";
+  const cls = r.status==="waived" ? "" : repl ? "is-replace" : done ? "is-done" : "is-open";
+  const chip = r.status==="waived" ? "" : repl ? `<span class="chip replace">NEEDS REPLACEMENT</span>` : done ? `<span class="chip done">RECEIVED ✓</span>` : `<span class="chip open">OUTSTANDING</span>`;
   const meta = [r.requested?"REQUESTED "+String(r.requested).toUpperCase():"", done&&r.received?"RECEIVED "+String(r.received).toUpperCase():""].filter(Boolean).join(" · ");
   const onRecord = (r.files_list||[]).map(f=>`<li>📄 ${esc(f.name)}<span class="sz">FILED ${esc(String(f.date||"")).toUpperCase()}</span></li>`).join("");
   const drop = r.status==="waived" ? "" :
-    `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${done?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
+    `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${repl?`Drop the <b>corrected file</b> here, or <b>browse</b>`:done?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
   return `<div class="req ${cls}">
     <div class="req-top"><h3>${esc(r.title)}</h3>${chip}</div>
     ${r.note?`<p class="req-note">${esc(r.note)}</p>`:""}
@@ -498,12 +501,25 @@ function renderReview(){
   });
 }
 
+function docSummary(){
+  const active = requests.filter(r=>r.status!=="waived");
+  const inCount = active.filter(r=>r.status==="received"||r.status==="reviewed").length;
+  const obstacles = active.filter(r=>r.status==="open"||r.status==="replace");
+  const pct = active.length ? Math.round(100*inCount/active.length) : 0;
+  const doneAll = !obstacles.length;
+  return `<h2 style="font-size:1.15rem">Where your document collection stands</h2>
+    <p class="note" style="margin-top:4px"><b>${inCount} of ${active.length}</b> requested documents are in and under review.${doneAll?" Collection is complete — analysis proceeds on a full record.":` <b>${obstacles.length}</b> item${obstacles.length===1?" stands":"s stand"} between you and a complete record:`}</p>
+    <div class="progressbar"><i style="width:${pct}%"></i></div>
+    ${doneAll?"":`<ul style="list-style:none;margin:10px 0 6px">${obstacles.map(r=>`<li style="font-size:14px;color:#31424A;padding:5px 0;border-bottom:1px solid var(--line-lt)"><span class="chip ${r.status==="replace"?"replace":"open"}" style="margin-right:10px">${r.status==="replace"?"REPLACE":"SEND"}</span><b>${esc(r.title)}</b>${r.status==="replace"&&r.note?` — ${esc(r.note)}`:""}</li>`).join("")}</ul>
+    <p class="note">Each is one upload below. Findings that depend on them stay marked “evidence pending” until they arrive.</p>`}`;
+}
 function renderDocsView(){
   const bySec = {};
   requests.forEach(r=>{ (bySec[r.section||"—"] = bySec[r.section||"—"]||[]).push(r); });
   stage.innerHTML = `<div class="card">
     <div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. New document requests appear here — same link, any device.</div>
-    <h2>Documents</h2>
+    ${docSummary()}
+    <h2 style="margin-top:24px">Documents</h2>
     ${Object.entries(bySec).map(([k,list])=>`<div class="docblock"><div class="dhead">${k==="—"?"General":"Section "+esc(k)}</div>${list.map(reqCard).join("")}</div>`).join("") || "<p class='note'>Nothing requested right now.</p>"}
     <div class="drop" data-req="MISC" data-title="Additional documents" style="margin-top:20px">Something we didn't ask for? Drop it here, or <b>browse</b></div>
     <ul class="filelist" data-list="MISC"></ul>
