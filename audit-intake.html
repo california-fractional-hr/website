@@ -96,6 +96,14 @@
   .req.is-replace{border-left:3px solid #B4552B}
   .rev-note{border-left:3px solid #B4552B;background:#FBF1EC;border-radius:2px;padding:11px 15px;margin-top:10px;font-size:13.5px;color:#7A2E1D;line-height:1.55}
   .rev-note b{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:#B4552B}
+  .obstacles{list-style:none;margin:10px 0 6px}
+  .obstacles button{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line-lt);padding:9px 8px;font-family:'Public Sans',sans-serif;font-size:14px;color:#31424A;line-height:1.5;cursor:pointer;border-radius:2px;transition:background .15s}
+  .obstacles button:hover{background:#FBF6EA}
+  .obstacles .chip{flex:none}
+  .obstacles .arrow{margin-left:auto;flex:none;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--brass);align-self:center}
+  .req{scroll-margin-top:86px}
+  .req.pinged{animation:req-ping 1.6s ease}
+  @keyframes req-ping{0%{box-shadow:0 0 0 3px rgba(180,134,43,.55)}100%{box-shadow:0 0 0 3px rgba(180,134,43,0)}}
   .req-note{font-size:13.5px;color:#31424A;margin-top:4px;line-height:1.55}
   .req-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--slate);margin-top:6px}
   .drop{border:2px dashed rgba(180,134,43,.45);border-radius:4px;background:#FFFFFF;padding:12px 16px;text-align:center;color:#31424A;cursor:pointer;transition:border-color .15s,background .15s;margin-top:12px;font-size:13.5px}
@@ -449,7 +457,7 @@ function reqCard(r){
   const onRecord = (r.files_list||[]).map(f=>`<li>📄 ${esc(f.name)}<span class="sz">FILED ${esc(String(f.date||"")).toUpperCase()}</span></li>`).join("");
   const drop = r.status==="waived" ? "" :
     `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${repl?`Drop the <b>corrected file</b> here, or <b>browse</b>`:(inReview||verified)?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
-  return `<div class="req ${cls}">
+  return `<div class="req ${cls}" id="req-${esc(r.id)}">
     <div class="req-top"><h3>${esc(r.title)}</h3>${chip}</div>
     ${r.note?`<p class="req-note">${esc(r.note)}</p>`:""}
     ${revNote}
@@ -564,8 +572,16 @@ function docSummary(){
   return `<h2 style="font-size:1.15rem">Where your document collection stands</h2>
     <p class="note" style="margin-top:4px">${lead}</p>
     <div class="progressbar" style="display:flex"><i style="width:${pctV}%;background:var(--ok)"></i><i style="width:${pctR}%;background:#9DB2AD"></i></div>
-    ${obstacles.length?`<ul style="list-style:none;margin:10px 0 6px">${obstacles.map(r=>`<li style="font-size:14px;color:#31424A;padding:5px 0;border-bottom:1px solid var(--line-lt)"><span class="chip ${r.status==="replace"?"replace":"open"}" style="margin-right:10px">${r.status==="replace"?"REPLACE":"SEND"}</span><b>${esc(r.title)}</b>${r.status==="replace"&&(r.review_note||r.note)?` — ${esc(r.review_note||r.note)}`:""}</li>`).join("")}</ul>
-    <p class="note">Each is one upload below. Findings that depend on them stay marked “evidence pending” until they arrive.</p>`:""}`;
+    ${obstacles.length?`<ul class="obstacles">${obstacles.map(r=>`<li><button onclick="jumpReq('${esc(r.id)}')"><span class="chip ${r.status==="replace"?"replace":"open"}">${r.status==="replace"?"REPLACE":"SEND"}</span><span><b>${esc(r.title)}</b>${r.status==="replace"&&(r.review_note||r.note)?` — ${esc(r.review_note||r.note)}`:""}</span><span class="arrow">↓</span></button></li>`).join("")}</ul>
+    <p class="note">Click any item to jump to its upload below. Findings that depend on them stay marked “evidence pending” until they arrive.</p>`:""}`;
+}
+function jumpReq(id){
+  const el = document.getElementById("req-"+id);
+  if(!el) return;
+  el.scrollIntoView({behavior:"smooth", block:"start"});
+  el.classList.remove("pinged"); void el.offsetWidth; // restart the highlight on repeat clicks
+  el.classList.add("pinged");
+  setTimeout(()=>el.classList.remove("pinged"), 1700);
 }
 function renderDocsView(){
   const bySec = {};
