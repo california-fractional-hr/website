@@ -71,6 +71,7 @@
   .yn label:has(input:checked){border-color:var(--brass);background:#FBF6EA;font-weight:600}
   .attrib{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:var(--slate-lt);margin-top:6px}
   .attrib b{color:var(--ok);font-weight:500}
+  .amend-badge{font-size:9px;letter-spacing:.14em;color:#8A6D1F;background:#FBF6EA;border:1px solid rgba(180,134,43,.5);border-radius:2px;padding:2px 6px;font-weight:500}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
 
@@ -170,7 +171,8 @@
 <script>
 /* ============ config ============ */
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbxvD_IyGgKoxJ4LZzyOL6ilPxXdkz9FR1vZm2fPyHaUcIpb-WjuTeoZ7ZWkrC4PF7ZZ5w/exec";
-const PREVIEW = location.hash === "#preview";
+const PREVIEW = location.hash === "#preview" || location.hash === "#preview-done";
+const PREVIEW_DONE = location.hash === "#preview-done"; // preview the post-submit (amendment-lane) state
 const token = new URLSearchParams(location.search).get("t") || "";
 const MAX = 25*1024*1024;
 const SCALE = ["Yes","No","Sometimes / varies","Don't know","Not applicable"];
@@ -302,6 +304,7 @@ let company = "", contactSeed = "";
 let step = 0;
 const steps = ["start", ...SECTIONS.map(s=>s.k), "review"];
 let dirty = {}, saveTimer = null, activeDropReq = null, pendingNotify = [], notifyTimer = null;
+let pendingAmend = {}, amendTimer = null;   // post-submit changes awaiting the one quiet email
 
 try { const l = JSON.parse(localStorage.getItem(LSK) || "{}"); me = l.me || null; step = l.step || 0; } catch(e){}
 function remember(){ try{ localStorage.setItem(LSK, JSON.stringify({me, step})); }catch(e){} }
@@ -329,14 +332,36 @@ async function flushSaves(){
   const by = me ? `${me.name} — ${me.role}` : "";
   try{
     if (!PREVIEW) { const r = await api({action:"saveAnswers", token, by, answers: batch}); if(!r.ok) throw new Error(r.error||"save failed"); }
-    batch.forEach(b => { state.meta[b.qid] = { by, at: "just now" }; });
-    chipMsg("SAVED ✓", false); setTimeout(()=>chipMsg("AUTOSAVE ON", true), 1600);
+    batch.forEach(b => { state.meta[b.qid] = { by, at: "just now", amended: !!submitted }; });
+    if (submitted){
+      batch.forEach(b => queueAmendNotify(b.qid, b.section));
+      chipMsg("AMENDMENT SAVED ✓", false); setTimeout(()=>chipMsg("AUTOSAVE ON", true), 1600);
+    } else {
+      chipMsg("SAVED ✓", false); setTimeout(()=>chipMsg("AUTOSAVE ON", true), 1600);
+    }
   }catch(e){
     chipMsg("OFFLINE — RETRYING", false);
     batch.forEach(b => dirty[b.qid] = b.section);
     setTimeout(flushSaves, 5000);
   }
 }
+
+/* ============ amendment notify (post-submit; one quiet email per session) ============ */
+function queueAmendNotify(qid, section){
+  pendingAmend[qid] = section;
+  clearTimeout(amendTimer);
+  amendTimer = setTimeout(()=>flushAmendNotify(false), 90000);
+}
+function flushAmendNotify(useBeacon){
+  const items = Object.entries(pendingAmend).map(([qid, section])=>({qid, section}));
+  pendingAmend = {};
+  clearTimeout(amendTimer);
+  if(!items.length || PREVIEW) return;
+  const payload = JSON.stringify({action:"notifyAmend", token, by: me?`${me.name} — ${me.role}`:"", items});
+  if(useBeacon && navigator.sendBeacon){ navigator.sendBeacon(ENDPOINT, payload); return; }
+  try{ fetch(ENDPOINT, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: payload, keepalive: true}); }catch(e){}
+}
+window.addEventListener("pagehide", ()=>flushAmendNotify(true));
 
 /* ============ answered logic ============ */
 function isAnswered(v){
@@ -373,28 +398,29 @@ function go(i){ step=i; remember(); render(); window.scrollTo({top:0}); }
 /* ============ render: questions ============ */
 function attribLine(qid){
   const m = state.meta[qid];
-  return m && m.by ? `<p class="attrib">answered by <b>${esc(m.by)}</b>${m.at?" · "+esc(m.at):""}</p>` : "";
+  if (!m || !m.by) return "";
+  const badge = m.amended ? `<span class="amend-badge">AMENDED</span> ` : "";
+  return `<p class="attrib">${badge}${m.amended?"amended":"answered"} by <b>${esc(m.by)}</b>${m.at?" · "+esc(m.at):""}</p>`;
 }
 function qHtml(q){
   const [id, question, type, cfg] = q;
   const v = state.answers[id] || {};
-  const dis = submitted ? "disabled" : "";
   let control = "";
   if (type === "sel"){
-    control = `<div class="selwrap"><select data-qsel="${id}" ${dis}>
+    control = `<div class="selwrap"><select data-qsel="${id}">
       <option value=""></option>${cfg.opts.map(o=>`<option ${v.choice===o?"selected":""}>${esc(o)}</option>`).join("")}</select>
-      ${cfg.explain?`<textarea data-qtext="${id}" placeholder="${esc(cfg.explain)}" ${dis}>${esc(v.text||"")}</textarea>`:""}</div>`;
+      ${cfg.explain?`<textarea data-qtext="${id}" placeholder="${esc(cfg.explain)}">${esc(v.text||"")}</textarea>`:""}</div>`;
   } else if (type === "num"){
     control = `<div class="numgrid">${cfg.fields.map((f,i)=>`<div><label>${esc(f)}</label>
-      <input type="text" inputmode="numeric" data-qnum="${id}:${i}" value="${esc((v.parts||{})[i]||"")}" ${dis}></div>`).join("")}</div>`;
+      <input type="text" inputmode="numeric" data-qnum="${id}:${i}" value="${esc((v.parts||{})[i]||"")}"></div>`).join("")}</div>`;
   } else if (type === "yn"){
-    control = `<div class="yn">${SCALE.map(o=>`<label><input type="radio" name="yn-${id}" value="${esc(o)}" ${v.choice===o?"checked":""} ${dis}>${esc(o)}</label>`).join("")}</div>
-      <textarea data-qtext="${id}" placeholder="Anything worth adding?" ${dis}>${esc(v.text||"")}</textarea>`;
+    control = `<div class="yn">${SCALE.map(o=>`<label><input type="radio" name="yn-${id}" value="${esc(o)}" ${v.choice===o?"checked":""}>${esc(o)}</label>`).join("")}</div>
+      <textarea data-qtext="${id}" placeholder="Anything worth adding?">${esc(v.text||"")}</textarea>`;
   } else if (type === "multi"){
     const sel = v.multi || [];
-    control = `<div class="yn">${cfg.opts.map(o=>`<label><input type="checkbox" data-qmulti="${id}" value="${esc(o)}" ${sel.includes(o)?"checked":""} ${dis}>${esc(o)}</label>`).join("")}</div>`;
+    control = `<div class="yn">${cfg.opts.map(o=>`<label><input type="checkbox" data-qmulti="${id}" value="${esc(o)}" ${sel.includes(o)?"checked":""}>${esc(o)}</label>`).join("")}</div>`;
   } else {
-    control = `<textarea data-qtext="${id}" class="${type==="long"?"long":""}" ${dis}>${esc(v.text||"")}</textarea>`;
+    control = `<textarea data-qtext="${id}" class="${type==="long"?"long":""}">${esc(v.text||"")}</textarea>`;
   }
   return `<div class="q" data-q="${id}"><label class="qt"><span class="qid">${id}</span>${esc(question)}</label>${control}${attribLine(id)}</div>`;
 }
@@ -432,7 +458,7 @@ function render(){
   const sec = SECTIONS.find(s=>s.k===key);
   const [a,t] = sectionAnswered(key);
   stage.innerHTML = `<div class="card">
-    ${submitted?`<div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)} — answers are read-only. Document requests below stay live.</div>`:""}
+    ${submitted?`<div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. Answers stay open — anything you correct or add from here on is filed as a dated amendment alongside your original submission, and we're notified.</div>`:""}
     <h2>Section ${sec.k} — ${esc(sec.t)}</h2>
     <div class="why"><b>Why we ask</b>${esc(sec.why)}</div>
     ${sec.qs.map(qHtml).join("")}
@@ -449,7 +475,7 @@ function renderStart(){
   const done = SECTIONS.reduce((n,s)=>n+sectionAnswered(s.k)[0],0);
   const pct = Math.round(100*done/total);
   stage.innerHTML = `<div class="card">
-    ${submitted?`<div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. This workspace stays open for document requests — see the Documents view, or any section below.</div>`:""}
+    ${submitted?`<div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. This workspace stays open for the life of the audit — document requests live in the Documents view, and any answer below can still be corrected. Changes are filed as dated amendments; your original submission stays intact.</div>`:""}
     <h2>${esc(company||"Welcome")} — your audit workspace</h2>
     <p style="color:var(--slate);font-size:14.5px;margin-top:6px">Ten short sections. Everything saves as you type, from any device — and this link can be shared: forward it to whoever runs payroll, HR, or operations day-to-day, and each of you can fill in the sections you know best.</p>
     <div class="progressbar"><i style="width:${pct}%"></i></div>
@@ -467,7 +493,8 @@ function renderStart(){
 function startGo(){
   const name = document.getElementById("meName").value.trim();
   const role = document.getElementById("meRole").value.trim();
-  if (!submitted && !name){ alert("Tell us your name first — every answer is stamped with who gave it."); return; }
+  // Post-submit too: amendments are attributed the same as original answers.
+  if (!name && !me){ alert("Tell us your name first — every answer is stamped with who gave it."); return; }
   if (name) me = { name, role: role||"Team" };
   remember(); go(1);
 }
@@ -479,7 +506,7 @@ function renderReview(){
   const openReqs = requests.filter(r=>r.status==="open").length;
   stage.innerHTML = `<div class="card">
     <h2>Review & complete</h2>
-    <p style="color:var(--slate);font-size:14.5px;margin-top:6px">Completing the intake tells us to begin analysis. You can still upload documents here afterward — this workspace stays open for the life of the audit.</p>
+    <p style="color:var(--slate);font-size:14.5px;margin-top:6px">Completing the intake tells us to begin analysis. This workspace stays open for the life of the audit — documents upload here afterward, and answers can still be corrected (corrections file as dated amendments to your submission).</p>
     <div class="why" style="margin-top:16px"><b>Where you stand</b>${missing.length?`${missing.length} unanswered: ${missing.slice(0,20).join(", ")}${missing.length>20?"…":""}. Partial is allowed — "don't know" beats blank.`:"Every question answered."} ${openReqs?`· ${openReqs} document request${openReqs===1?"":"s"} still open (fine to send later).`:""}</div>
     <h2 style="font-size:1.15rem;margin-top:22px">Confirm your contact details</h2>
     <div class="grid2" style="margin-top:12px">
@@ -517,7 +544,7 @@ function renderDocsView(){
   const bySec = {};
   requests.forEach(r=>{ (bySec[r.section||"—"] = bySec[r.section||"—"]||[]).push(r); });
   stage.innerHTML = `<div class="card">
-    <div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. New document requests appear here — same link, any device.</div>
+    <div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. New document requests appear here — same link, any device. Remembered something? Any section's answers can still be corrected; changes are filed as dated amendments.</div>
     ${docSummary()}
     <h2 style="margin-top:24px">Documents</h2>
     ${Object.entries(bySec).map(([k,list])=>`<div class="docblock"><div class="dhead">${k==="—"?"General":"Section "+esc(k)}</div>${list.map(reqCard).join("")}</div>`).join("") || "<p class='note'>Nothing requested right now.</p>"}
@@ -638,7 +665,7 @@ async function completeAll(){
     stage.innerHTML = `<div class="card" style="text-align:center;padding:56px 40px">
       <svg class="done-seal" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="18.5" stroke="#B4862B" stroke-width="1.4"/><path d="M12 20.5 L17.5 26 L28 14" stroke="#3E7D5B" stroke-width="2.4" fill="none"/></svg>
       <h2>Received — thank you.</h2>
-      <p style="color:var(--slate);font-size:15px;max-width:480px;margin:12px auto 0">Your intake is filed. This workspace stays open: any documents still outstanding — and anything we request during the audit — upload right here, same link. Next: we review your answers together in a scoping call, then document testing begins. Findings arrive as the rule, your practice, the exposure, and the fix — prioritized by risk per dollar.</p>
+      <p style="color:var(--slate);font-size:15px;max-width:480px;margin:12px auto 0">Your intake is filed. This workspace stays open: any documents still outstanding — and anything we request during the audit — upload right here, same link. Remember something later? Your answers stay open too; corrections are filed as dated amendments. Next: we review your answers together in a scoping call, then document testing begins. Findings arrive as the rule, your practice, the exposure, and the fix — prioritized by risk per dollar.</p>
     </div>`;
     renderRail();
   }catch(err){
@@ -653,6 +680,10 @@ async function completeAll(){
     company="Sample Client Co."; me = me || {name:"Preview User", role:"Owner"};
     state.answers = { A1:{choice:"LLC", text:"Sample Client Co, LLC"}, C2:{choice:"System auto-deducts 30 minutes", text:"Lunch gets skipped on delivery days."} };
     state.meta = { A1:{by:"Jordan — Owner", at:"Aug 18 10:02"}, C2:{by:"Sam — Controller", at:"Aug 18 11:40"} };
+    if (PREVIEW_DONE){
+      submitted = { id:"AI-PREVIEW", at:"Aug 15" };
+      state.meta.C2 = { by:"Sam — Controller", at:"Aug 18 11:40", amended:true };
+    }
     requests = [
       {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing is where the expensive findings surface.", status:"received", requested:"Aug 12", received:"Aug 15", section:"C", files_list:[{name:"register-jul.pdf", date:"Aug 15"}]},
       {id:"R-02", title:"Wage statements (3–5 employees)", note:"We test the nine §226 line items against real stubs.", status:"open", requested:"Aug 12", section:"C"},
@@ -669,7 +700,7 @@ async function completeAll(){
     company = st.company||""; submitted = st.submitted||null; requests = st.requests||[];
     Object.entries(st.answers||{}).forEach(([qid,rec])=>{
       try{ state.answers[qid]=JSON.parse(rec.v||"{}"); }catch(e){ state.answers[qid]={text:String(rec.v||"")}; }
-      state.meta[qid]={by:rec.by, at:rec.at};
+      state.meta[qid]={by:rec.by, at:rec.at, amended:!!rec.amended};
     });
     document.getElementById("gate").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
