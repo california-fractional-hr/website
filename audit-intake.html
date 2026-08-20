@@ -14,7 +14,7 @@
   :root{
     --ink:#0A2C44; --deep:#061C2E; --paper:#F2EFE5; --brass:#B4862B; --brass-2:#D8AC4E;
     --slate:#42535A; --slate-lt:#6E837F; --line-lt:rgba(10,38,35,.24); --maxw:1080px;
-    --ok:#3E7D5B;
+    --ok:#3E7D5B; --live:#22C55E; --live-ink:#0A3B1E; --warn:#A9430F;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Public Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -28,8 +28,12 @@
   .brand{display:flex;align-items:center;gap:12px;font-family:'Spectral',serif;font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.05}
   .brand .rose{width:26px;height:26px;flex:none}
   .brand small{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:var(--slate);display:block;font-weight:400;margin-top:1px}
-  .save-chip{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--slate);border:1px solid var(--line-lt);border-radius:2px;padding:8px 14px;transition:color .3s}
-  .save-chip.saved{color:var(--ok)}
+  .save-chip{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;color:var(--live-ink);background:var(--live);border:1px solid var(--live);border-radius:2px;padding:8px 14px;display:inline-flex;align-items:center;gap:8px;transition:background-color .3s,border-color .3s,color .3s}
+  .save-chip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--live-ink);animation:chip-pulse 2.2s ease-in-out infinite}
+  @keyframes chip-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .save-chip.err{color:var(--paper);background:var(--warn);border-color:var(--warn)}
+  .save-chip.err::before{background:var(--paper);animation:none}
+  @media (prefers-reduced-motion:reduce){.save-chip::before{animation:none}}
 
   .page-head{background:var(--ink);color:var(--paper);padding:40px 0 36px}
   .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--brass-2);display:inline-flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -316,7 +320,7 @@ async function api(payload){
 }
 function b64(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result.split(",")[1]); r.onerror=rej; r.readAsDataURL(file); }); }
 function esc(s){ return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-function chipMsg(text, calm){ const c=document.getElementById("saveChip"); c.textContent=text; c.classList.toggle("saved", !calm); }
+function chipMsg(text, calm, err){ const c=document.getElementById("saveChip"); c.textContent=text; c.classList.toggle("saved", !calm); c.classList.toggle("err", !!err); }
 
 /* ============ autosave ============ */
 function queueSave(qid, section){
@@ -340,7 +344,7 @@ async function flushSaves(){
       chipMsg("SAVED ✓", false); setTimeout(()=>chipMsg("AUTOSAVE ON", true), 1600);
     }
   }catch(e){
-    chipMsg("OFFLINE — RETRYING", false);
+    chipMsg("OFFLINE — RETRYING", false, true);
     batch.forEach(b => dirty[b.qid] = b.section);
     setTimeout(flushSaves, 5000);
   }
