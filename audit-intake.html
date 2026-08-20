@@ -90,8 +90,12 @@
   .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;border-radius:2px;padding:4px 10px;white-space:nowrap}
   .chip.open{color:#fff;background:var(--brass);border:1px solid var(--brass);font-weight:500}
   .chip.done{color:#fff;background:var(--ok);border:1px solid var(--ok);font-weight:500}
+  .chip.inreview{color:#fff;background:var(--slate);border:1px solid var(--slate);font-weight:500}
+  .req.is-inreview{border-left:3px solid var(--slate)}
   .chip.replace{color:#7A2E1D;background:#F6E3DC;border:1px solid #B4552B;font-weight:500}
   .req.is-replace{border-left:3px solid #B4552B}
+  .rev-note{border-left:3px solid #B4552B;background:#FBF1EC;border-radius:2px;padding:11px 15px;margin-top:10px;font-size:13.5px;color:#7A2E1D;line-height:1.55}
+  .rev-note b{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:#B4552B}
   .req-note{font-size:13.5px;color:#31424A;margin-top:4px;line-height:1.55}
   .req-meta{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--slate);margin-top:6px}
   .drop{border:2px dashed rgba(180,134,43,.45);border-radius:4px;background:#FFFFFF;padding:12px 16px;text-align:center;color:#31424A;cursor:pointer;transition:border-color .15s,background .15s;margin-top:12px;font-size:13.5px}
@@ -431,17 +435,24 @@ function qHtml(q){
 
 /* ============ render: section documents ============ */
 function reqCard(r){
-  const done = r.status==="received"||r.status==="reviewed";
+  // Three client-visible states (v2.3): received means a person is checking it;
+  // the checkmark belongs to the review, not the upload.
+  const verified = r.status==="reviewed";
+  const inReview = r.status==="received";
   const repl = r.status==="replace";
-  const cls = r.status==="waived" ? "" : repl ? "is-replace" : done ? "is-done" : "is-open";
-  const chip = r.status==="waived" ? "" : repl ? `<span class="chip replace">NEEDS REPLACEMENT</span>` : done ? `<span class="chip done">RECEIVED ✓</span>` : `<span class="chip open">OUTSTANDING</span>`;
-  const meta = [r.requested?"REQUESTED "+String(r.requested).toUpperCase():"", done&&r.received?"RECEIVED "+String(r.received).toUpperCase():""].filter(Boolean).join(" · ");
+  const cls = r.status==="waived" ? "" : repl ? "is-replace" : verified ? "is-done" : inReview ? "is-inreview" : "is-open";
+  const chip = r.status==="waived" ? "" : repl ? `<span class="chip replace">NEEDS ATTENTION</span>` : verified ? `<span class="chip done">VERIFIED ✓</span>` : inReview ? `<span class="chip inreview">IN REVIEW</span>` : `<span class="chip open">OUTSTANDING</span>`;
+  const meta = [r.requested?"REQUESTED "+String(r.requested).toUpperCase():"",
+    (inReview||verified)&&r.received?"RECEIVED "+String(r.received).toUpperCase():"",
+    verified&&r.reviewed?"VERIFIED "+String(r.reviewed).toUpperCase()+(r.reviewed_by?" — "+esc(String(r.reviewed_by).toUpperCase()):""):""].filter(Boolean).join(" · ");
+  const revNote = repl&&r.review_note?`<p class="rev-note"><b>From our review</b>${esc(r.review_note)}</p>`:"";
   const onRecord = (r.files_list||[]).map(f=>`<li>📄 ${esc(f.name)}<span class="sz">FILED ${esc(String(f.date||"")).toUpperCase()}</span></li>`).join("");
   const drop = r.status==="waived" ? "" :
-    `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${repl?`Drop the <b>corrected file</b> here, or <b>browse</b>`:done?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
+    `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${repl?`Drop the <b>corrected file</b> here, or <b>browse</b>`:(inReview||verified)?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
   return `<div class="req ${cls}">
     <div class="req-top"><h3>${esc(r.title)}</h3>${chip}</div>
     ${r.note?`<p class="req-note">${esc(r.note)}</p>`:""}
+    ${revNote}
     ${meta?`<p class="req-meta">${meta}</p>`:""}
     ${onRecord?`<ul class="filelist">${onRecord}</ul>`:""}
     ${drop}<ul class="filelist" data-list="${esc(r.id)}"></ul></div>`;
@@ -449,7 +460,8 @@ function reqCard(r){
 function docBlock(sectionKey){
   const list = requests.filter(r=>r.section===sectionKey && r.status!=="waived");
   if (!list.length) return "";
-  return `<div class="docblock"><div class="dhead">Documents for this section · ${list.filter(r=>r.status!=="open").length} of ${list.length} in</div>
+  const vN = list.filter(r=>r.status==="reviewed").length;
+  return `<div class="docblock"><div class="dhead">Documents for this section · ${list.filter(r=>r.status!=="open").length} of ${list.length} in · ${vN} verified</div>
     ${list.map(reqCard).join("")}</div>`;
 }
 
@@ -533,16 +545,27 @@ function renderReview(){
 }
 
 function docSummary(){
+  // Collection is complete only when every active request is VERIFIED (v2.3).
+  // Uploading everything gets you to "all in — under review", never to "complete".
   const active = requests.filter(r=>r.status!=="waived");
-  const inCount = active.filter(r=>r.status==="received"||r.status==="reviewed").length;
+  const verified = active.filter(r=>r.status==="reviewed");
+  const inReview = active.filter(r=>r.status==="received");
   const obstacles = active.filter(r=>r.status==="open"||r.status==="replace");
-  const pct = active.length ? Math.round(100*inCount/active.length) : 0;
-  const doneAll = !obstacles.length;
+  const inCount = verified.length + inReview.length;
+  const pctV = active.length ? Math.round(100*verified.length/active.length) : 0;
+  const pctR = active.length ? Math.round(100*inReview.length/active.length) : 0;
+  const allVerified = active.length>0 && !obstacles.length && !inReview.length;
+  const allIn = !obstacles.length && inReview.length>0;
+  const reviewer = (verified.find(r=>r.reviewed_by)||{}).reviewed_by || "California Fractional HR";
+  let lead;
+  if (allVerified) lead = `<b>${verified.length} of ${active.length}</b> documents verified. Collection is complete — every document has been opened, checked against your intake record, and confirmed by ${esc(reviewer)}. Analysis proceeds on a verified record.`;
+  else if (allIn) lead = `<b>All ${active.length}</b> requested documents are in — ${verified.length} verified, ${inReview.length} under review. We open and check every document against your intake record before analysis begins; anything that needs a second look comes back here with a note. Nothing more is needed from you right now — you'll see each item flip to VERIFIED as we confirm it.`;
+  else lead = `<b>${inCount} of ${active.length}</b> requested documents are in · ${verified.length} verified. <b>${obstacles.length}</b> item${obstacles.length===1?" stands":"s stand"} between you and a complete record:`;
   return `<h2 style="font-size:1.15rem">Where your document collection stands</h2>
-    <p class="note" style="margin-top:4px"><b>${inCount} of ${active.length}</b> requested documents are in and under review.${doneAll?" Collection is complete — analysis proceeds on a full record.":` <b>${obstacles.length}</b> item${obstacles.length===1?" stands":"s stand"} between you and a complete record:`}</p>
-    <div class="progressbar"><i style="width:${pct}%"></i></div>
-    ${doneAll?"":`<ul style="list-style:none;margin:10px 0 6px">${obstacles.map(r=>`<li style="font-size:14px;color:#31424A;padding:5px 0;border-bottom:1px solid var(--line-lt)"><span class="chip ${r.status==="replace"?"replace":"open"}" style="margin-right:10px">${r.status==="replace"?"REPLACE":"SEND"}</span><b>${esc(r.title)}</b>${r.status==="replace"&&r.note?` — ${esc(r.note)}`:""}</li>`).join("")}</ul>
-    <p class="note">Each is one upload below. Findings that depend on them stay marked “evidence pending” until they arrive.</p>`}`;
+    <p class="note" style="margin-top:4px">${lead}</p>
+    <div class="progressbar" style="display:flex"><i style="width:${pctV}%;background:var(--ok)"></i><i style="width:${pctR}%;background:#9DB2AD"></i></div>
+    ${obstacles.length?`<ul style="list-style:none;margin:10px 0 6px">${obstacles.map(r=>`<li style="font-size:14px;color:#31424A;padding:5px 0;border-bottom:1px solid var(--line-lt)"><span class="chip ${r.status==="replace"?"replace":"open"}" style="margin-right:10px">${r.status==="replace"?"REPLACE":"SEND"}</span><b>${esc(r.title)}</b>${r.status==="replace"&&(r.review_note||r.note)?` — ${esc(r.review_note||r.note)}`:""}</li>`).join("")}</ul>
+    <p class="note">Each is one upload below. Findings that depend on them stay marked “evidence pending” until they arrive.</p>`:""}`;
 }
 function renderDocsView(){
   const bySec = {};
@@ -690,8 +713,9 @@ async function completeAll(){
     }
     requests = [
       {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing is where the expensive findings surface.", status:"received", requested:"Aug 12", received:"Aug 15", section:"C", files_list:[{name:"register-jul.pdf", date:"Aug 15"}]},
-      {id:"R-02", title:"Wage statements (3–5 employees)", note:"We test the nine §226 line items against real stubs.", status:"open", requested:"Aug 12", section:"C"},
-      {id:"R-03", title:"Current employee handbook", note:"Whatever version employees actually received.", status:"open", requested:"Aug 12", section:"F"},
+      {id:"R-02", title:"Wage statements (3–5 employees)", note:"We test the nine §226 line items against real stubs.", status:"replace", requested:"Aug 12", received:"Aug 14", section:"C", review_note:"The file titled 'wage statements' is a benefits deduction summary — re-export actual pay stubs, one per pay group.", files_list:[{name:"stubs-batch.pdf", date:"Aug 14"}]},
+      {id:"R-03", title:"Current employee handbook", note:"Whatever version employees actually received.", status:"reviewed", requested:"Aug 12", received:"Aug 13", reviewed:"Aug 16", reviewed_by:"Troy Avery", section:"F", files_list:[{name:"handbook-2025.pdf", date:"Aug 13"}]},
+      {id:"R-04", title:"Org chart or roster with titles and pay rates", note:"Headcount here reconciles against your Section A answers.", status:"open", requested:"Aug 12", section:"A"},
     ];
     document.getElementById("gate").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
