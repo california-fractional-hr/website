@@ -202,6 +202,9 @@
   .tile .sub{font-size:13px;color:var(--slate);margin:0 0 8px}
   .tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border:1px solid rgba(10,44,68,.55);border-radius:2px;background:#F1F4F7;color:#0A2C44;vertical-align:middle}
   .tag.verified{color:#2E6347;border-color:rgba(62,125,91,.85);background:#EAF3EC} .tag.analysis{color:#7F5D1C;border-color:rgba(180,134,43,.9);background:#FBF3E1}
+  /* Descriptive labels (pay types) are not stage badges: they keep the quiet hairline
+     look so the framed badge means one thing — the stage of the evidence. */
+  .tag.plain{font-family:'Public Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;border:1px solid var(--line-lt);background:#FFFFFF;color:var(--slate)}
   .si{display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px;flex:none}
   .si.ok{background:#EFF5F0;color:var(--ok)} .si.flag{background:rgba(169,67,15,.09);color:var(--warn)} .si.unk{background:#EEF0F3;color:#6B7684}
   .chk{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line-lt);font-size:13.5px}
@@ -915,7 +918,7 @@ function renderDashboard(){
         <p class="ask">How your people are paid — each pay type carries its own rules.</p>
         ${splitBar([{value:ft||0,color:"#B4862B"},{value:pt||0,color:"#D8AC4E"},{value:out||0,color:"#EEE3C6"}])}
         <div class="legend"><span><i style="background:#B4862B"></i>Full-time ${ft??"—"}</span><span><i style="background:#D8AC4E"></i>Part-time / seasonal ${pt??"—"}</span>${out?`<span><i style="background:#EEE3C6"></i>Outside CA ${out}</span>`:""}</div>
-        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">${mix.map(x=>`<span class="tag" style="text-transform:none;letter-spacing:0;font-family:'Public Sans',sans-serif;font-size:12px">${esc(x)}</span>`).join("")||'<span class="sub">Select the workforce types in Section B.</span>'}</div>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">${mix.map(x=>`<span class="tag plain">${esc(x)}</span>`).join("")||'<span class="sub">Select the workforce types in Section B.</span>'}</div>
       </div>
       <div class="tile wide">
         <span class="k">Systems &amp; policies <span class="tag">As stated</span></span>
