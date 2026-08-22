@@ -136,12 +136,16 @@
   .foot-bottom{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em}
   footer a{color:var(--brass-2)}
   /* Audit Dashboard */
-  .dash{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
-  @media (max-width:760px){.dash{grid-template-columns:1fr}}
+  .dash{display:grid;grid-template-columns:1fr;gap:16px;margin-top:18px}
   .tile{border:1px solid var(--line-lt);border-radius:4px;padding:16px 18px;background:#fff;min-width:0}
   .tile.wide{grid-column:1/-1}
-  .tile h3{font-size:15.5px;margin:0 0 2px;color:var(--ink)}
-  .tile .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);display:block;margin-bottom:6px}
+  .tile h3{font-size:23px;line-height:1.2;margin:4px 0 4px;color:var(--ink)}
+  .tile .k{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .tile .ask{font-size:14.5px;line-height:1.5;color:#2F3A47;margin:0 0 12px}
+  .tile:not(.wide) .chk .val{white-space:normal}
+  .cap{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;margin-top:10px;padding-bottom:6px;border-bottom:1px solid var(--line-lt);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+  .cap:first-child{margin-top:0} .cap b{color:var(--brass);font-weight:600} .cap span{font-family:'Public Sans',sans-serif;font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--slate)}
+  .dash-lead{font-size:17px;line-height:1.5;color:var(--ink);margin:14px 0 4px}
   .tile .big{font-size:30px;font-weight:600;color:var(--ink);line-height:1.05;margin:6px 0 2px}
   .tile .sub{font-size:13px;color:var(--slate);margin:0 0 8px}
   .tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--line-lt);border-radius:2px;color:var(--slate);vertical-align:middle}
@@ -152,9 +156,14 @@
   .chk:last-child{border-bottom:0} .chk .lbl{flex:1;min-width:0} .chk .val{color:var(--slate);font-size:12.5px;text-align:right;max-width:56%;white-space:nowrap}
   .legend{display:flex;flex-wrap:wrap;gap:12px 16px;font-size:12px;color:var(--slate);margin-top:8px}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
-  .ratio{padding:10px 0;border-bottom:1px solid var(--line-lt)} .ratio:last-child{border-bottom:0}
-  .ratio .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13.5px}
-  .ratio .v{font-weight:600;color:var(--ink);white-space:nowrap} .ratio .n{font-size:12.5px;color:var(--slate);margin-top:2px}
+  .ratio{padding:14px 0;border-bottom:1px solid var(--line-lt)} .ratio:last-child{border-bottom:0}
+  .ratio .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .ratio h4{font-size:16px;line-height:1.3;margin:0;color:var(--ink);display:flex;align-items:center}
+  .ratio .v{font-weight:600;color:var(--ink);white-space:nowrap;font-size:17px}
+  .ratio .m{font-size:12.5px;color:var(--slate);margin:2px 0 6px 26px}
+  .ratio .read{font-size:13.5px;color:var(--ink);margin-top:4px} .ratio .read b{font-weight:600}
+  .ratio .read.flag b{color:var(--warn)} .ratio .read.ok b{color:var(--ok)}
+  .ratio .n{font-size:12.5px;color:var(--slate);margin-top:3px}
   .dashlock{background:#FBF6EA;border-left:3px solid var(--brass);border-radius:2px;padding:13px 17px;font-size:14px;color:#6B5A2A;line-height:1.55}
   .dashlock b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--brass)}
   .rungs{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px;color:var(--slate)} .rungs li{display:flex;gap:8px;padding:3px 0} .rungs b{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--ink);min-width:34px}
@@ -666,7 +675,7 @@ function renderDocsView(){
 const LADDER = [
   {n:5,   tag:"harassment-prevention training · family & pregnancy leave"},
   {n:15,  tag:"pay scale on every job posting"},
-  {n:26,  tag:"large-employer wage & overtime schedules (25 / 26)"},
+  {n:25,  tag:"school-activities leave · victims-of-violence leave"},
   {n:50,  tag:"federal FMLA · ACA employer mandate"},
   {n:100, tag:"annual pay-data report to the state"}];
 function ansChoice(id){ return ((state.answers[id]||{}).choice||"").trim(); }
@@ -686,11 +695,32 @@ function splitBar(parts){
   return `<svg viewBox="0 0 ${W} 14" width="100%" height="14" aria-hidden="true">${segs}</svg>`;
 }
 function lineBar(r){
-  const W=520,H=44,L=8,R=8, max=r.max||Math.max((r.line||0)*1.5, r.value*1.2, 1), x=v=>L+Math.min(Math.max(v,0),max)/max*(W-L-R);
-  const col = r.status==="ok"?"#3E7D5B":r.status==="flag"?"#A9430F":"#9AA3AE";
-  const lx = r.line==null?0:x(r.line), anchor = lx<60?"start":lx>W-60?"end":"middle";
-  const line = (r.line==null)?"":`<line x1="${lx}" x2="${lx}" y1="6" y2="30" stroke="#0A2C44" stroke-width="1.5" stroke-dasharray="3 2"/><text x="${lx}" y="42" text-anchor="${anchor}" font-size="9.5" fill="#0A2C44" font-family="IBM Plex Mono,monospace">${esc(r.lineLabel||"the line")}</text>`;
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(r.label)}: ${esc(r.display)}"><line x1="${L}" x2="${W-R}" y1="18" y2="18" stroke="#D9DEE5" stroke-width="2"/><rect x="${L}" y="14" width="${Math.max(2,x(r.value)-L)}" height="8" rx="3" fill="${col}"/>${line}</svg>`;
+  // Bullet bar: a thick track, the client's number as a brass fill (one hue for
+  // magnitude), the statutory line as a bold navy marker with its label. Status is
+  // never color alone — the icon and the words line beside the bar carry it.
+  const W=520,H=46,L=8,R=8, max=r.max||Math.max((r.line||0)*1.5, r.value*1.2, 1), x=v=>L+Math.min(Math.max(v,0),max)/max*(W-L-R);
+  const lx = r.line==null?0:x(r.line), anchor = lx<70?"start":lx>W-70?"end":"middle";
+  const line = (r.line==null)?"":`<line x1="${lx}" x2="${lx}" y1="2" y2="32" stroke="#0A2C44" stroke-width="3"/><text x="${lx}" y="44" text-anchor="${anchor}" font-size="10.5" font-weight="600" fill="#0A2C44" font-family="IBM Plex Mono,monospace" letter-spacing=".08em">${esc((r.lineLabel||"the line").toUpperCase())}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(r.label)}: ${esc(r.display)}"><rect x="${L}" y="9" width="${W-L-R}" height="16" rx="3" fill="#EEF0F3"/><rect x="${L}" y="9" width="${Math.max(3,x(r.value)-L)}" height="16" rx="3" fill="#B4862B"/>${line}</svg>`;
+}
+// The plain question each measure answers — the heading a first-time reader needs.
+// A record may carry its own `question`; otherwise the key maps to one; otherwise the label.
+const QUESTIONS = {
+  exempt_floor:"Are your salaried managers paid above the exemption floor?",
+  ot_pickers:"Were the harvest pickers paid the overtime they worked?",
+  ot_field:"Was the field crew paid the overtime it worked?",
+  ot_cellar:"Was the cellar crew paid the overtime it worked?",
+  meals:"Are meal periods being taken on time — and recorded?",
+  piece_rest:"Are piece-rate workers paid separately for their rest periods?",
+  time_fidelity:"Are people paid for the hours on the original time records?",
+  deductions:"Are there deductions from pay that California doesn't allow?",
+  heat_training:"Has everyone who works in heat been trained?"};
+function ratioQuestion(r){ return r.question || QUESTIONS[r.key] || (r.key&&r.key.startsWith("ot_") ? "Was this crew paid the overtime it worked?" : r.label); }
+function ratioRead(r){
+  const where = r.status==="ok" ? "At or past the line" : r.status==="flag" ? (r.line!=null && r.value<r.line ? "Below the line" : "Past the line") : "Not yet measurable";
+  const lineNum = r.line==null ? "" : ((r.max||1)<=2 ? `${Math.round(r.line*100)}%` : String(r.line));
+  const you = r.display ? `you: ${r.display}` : "", ln = r.line!=null ? `the line: ${lineNum}${r.lineLabel?` (${r.lineLabel})`:""}` : "";
+  return `<div class="read ${r.status||"unk"}"><b>${where}</b>${you||ln?` — ${[you,ln].filter(Boolean).join(" · ")}`:""}</div>`;
 }
 function statedChecks(){
   const c = id=>ansChoice(id);
@@ -722,45 +752,52 @@ function renderDashboard(){
   stage.innerHTML = `<div class="card">
     <h2>Audit Dashboard</h2>
     <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · ${updated}</p>
-    <div class="why"><b>How to read this</b>Each measure is shown against the line California draws, not against a score. <span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. <span class="tag analysis">In analysis</span> is shared here with your report at the readback. This page informs; it does not render legal advice.</div>
+    <p class="dash-lead">${delivered
+      ? `<b>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length}</b> measures cross a line California draws. Each one is explained, with its fix, in your report — this page is the picture in numbers.`
+      : `What you told us, what we have verified, and — the day your report is delivered — what the analysis found. Nothing here is a score; every measure is your number against the line California draws.`}</p>
+    <div class="why"><b>How to read this</b><span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. <span class="tag analysis">In analysis</span> is shared here with your report at the readback. This page informs; it does not render legal advice.</div>
     <div class="dash">
+      <div class="cap"><b>1</b> What you told us <span>from your answers — appears at once</span></div>
       <div class="tile wide">
         <span class="k">Threshold position <span class="tag">As stated</span></span>
         <h3>${ca==null?"Headcount not yet stated":`${ca} employees in California`}</h3>
+        <p class="ask">Which California rules switch on at your size — each rung turns on its own set of obligations.</p>
         <p class="sub">${ca==null?"Answer A2 to place your company on the ladder.":`${ft??0} full-time · ${pt??0} part-time / seasonal${out?` · ${out} outside California`:""}${peak!=null?` · peak ${peak} in the last 12 months`:""}`}</p>
         ${ladderSVG(ca)}
         <ul class="rungs">${onRungs.map(r=>`<li class="${r.on?"on":""}"><b>${r.n}+</b><span>${r.on?"On — ":""}${esc(r.tag)}</span></li>`).join("")}</ul>
         ${next?`<p class="sub" style="margin-top:8px">Next rung: <b>${next.n}</b> employees${peak!=null&&peak>=next.n?` — your stated peak of ${peak} already crosses it.`:"."}</p>`:""}
       </div>
-      <div class="tile">
+      <div class="tile wide">
         <span class="k">Workforce shape <span class="tag">As stated</span></span>
         <h3>${mix.length?`${mix.length} pay types in play`:"Not yet stated"}</h3>
-        <p class="sub">Each type switches on its own set of rules.</p>
+        <p class="ask">How your people are paid — each pay type carries its own rules.</p>
         ${splitBar([{value:ft||0,color:"#B4862B"},{value:pt||0,color:"#D8AC4E"},{value:out||0,color:"#EEE3C6"}])}
         <div class="legend"><span><i style="background:#B4862B"></i>Full-time ${ft??"—"}</span><span><i style="background:#D8AC4E"></i>Part-time / seasonal ${pt??"—"}</span>${out?`<span><i style="background:#EEE3C6"></i>Outside CA ${out}</span>`:""}</div>
         <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">${mix.map(x=>`<span class="tag" style="text-transform:none;letter-spacing:0;font-family:'Public Sans',sans-serif;font-size:12px">${esc(x)}</span>`).join("")||'<span class="sub">Select the workforce types in Section B.</span>'}</div>
       </div>
-      <div class="tile">
+      <div class="tile wide">
+        <span class="k">Systems &amp; policies <span class="tag">As stated</span></span>
+        <h3>What you told us is in place</h3>
+        <p class="ask">"Review" means the answer itself puts this on the audit's list — not a finding yet.</p>
+        ${checks.map(c=>`<div class="chk">${stIcon(c.st)}<span class="lbl">${esc(c.label)} <span class="sub" style="display:inline;margin:0">· ${stWord(c.st)}</span></span><span class="val">${esc(c.val)}</span></div>`).join("")}
+      </div>
+      <div class="cap"><b>2</b> What we verified <span>checked against your documents</span></div>
+      <div class="tile wide">
         <span class="k">Evidence <span class="tag verified">Verified</span></span>
         <h3>${act.length?`${ev.verified} of ${act.length} documents verified`:"No documents requested yet"}</h3>
-        <p class="sub">A document counts only once a person has opened it and checked it against your answers.</p>
+        <p class="ask">A document counts only once a person has opened it and checked it against your answers.</p>
         ${splitBar([{value:ev.verified,color:"#3E7D5B"},{value:ev.review,color:"#9DB2AD"},{value:ev.attention,color:"#A9430F"},{value:ev.open,color:"#D9DEE5"}])}
         <div class="legend"><span><i style="background:#3E7D5B"></i>Verified ${ev.verified}</span><span><i style="background:#9DB2AD"></i>In review ${ev.review}</span><span><i style="background:#A9430F"></i>Needs attention ${ev.attention}</span><span><i style="background:#D9DEE5"></i>Outstanding ${ev.open}</span></div>
         ${delivered&&m.documented_headcount?`<div class="chk" style="margin-top:12px">${stIcon(ca!=null&&ca===m.documented_headcount?"ok":"flag")}<span class="lbl">Record coverage — stated vs. documented</span><span class="val">${ca??"—"} stated · ${m.documented_headcount} on the roster</span></div>`:""}
         ${delivered&&m.contradictions!=null?`<div class="chk">${stIcon(m.contradictions?"flag":"ok")}<span class="lbl">Answers the documents disagree with</span><span class="val">${m.contradictions}</span></div>`:""}
       </div>
-      <div class="tile wide">
-        <span class="k">Systems &amp; policies <span class="tag">As stated</span></span>
-        <h3>What you told us is in place</h3>
-        <p class="sub">"Review" means the answer itself puts this on the audit's list — not a finding yet.</p>
-        ${checks.map(c=>`<div class="chk">${stIcon(c.st)}<span class="lbl">${esc(c.label)} <span class="sub" style="display:inline;margin:0">· ${stWord(c.st)}</span></span><span class="val">${esc(c.val)}</span></div>`).join("")}
-      </div>
+      <div class="cap"><b>3</b> What the analysis found <span>shared with your report</span></div>
       <div class="tile wide">
         <span class="k">Measures against the line <span class="tag analysis">In analysis</span></span>
         ${delivered ? `
           <h3>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length} measures cross a line</h3>
-          <p class="sub">Each bar is your number; the dashed mark is where California draws the line. Details and fixes are in your report.</p>
-          ${m.ratios.map(r=>`<div class="ratio"><div class="row"><span>${stIcon(r.status)}${esc(r.label)} <span class="tag ${r.evidence==="verified"?"verified":"analysis"}">${esc(r.evidence||"analysis")}</span></span><span class="v">${esc(r.display)}</span></div>${lineBar(r)}${r.note?`<div class="n">${esc(r.note)}</div>`:""}</div>`).join("")}
+          <p class="ask">The brass bar is your number; the navy mark is where California draws the line. Details and fixes are in your report.</p>
+          ${m.ratios.map(r=>`<div class="ratio"><div class="row"><h4>${stIcon(r.status)}${esc(ratioQuestion(r))}</h4><span class="v">${esc(r.display)}</span></div><div class="m">${esc(r.label)} <span class="tag ${r.evidence==="verified"?"verified":"analysis"}">${esc(r.evidence||"analysis")}</span></div>${lineBar(r)}${ratioRead(r)}${r.note?`<div class="n">${esc(r.note)}</div>`:""}</div>`).join("")}
           ${m.exposure?`<div class="chk" style="margin-top:14px;border-top:1px solid var(--line-lt);padding-top:12px"><span class="lbl"><b>Illustrative exposure</b>${m.exposure.note?`<div class="n" style="font-size:12.5px;color:var(--slate)">${esc(m.exposure.note)}</div>`:""}</span><span class="big" style="font-size:22px;margin:0">${esc(m.exposure.display)}</span></div>`:""}
           ${m.findings?`<div class="legend" style="margin-top:10px"><span><i style="background:#A9430F"></i>Critical ${m.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${m.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${m.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${m.findings.minor||0}</span></div>`:""}
         ` : `
