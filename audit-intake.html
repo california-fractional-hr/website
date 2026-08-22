@@ -67,7 +67,9 @@
   .selwrap{display:flex;flex-direction:column;gap:9px;margin-bottom:10px}
   .numgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
   .numgrid label{display:block;font-size:12.5px;color:var(--slate);margin-bottom:5px}
-  textarea{min-height:64px}
+  /* Answer boxes size themselves to their text (autosize below): no inner scrollbar,
+     nothing hidden, the same frame around every answer whoever is reading it back. */
+  textarea{min-height:64px;resize:none;overflow:hidden;line-height:1.55;box-sizing:border-box}
   textarea.long{min-height:120px}
   .yn{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .yn label{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-lt);border-radius:3px;padding:8px 14px;font-size:14px;cursor:pointer;background:#FFFFFF;transition:border-color .15s,background .15s}
@@ -952,11 +954,18 @@ function renderDashboard(){
 }
 
 /* ============ input wiring ============ */
+// Every answer box grows to fit its text — on load, on every keystroke, and when the
+// window changes width — so a long answer is read in full, never scrolled inside a
+// 64px frame. min-height keeps the frame even for short answers.
+function autosize(el){ el.style.height = "auto"; el.style.height = Math.max(el.scrollHeight + 2, parseFloat(getComputedStyle(el).minHeight) || 0) + "px"; }
+function autosizeAll(){ stage.querySelectorAll("textarea").forEach(autosize); }
+window.addEventListener("resize", autosizeAll);
 function wireInputs(sec){
+  autosizeAll();
   sec.qs.forEach(q=>{
     const id = q[0];
     const upd = ()=>{ collectQ(id); queueSave(id, sec.k); };
-    stage.querySelectorAll(`[data-qtext="${id}"]`).forEach(el=>el.addEventListener("blur", upd));
+    stage.querySelectorAll(`[data-qtext="${id}"]`).forEach(el=>{ el.addEventListener("blur", upd); el.addEventListener("input", ()=>autosize(el)); });
     stage.querySelectorAll(`[data-qsel="${id}"]`).forEach(el=>el.addEventListener("change", upd));
     stage.querySelectorAll(`input[name="yn-${id}"]`).forEach(el=>el.addEventListener("change", upd));
     stage.querySelectorAll(`[data-qmulti="${id}"]`).forEach(el=>el.addEventListener("change", upd));
