@@ -841,6 +841,11 @@ function renderDashboard(){
         <p class="ask">A document counts only once a person has opened it and checked it against your answers.</p>
         ${splitBar([{value:ev.verified,color:"#3E7D5B"},{value:ev.review,color:"#9DB2AD"},{value:ev.attention,color:"#A9430F"},{value:ev.open,color:"#D9DEE5"}])}
         <div class="legend"><span><i style="background:#3E7D5B"></i>Verified ${ev.verified}</span><span><i style="background:#9DB2AD"></i>In review ${ev.review}</span><span><i style="background:#A9430F"></i>Needs attention ${ev.attention}</span><span><i style="background:#D9DEE5"></i>Outstanding ${ev.open}</span></div>
+        ${act.length?`<div style="margin-top:14px">${act.map(r=>{
+          const st = r.status==="reviewed"?"ok":r.status==="received"?"unk":"flag";
+          const word = r.status==="reviewed"?`Verified${r.reviewed?" · "+esc(r.reviewed):""}`:r.status==="received"?`Under review${r.received?" · received "+esc(r.received):""}`:r.status==="replace"?"Needs replacement — see the note in Documents":"Outstanding — awaiting your upload";
+          return `<div class="chk">${stIcon(st)}<span class="lbl"><span class="sub" style="display:inline;margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em">${esc(r.id)}</span> · ${esc((r.title||"").split(" — ")[0])}</span><span class="val" style="white-space:normal">${word}</span></div>`;
+        }).join("")}</div>`:""}
         ${delivered&&m.documented_headcount?`<div class="chk" style="margin-top:12px">${stIcon(ca!=null&&ca===m.documented_headcount?"ok":"flag")}<span class="lbl">Record coverage — stated vs. documented</span><span class="val">${ca??"—"} stated · ${m.documented_headcount} on the roster</span></div>`:""}
         ${delivered&&m.contradictions!=null?`<div class="chk">${stIcon(m.contradictions?"flag":"ok")}<span class="lbl">Answers the documents disagree with</span><span class="val">${m.contradictions}</span></div>`:""}
       </div>
