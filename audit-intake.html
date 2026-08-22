@@ -92,16 +92,18 @@
   /* A verified request reads as settled: the same light green as the Intake Complete
      banner fills the card; the files inside stay white. */
   .req.is-done{background:#EFF5F0;border-color:rgba(62,125,91,.4);border-left:3px solid var(--ok)}
-  .req.is-open{border-left:3px solid var(--brass)}
+  .req.is-open{border-left:3px solid var(--brass)}                       /* white: yours to fill */
+  .req.is-open .drop{background:#FBF6EA;border-color:rgba(180,134,43,.7)} /* the action is the brightest thing on the card */
   .req-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
   .req-top h3{font-size:19px;line-height:1.3;flex:1;min-width:180px}
   .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;border-radius:2px;padding:4px 10px;white-space:nowrap}
   .chip.open{color:#fff;background:var(--brass);border:1px solid var(--brass);font-weight:500}
   .chip.done{color:#fff;background:var(--ok);border:1px solid var(--ok);font-weight:500}
   .chip.inreview{color:#fff;background:var(--slate);border:1px solid var(--slate);font-weight:500}
-  .req.is-inreview{border-left:3px solid var(--slate)}
+  .req.is-inreview{background:#F1F4F7;border-color:rgba(10,44,68,.3);border-left:3px solid var(--slate)} /* grey: ours — we have it, we're checking */
   .chip.replace{color:#7A2E1D;background:#F6E3DC;border:1px solid #B4552B;font-weight:500}
-  .req.is-replace{border-left:3px solid #B4552B}
+  .req.is-replace{background:#FBF1EC;border-color:rgba(180,85,43,.45);border-left:3px solid #B4552B}    /* warm: yours to fix */
+  .req.is-replace .rev-note{background:#FFFFFF}
   .rev-note{border-left:3px solid #B4552B;background:#FBF1EC;border-radius:2px;padding:11px 15px;margin-top:10px;font-size:13.5px;color:#7A2E1D;line-height:1.55}
   .rev-note b{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:#B4552B}
   .obstacles{list-style:none;margin:10px 0 6px}
@@ -576,7 +578,9 @@ function docBlock(sectionKey){
   const list = requests.filter(r=>r.section===sectionKey && r.status!=="waived");
   if (!list.length) return "";
   const vN = list.filter(r=>r.status==="reviewed").length;
-  return `<div class="docblock"><div class="dhead">Documents for this section · ${list.filter(r=>r.status!=="open").length} of ${list.length} in · ${vN} verified</div>
+  const inN = list.filter(r=>r.status!=="open").length;
+  const title = vN===list.length ? `All ${list.length} verified` : inN===list.length ? `All ${list.length} in · ${vN} verified` : `${inN} of ${list.length} in · ${vN} verified`;
+  return `<div class="docblock"><div class="dhead"><small>Documents for this section</small>${title}</div>
     ${list.map(reqCard).join("")}</div>`;
 }
 
