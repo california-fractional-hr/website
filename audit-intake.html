@@ -176,6 +176,15 @@
   .xp.kv td:first-child{width:22%;font-weight:600;color:var(--ink);white-space:nowrap}
   .xp-ul.tight li{padding:3px 0 3px 18px;font-size:13px}
   .pg-note{font-size:13px;line-height:1.5;color:#2F3A47;margin:10px 0 0}
+  .cap-line{font-size:11.5px;line-height:1.5;color:#6B7684;margin:6px 0 0}
+  .tot-line{display:flex;justify-content:flex-end;align-items:baseline;gap:10px;margin:2px 0 0;font-size:13px;color:var(--slate)} .tot-line b{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:24px;color:var(--brass);letter-spacing:-.01em}
+  .chart{margin:10px 0 0} .chart svg{display:block;width:100%;height:auto}
+  .drill{margin:12px 0 0;border-top:1px solid var(--line-lt)}
+  .drill summary{cursor:pointer;list-style:none;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);padding:10px 0;display:flex;align-items:center;gap:8px;user-select:none}
+  .drill summary::-webkit-details-marker{display:none}
+  .drill summary::before{content:"+";font-weight:700;width:14px;display:inline-block} .drill[open] summary::before{content:"–"}
+  .drill summary:hover{text-decoration:underline}
+  .drill > div{padding:2px 0 10px}
   .xp-ol{margin:0;padding-left:22px;font-size:13.5px;line-height:1.55;color:#2F3A47} .xp-ol li{margin:6px 0} .xp-ol b{color:var(--ink)}
   .xp-ul{margin:0;padding-left:0;list-style:none;font-size:13.5px;line-height:1.5;color:#2F3A47} .xp-ul li{padding:5px 0 5px 18px;position:relative} .xp-ul li::before{content:"—";position:absolute;left:0;color:var(--brass)}
   .dash-lead{font-size:17px;line-height:1.5;color:var(--ink);margin:14px 0 4px}
@@ -755,6 +764,25 @@ function fmtK(v){ if(v==null||!isFinite(v)) return "—"; return v>=1e6?`$${(v/1
 function secOpen(n,title,subtitle,peek){ return `<details class="secwrap"><summary class="sec"><span class="num">${n}</span><div><h3>${esc(title)}</h3>${subtitle?`<p>${esc(subtitle)}</p>`:""}</div>${peek?`<span class="peek">${esc(peek)}</span>`:""}<svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>`; }
 function secClose(){ return `</details>`; }
 function setAllSections(open){ document.querySelectorAll(".secwrap").forEach(d=>{ d.open = open; }); }
+function niceMax(v){ v=Math.max(v,1); const e=Math.pow(10,Math.floor(Math.log10(v))); const c=[1,1.5,2,2.5,3,4,5,6,8,10].find(c=>c*e>=v); return c*e; }
+function fmtRange(lo,hi){ const a=fmtK(lo), b=fmtK(hi); return (a.endsWith("K")&&b.endsWith("K")) ? `${a.slice(0,-1)}–${b.slice(1)}` : `${a}–${b}`; }
+function colChart(bars, opts={}){
+  const W=520, H=opts.h||236, padL=48, padR=8, padT=30, padB=42;
+  const max = opts.max || niceMax(Math.max(...bars.map(b=>b.value||0), 1));
+  const cw=(W-padL-padR)/bars.length, bw=Math.min(cw*0.62, 60);
+  const y=v=>padT+(H-padT-padB)*(1-Math.min(v,max)/max);
+  const grid=[0,.2,.4,.6,.8,1].map(t=>{const yy=y(max*t);return `<line x1="${padL}" x2="${W-padR}" y1="${yy}" y2="${yy}" stroke="#D9DEE5" stroke-dasharray="2 3"/><text x="${padL-6}" y="${yy+3.5}" text-anchor="end" font-size="9.5" fill="#5A6675" font-family="IBM Plex Mono,monospace">${fmtK(Math.round(max*t))}</text>`;}).join("");
+  const cols=bars.map((b,i)=>{
+    const cx=padL+cw*i+cw/2, x=cx-bw/2, v=b.value||0, top=y(v), h=Math.max(0,y(0)-top), fill=b.color||"#0A2C44";
+    const bar = v>0 ? `<rect x="${x}" y="${top}" width="${bw}" height="${h}" fill="${fill}"/>` : `<line x1="${x}" x2="${x+bw}" y1="${y(0)-2}" y2="${y(0)-2}" stroke="#B4862B" stroke-width="2.5" stroke-dasharray="4 3"/>`;
+    const lowTick = (b.low!=null && b.low>0 && b.low<v) ? `<line x1="${x+3}" x2="${x+bw-3}" y1="${y(b.low)}" y2="${y(b.low)}" stroke="#FFFFFF" stroke-width="1.5" opacity=".95"/>` : "";
+    const lab=`<text x="${cx}" y="${top-7}" text-anchor="middle" font-size="${bars.length>6?10.5:11.5}" font-weight="600" fill="#0A2C44" font-family="Public Sans,sans-serif">${esc(b.display)}</text>`;
+    const flag=b.flag?`<text x="${cx}" y="${top-20}" text-anchor="middle" font-size="8.5" font-weight="600" fill="#B4862B" font-family="IBM Plex Mono,monospace" letter-spacing=".1em">▲ ${esc(String(b.flag).toUpperCase())}</text>`:"";
+    const cat=String(b.label).split("\n").map((l,j)=>`<tspan x="${cx}" dy="${j?11:0}">${esc(l)}</tspan>`).join("");
+    return `${bar}${lowTick}${lab}${flag}<text x="${cx}" y="${H-padB+16}" text-anchor="middle" font-size="9.5" fill="#2F3A47" font-family="Public Sans,sans-serif">${cat}</text>`;
+  }).join("");
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria||"")}"><line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}" stroke="#0A2C44" stroke-width="1"/>${grid}${cols}</svg></div>`;
+}
 function exposureSection(x){
   const items=x.items||[], lo=items.reduce((s,i)=>s+(+i.low||0),0), hi=items.reduce((s,i)=>s+(+i.high||0),0);
   const axisMax = Math.max(...items.map(i=>+i.high||0), 1), W=520;
@@ -768,7 +796,7 @@ function exposureSection(x){
   const pgTotal=pgItems.reduce((s,i)=>s+i.pg.total,0);
   const caps=(pg&&pg.caps)||[];
   const capBar=(c)=>{ const v=pgTotal*c.factor, w=Math.max(4,Math.round(v/Math.max(pgTotal,1)*(W-4))); return `<svg viewBox="0 0 ${W} 18" height="18" aria-hidden="true"><rect x="2" y="4" width="${W-4}" height="10" rx="3" fill="#EEF0F3"/><rect x="2" y="2" width="${w}" height="14" rx="3" fill="${c.factor<1?"#D8AC4E":"#B4862B"}"/></svg>`; };
-  const capLo = caps.length?Math.min(...caps.map(c=>c.factor)):1;
+  const capLo = caps.some(c=>c.factor>0)?Math.min(...caps.filter(c=>c.factor>0).map(c=>c.factor)):1; // the cure path can reach $0; the low end quoted is the 15% cap
   const headline = x.display||`${fmtK(lo)} – ${fmtK(hi)}`;
   const peek = pg&&pgTotal?`${headline} + PAGA ${fmtK(Math.round(pgTotal*capLo))}–${fmtK(pgTotal)}`:headline;
   return `
@@ -778,32 +806,40 @@ function exposureSection(x){
         <h3>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}${pg&&pgTotal?` <span style="font-size:15px;font-weight:400;color:var(--slate)">+ PAGA ${fmtK(Math.round(pgTotal*capLo))} – ${fmtK(pgTotal)}</span>`:""}</h3>
         <p class="ask">${esc(x.note||"")}</p>
 
-        ${items.length?`<div class="sub4"><b>4A</b><h4>The findings</h4><span>low to high, before penalties</span></div>
-        <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>Range</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
-          ${items.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td class="bar">${rangeBar(i)}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
-          ${axis}
-          <tr class="tot"><td colspan="2">Together, before penalties and before any fix</td><td class="nr">${fmtK(lo)} – ${fmtK(hi)}</td></tr></tbody></table></div>
+        ${items.length?`<div class="sub4"><b>4A</b><h4>The findings</h4><span>cost per violation, and the total</span></div>
+        ${colChart(items.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Illustrative exposure by finding"})}
+        <div class="tot-line">Together, before penalties <b>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}</b></div>
+        ${x.captions&&x.captions.findings?`<p class="cap-line">${esc(x.captions.findings)}</p>`:""}
+        <details class="drill"><summary>Show the arithmetic behind each bar</summary><div>
+          <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>In the sample</th><th>Scaled</th><th>Over the lookback</th><th>Assumes</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
+          ${items.map(i=>`<tr><td class="f" style="width:18%"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.sample||i.shows||"")}</td><td>${esc(i.scale||"")}</td><td>${esc(i.lookback||"")}</td><td>${esc(i.assumption||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
+          <tr class="tot"><td colspan="5">Together, before penalties and before any fix</td><td class="nr">${fmtK(lo)} – ${fmtK(hi)}</td></tr></tbody></table></div>
+        </div></details>`:""}
 
-        <div class="sub4"><b>4B</b><h4>The arithmetic</h4><span>how each range was built</span></div>
-        <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>In the sample</th><th>Scaled</th><th>Over the lookback</th><th>Assumes</th></tr></thead><tbody>
-          ${items.map(i=>`<tr><td class="n"><b>${esc(i.id)}</b></td><td>${esc(i.sample||i.shows||"")}</td><td>${esc(i.scale||"")}</td><td>${esc(i.lookback||"")}</td><td>${esc(i.assumption||"")}</td></tr>`).join("")}
-        </tbody></table></div>`:""}
-
-        ${pg&&pgItems.length?`<div class="sub4"><b>4C</b><h4>Then PAGA</h4><span>civil penalties on top of the findings</span></div>
-        <p class="pg-note">${esc(pg.display_note||"")}</p>
-        <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>Employees</th><th>Pay periods</th><th>Rate</th><th>Violations</th><th style="text-align:right">Unmitigated</th></tr></thead><tbody>
+        ${pg&&pgItems.length?`<div class="sub4"><b>4B</b><h4>Then PAGA</h4><span>civil penalties per violation, and the total</span></div>
+        ${colChart(pgItems.map(i=>({label:`${i.id}\n${i.tag||""}`, value:i.pg.total, display:fmtK(i.pg.total)})), {aria:"PAGA civil penalties by finding, unmitigated"})}
+        <div class="tot-line">Together, before any cap <b>${fmtK(pgTotal)}</b></div>
+        ${x.captions&&x.captions.paga?`<p class="cap-line">${esc(x.captions.paga)}</p>`:""}
+        ${caps.length?`<div class="sub4" style="margin-top:22px"><b>4C</b><h4>What documented reasonable steps do to that number</h4></div>
+        ${colChart(caps.map(c=>({label:c.label.replace(" of a notice","\nof a notice").replace(" + violation cured","\n+ violation cured").replace("before a notice","\nbefore a notice"), value:Math.round(pgTotal*c.factor), display:c.factor>0?fmtK(Math.round(pgTotal*c.factor)):"$0", color:c.flag?"#B4862B":"#0A2C44", flag:c.flag})), {aria:"PAGA penalties under each cap"})}
+        ${x.captions&&x.captions.caps?`<p class="cap-line">${esc(x.captions.caps)}</p>`:""}`:""}
+        <details class="drill"><summary>Show the PAGA math</summary><div>
+          <p class="pg-note" style="margin-top:0">${esc(pg.display_note||"")}</p>
+          <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>Employees</th><th>Pay periods</th><th>Rate</th><th>Violations</th><th style="text-align:right">Penalty</th></tr></thead><tbody>
           ${pgItems.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.pg.basis?`<small style="color:var(--slate);font-family:'Public Sans',sans-serif;letter-spacing:0;font-size:11.5px">${esc(i.pg.basis)}</small>`:""}</td><td class="n">${i.pg.employees}</td><td class="n">${i.pg.periods}</td><td class="n">$${i.pg.rate}</td><td class="n">${i.pg.types||1}</td><td class="nr">${fmtK(i.pg.total)}</td></tr>`).join("")}
           <tr class="tot"><td colspan="5">Before any cap</td><td class="nr">${fmtK(pgTotal)}</td></tr></tbody></table></div>
-        ${caps.length?`<div class="xpwrap" style="margin-top:14px"><table class="xp tight"><thead><tr><th>What the company does</th><th>Penalty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
-          ${caps.map(c=>`<tr><td class="f"><b>${esc(c.label)}</b><small style="color:var(--slate);font-family:'Public Sans',sans-serif;letter-spacing:0;font-size:11.5px">${esc(c.words||"")}</small></td><td class="bar">${capBar(c)}</td><td class="nr">${fmtK(Math.round(pgTotal*c.factor))}</td></tr>`).join("")}
-        </tbody></table></div>`:""}
-        ${pg.split?`<p class="pg-note"><b>${esc(pg.split)}</b></p>`:""}
-        ${pg.notes&&pg.notes.length?`<ul class="xp-ul tight" style="margin-top:8px">${pg.notes.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}`:""}
+          ${caps.length?`<div class="xpwrap" style="margin-top:12px"><table class="xp tight"><thead><tr><th>What the company does</th><th></th><th style="text-align:right">Penalty</th></tr></thead><tbody>
+          ${caps.map(c=>`<tr><td class="f"><b>${esc(c.label)}</b></td><td>${esc(c.words||"")}</td><td class="nr">${fmtK(Math.round(pgTotal*c.factor))}</td></tr>`).join("")}</tbody></table></div>`:""}
+          ${pg.split?`<p class="pg-note"><b>${esc(pg.split)}</b></p>`:""}
+          ${pg.notes&&pg.notes.length?`<ul class="xp-ul tight" style="margin-top:8px">${pg.notes.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+        </div></details>`:""}
 
-        ${x.unscored&&x.unscored.length?`<div class="sub4"><b>4D</b><h4>Carried without a number</h4></div><ul class="xp-ul tight">${x.unscored.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
-        ${x.method&&x.method.length?`<div class="sub4"><b>4E</b><h4>How the range is built</h4></div><div class="xpwrap"><table class="xp tight kv"><tbody>${x.method.map(t=>{const i=t.indexOf(". ");return `<tr><td>${esc(i>0&&i<40?t.slice(0,i):"—")}</td><td>${esc(i>0&&i<40?t.slice(i+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
-        ${x.excluded&&x.excluded.length?`<div class="sub4"><b>4F</b><h4>Left out of every number above</h4></div><ul class="xp-ul tight">${x.excluded.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
-        ${x.findings?`<div class="sub4"><b>4G</b><h4>Findings by severity</h4></div><div class="legend"><span><i style="background:#A9430F"></i>Critical ${x.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${x.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${x.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${x.findings.minor||0}</span></div>`:""}
+        <details class="drill"><summary>How the ranges are built, what they leave out, and what is carried without a number</summary><div>
+          ${x.method&&x.method.length?`<h4 class="xp-h4" style="margin-top:6px">How the range is built</h4><div class="xpwrap"><table class="xp tight kv"><tbody>${x.method.map(t=>{const i=t.indexOf(". ");return `<tr><td>${esc(i>0&&i<40?t.slice(0,i):"—")}</td><td>${esc(i>0&&i<40?t.slice(i+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
+          ${x.excluded&&x.excluded.length?`<h4 class="xp-h4">Left out of every number above</h4><ul class="xp-ul tight">${x.excluded.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
+          ${x.unscored&&x.unscored.length?`<h4 class="xp-h4">Carried without a number</h4><ul class="xp-ul tight">${x.unscored.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
+          ${x.findings?`<h4 class="xp-h4">Findings by severity</h4><div class="legend"><span><i style="background:#A9430F"></i>Critical ${x.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${x.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${x.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${x.findings.minor||0}</span></div>`:""}
+        </div></details>
         ${x.guardrail?`<div class="why" style="margin:22px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}
       </div>
       ${secClose()}`;
