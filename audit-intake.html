@@ -782,7 +782,7 @@ function setAllSections(open){ document.querySelectorAll(".secwrap").forEach(d=>
 function niceMax(v){ v=Math.max(v,1); const e=Math.pow(10,Math.floor(Math.log10(v))); const c=[1,1.5,2,2.5,3,4,5,6,8,10].find(c=>c*e>=v); return c*e; }
 function fmtRange(lo,hi){ const a=fmtK(lo), b=fmtK(hi); return (a.endsWith("K")&&b.endsWith("K")) ? `${a.slice(0,-1)}–${b.slice(1)}` : `${a}–${b}`; }
 function colChart(bars, opts={}){
-  const W=520, H=opts.h||236, padL=48, padR=8, padT=30, padB=42;
+  const W=520, H=opts.h||236, padL=48, padR=8, padT=30, padB=opts.padB||42;
   const max = opts.max || niceMax(Math.max(...bars.map(b=>b.value||0), 1));
   const cw=(W-padL-padR)/bars.length, bw=Math.min(cw*0.62, 60);
   const y=v=>padT+(H-padT-padB)*(1-Math.min(v,max)/max);
@@ -793,8 +793,11 @@ function colChart(bars, opts={}){
     const lowTick = (b.low!=null && b.low>0 && b.low<v) ? `<line x1="${x+3}" x2="${x+bw-3}" y1="${y(b.low)}" y2="${y(b.low)}" stroke="#FFFFFF" stroke-width="1.5" opacity=".95"/>` : "";
     const lab=`<text x="${cx}" y="${top-7}" text-anchor="middle" font-size="${bars.length>6?10.5:11.5}" font-weight="600" fill="#0A2C44" font-family="Public Sans,sans-serif">${esc(b.display)}</text>`;
     const flag=b.flag?`<text x="${cx}" y="${top-20}" text-anchor="middle" font-size="8.5" font-weight="600" fill="#B4862B" font-family="IBM Plex Mono,monospace" letter-spacing=".1em">▲ ${esc(String(b.flag).toUpperCase())}</text>`:"";
-    const cat=String(b.label).split("\n").map((l,j)=>`<tspan x="${cx}" dy="${j?11:0}">${esc(l)}</tspan>`).join("");
-    return `${bar}${lowTick}${lab}${flag}<text x="${cx}" y="${H-padB+16}" text-anchor="middle" font-size="9.5" fill="#2F3A47" font-family="Public Sans,sans-serif">${cat}</text>`;
+    const lines=String(b.label).split("\n");
+    const cat=lines.map((l,j)=>`<tspan x="${cx}" dy="${j?11:0}">${esc(l)}</tspan>`).join("");
+    // An optional sub-line under the category, in brass mono — the rule the bar sits under.
+    const sub=b.sub?`<tspan x="${cx}" dy="13" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600" fill="#8A6520" letter-spacing=".06em">${esc(String(b.sub).toUpperCase())}</tspan>`:"";
+    return `${bar}${lowTick}${lab}${flag}<text x="${cx}" y="${H-padB+16}" text-anchor="middle" font-size="9.5" fill="#2F3A47" font-family="Public Sans,sans-serif">${cat}${sub}</text>`;
   }).join("");
   return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria||"")}"><line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}" stroke="#0A2C44" stroke-width="1"/>${grid}${cols}</svg></div>`;
 }
@@ -836,7 +839,8 @@ function exposureSection(x){
         <div class="tot-line">Together, before any cap <b>${fmtK(pgTotal)}</b></div>
         ${x.captions&&x.captions.paga?`<p class="cap-line">${esc(x.captions.paga)}</p>`:""}
         ${caps.length?`<div class="sub4" style="margin-top:22px"><b>4C</b><h4>What documented reasonable steps do to that number</h4></div>
-        ${colChart(caps.map(c=>({label:c.label.replace(" of a notice","\nof a notice").replace(" + violation cured","\n+ violation cured").replace("before a notice","\nbefore a notice"), value:Math.round(pgTotal*c.factor), display:c.factor>0?fmtK(Math.round(pgTotal*c.factor)):"$0", color:c.flag?"#B4862B":"#0A2C44", flag:c.flag})), {aria:"PAGA penalties under each cap"})}
+        ${colChart(caps.map(c=>({label:c.label.replace(" of a notice","\nof a notice").replace(" + violation cured","\n+ violation cured").replace("before a notice","\nbefore a notice"), value:Math.round(pgTotal*c.factor), display:c.factor>0?fmtK(Math.round(pgTotal*c.factor)):"$0", color:c.flag?"#B4862B":"#0A2C44", flag:c.flag,
+          sub: c.factor>=1 ? "the full amount" : c.factor>0 ? `capped at ${Math.round(c.factor*100)}%` : "can reach $0"})), {aria:"PAGA penalties under each cap", h:252, padB:58})}
         ${x.captions&&x.captions.caps?`<p class="cap-line">${esc(x.captions.caps)}</p>`:""}`:""}
         <details class="drill"><summary>Show the PAGA math</summary><div>
           <p class="pg-note" style="margin-top:0">${esc(pg.display_note||"")}</p>
