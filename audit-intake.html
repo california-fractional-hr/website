@@ -437,8 +437,11 @@ function renderRail(){
     // Documents earns its tick the same way a section does — when the count reads
     // full. Full means every active request VERIFIED (v2.3): received is not done.
     if (it.key==="review" && submitted){ const [v,t]=docsVerified(); if (t) cnt = `<span class="cnt">${v}/${t}</span>`; }
+    // The dashboard's tick is the delivery itself: the receiver releases the analysis
+    // layer only once the report is in the client's hands, so "delivered" is the state.
     const done = (it.key.length===1 && sectionAnswered(it.key)[0]===sectionAnswered(it.key)[1])
-              || (it.key==="review" && submitted && docsComplete());
+              || (it.key==="review" && submitted && docsComplete())
+              || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)));
     return `<button class="${i===step?"active":""} ${done?"done":""}" onclick="go(${i})">
       <svg class="tick" viewBox="0 0 14 14" fill="none"><path d="M2 7.5 L5.5 11 L12 3.5" stroke="#3E7D5B" stroke-width="2"/></svg>
       ${esc(it.label)}${cnt}</button>`;
