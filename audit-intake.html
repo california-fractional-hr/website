@@ -135,6 +135,30 @@
   footer{background:var(--deep);color:#9DB2AD;padding:24px 0;margin-top:40px}
   .foot-bottom{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em}
   footer a{color:var(--brass-2)}
+  /* Audit Dashboard */
+  .dash{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+  @media (max-width:760px){.dash{grid-template-columns:1fr}}
+  .tile{border:1px solid var(--line-lt);border-radius:4px;padding:16px 18px;background:#fff;min-width:0}
+  .tile.wide{grid-column:1/-1}
+  .tile h3{font-size:15.5px;margin:0 0 2px;color:var(--ink)}
+  .tile .k{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);display:block;margin-bottom:6px}
+  .tile .big{font-size:30px;font-weight:600;color:var(--ink);line-height:1.05;margin:6px 0 2px}
+  .tile .sub{font-size:13px;color:var(--slate);margin:0 0 8px}
+  .tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--line-lt);border-radius:2px;color:var(--slate);vertical-align:middle}
+  .tag.verified{color:var(--ok);border-color:rgba(62,125,91,.5)} .tag.analysis{color:var(--brass);border-color:rgba(180,134,43,.6)}
+  .si{display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px;flex:none}
+  .si.ok{background:#EFF5F0;color:var(--ok)} .si.flag{background:rgba(169,67,15,.09);color:var(--warn)} .si.unk{background:#EEF0F3;color:#6B7684}
+  .chk{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line-lt);font-size:13.5px}
+  .chk:last-child{border-bottom:0} .chk .lbl{flex:1;min-width:0} .chk .val{color:var(--slate);font-size:12.5px;text-align:right;max-width:56%;white-space:nowrap}
+  .legend{display:flex;flex-wrap:wrap;gap:12px 16px;font-size:12px;color:var(--slate);margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .ratio{padding:10px 0;border-bottom:1px solid var(--line-lt)} .ratio:last-child{border-bottom:0}
+  .ratio .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13.5px}
+  .ratio .v{font-weight:600;color:var(--ink);white-space:nowrap} .ratio .n{font-size:12.5px;color:var(--slate);margin-top:2px}
+  .dashlock{background:#FBF6EA;border-left:3px solid var(--brass);border-radius:2px;padding:13px 17px;font-size:14px;color:#6B5A2A;line-height:1.55}
+  .dashlock b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--brass)}
+  .rungs{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px;color:var(--slate)} .rungs li{display:flex;gap:8px;padding:3px 0} .rungs b{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--ink);min-width:34px}
+  .rungs li.on b{color:var(--brass)}
   .hidden{display:none!important}
 </style>
 </head>
@@ -316,11 +340,13 @@ let me = null;                       // {name, role}
 let state = { answers:{}, meta:{} }; // answers[qid] = structured value; meta[qid] = {by, at}
 let requests = [];                   // server requests incl. section + files_list
 let submitted = null;                // {id, at} once complete
+let metrics = null;                  // Audit Dashboard record (receiver-gated: analysis ratios only once delivered)
 let company = "", contactSeed = "";
 let step = 0;
-const steps = ["start", ...SECTIONS.map(s=>s.k), "review"];
+const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard"];
 let dirty = {}, saveTimer = null, activeDropReq = null, pendingNotify = [], notifyTimer = null;
 let pendingAmend = {}, amendTimer = null;   // post-submit changes awaiting the one quiet email
+let needIdentity = false;                   // true once a save or a jump was held for a name
 
 try { const l = JSON.parse(localStorage.getItem(LSK) || "{}"); me = l.me || null; step = l.step || 0; } catch(e){}
 function remember(){ try{ localStorage.setItem(LSK, JSON.stringify({me, step})); }catch(e){} }
@@ -342,10 +368,14 @@ function queueSave(qid, section){
   saveTimer = setTimeout(flushSaves, 900);
 }
 async function flushSaves(){
+  if (!Object.keys(dirty).length) return;
+  // The invariant, independent of how the page was reached: no answer is written
+  // without a name on it. Work already typed stays in `dirty` and flushes the moment
+  // identity is given — held, never lost.
+  if (!me){ chipMsg("YOUR NAME FIRST", false, true); requireIdentity(); return; }
   const batch = Object.entries(dirty).map(([qid, section]) => ({ qid, section, v: JSON.stringify(state.answers[qid] || {}) }));
   dirty = {};
-  if (!batch.length) return;
-  const by = me ? `${me.name} — ${me.role}` : "";
+  const by = `${me.name} — ${me.role}`;
   try{
     if (!PREVIEW) { const r = await api({action:"saveAnswers", token, by, answers: batch}); if(!r.ok) throw new Error(r.error||"save failed"); }
     batch.forEach(b => { state.meta[b.qid] = { by, at: "just now", amended: !!submitted }; });
@@ -399,7 +429,8 @@ const rail = document.getElementById("rail");
 function renderRail(){
   const items = [{key:"start", label: submitted ? "Overview" : "Start here"},
     ...SECTIONS.map(s=>({key:s.k, label:`${s.k} · ${s.t.split(":")[0].split("&")[0].trim()}`})),
-    {key:"review", label: submitted ? "Documents" : "Review & complete"}];
+    {key:"review", label: submitted ? "Documents" : "Review & complete"},
+    {key:"dashboard", label:"Audit Dashboard"}];
   rail.innerHTML = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
@@ -409,7 +440,17 @@ function renderRail(){
       ${esc(it.label)}${cnt}</button>`;
   }).join("");
 }
-function go(i){ step=i; remember(); render(); window.scrollTo({top:0}); }
+function go(i){
+  // Identity is the door. Every answer is stamped with who gave it, so no route into
+  // the sections may skip the name step — the rail jumps straight here, which is how
+  // a shared link used to reach the questions unattributed.
+  if (i > 0 && !me) return requireIdentity();
+  step=i; remember(); render(); window.scrollTo({top:0});
+}
+function requireIdentity(){
+  needIdentity = true; step = 0; remember(); render(); window.scrollTo({top:0});
+  const el = document.getElementById("meName"); if (el) el.focus();
+}
 
 /* ============ render: questions ============ */
 function attribLine(qid){
@@ -479,6 +520,7 @@ function render(){
   const key = steps[step];
   if (key === "start") return renderStart();
   if (key === "review") return renderReview();
+  if (key === "dashboard") return renderDashboard();
   const sec = SECTIONS.find(s=>s.k===key);
   const [a,t] = sectionAnswered(key);
   stage.innerHTML = `<div class="card">
@@ -489,7 +531,7 @@ function render(){
     ${docBlock(key)}
     <div class="btnrow">
       <button class="btn" onclick="go(${step-1})">← Back</button>
-      <button class="btn primary" onclick="go(${step+1})">${step===steps.length-2?"Review →":"Next section →"}</button>
+      <button class="btn primary" onclick="go(${step+1})">${steps[step+1]==="review"?"Review →":"Next section →"}</button>
     </div></div>`;
   wireInputs(sec); wireDrops();
 }
@@ -506,6 +548,7 @@ function renderStart(){
     <p class="note"><b>${done}</b> of ${total} questions answered · every answer is stamped with who gave it</p>
     <div class="why" style="margin-top:18px"><b>Confidential</b>Your answers are confidential client records used solely to perform the audit. This form gathers facts; it does not render legal advice.</div>
     <h2 style="font-size:1.15rem;margin-top:26px">Who's filling this out right now?</h2>
+    ${needIdentity?`<div class="why" style="margin-top:10px;border-color:var(--brass)"><b>Your name first</b>Every answer carries the name of the person who gave it — that attribution is part of the record. Add your name and you'll go straight back; nothing you've typed is lost.</div>`:""}
     <div class="grid2" style="margin-top:12px">
       <div><label class="qt" style="font-size:13px">Your name</label><input type="text" id="meName" value="${esc(me?me.name:"")}" ${submitted?"":""}></div>
       <div><label class="qt" style="font-size:13px">Your role</label>
@@ -518,9 +561,12 @@ function startGo(){
   const name = document.getElementById("meName").value.trim();
   const role = document.getElementById("meRole").value.trim();
   // Post-submit too: amendments are attributed the same as original answers.
-  if (!name && !me){ alert("Tell us your name first — every answer is stamped with who gave it."); return; }
+  if (!name && !me){ requireIdentity(); return; }
   if (name) me = { name, role: role||"Team" };
-  remember(); go(1);
+  needIdentity = false;
+  remember();
+  flushSaves();          // anything held for a name goes now, attributed
+  go(1);
 }
 
 function renderReview(){
@@ -596,6 +642,122 @@ function renderDocsView(){
     <p class="note">Prefer email? Attachments to <a href="mailto:connect@calfractionalhr.com" style="color:var(--brass);font-weight:600">connect@calfractionalhr.com</a> work just as well.</p>
   </div>`;
   wireDrops();
+}
+
+/* ============ Audit Dashboard ============ */
+// One view, three evidence states. AS STATED = computed here from the client's own
+// answers (safe to show at once). VERIFIED / IN ANALYSIS = the metrics record the
+// analysis writes; the receiver withholds those ratios until the report is delivered,
+// so nothing reaches the client before the readback. Marks: one hue (brass) for
+// magnitude; status colors only with an icon and a word, never color alone.
+const LADDER = [
+  {n:5,   tag:"harassment-prevention training · family & pregnancy leave"},
+  {n:15,  tag:"pay scale on every job posting"},
+  {n:26,  tag:"large-employer wage & overtime schedules (25 / 26)"},
+  {n:50,  tag:"federal FMLA · ACA employer mandate"},
+  {n:100, tag:"annual pay-data report to the state"}];
+function ansChoice(id){ return ((state.answers[id]||{}).choice||"").trim(); }
+function ansNum(id,i){ const p=(state.answers[id]||{}).parts||{}; const v=parseFloat(String(p[i]??"").replace(/[^0-9.]/g,"")); return isFinite(v)?v:null; }
+function stIcon(s){ return s==="ok"?'<span class="si ok" aria-hidden="true">✓</span>':s==="flag"?'<span class="si flag" aria-hidden="true">▲</span>':'<span class="si unk" aria-hidden="true">?</span>'; }
+function stWord(s){ return s==="ok"?"In place":s==="flag"?"Review":"Unknown"; }
+function ladderSVG(n){
+  const W=520,H=72,L=14,R=14, x=v=>L+Math.sqrt(Math.min(v,120)/120)*(W-L-R);
+  const ticks=[5,15,25,50,100].map(v=>`<line x1="${x(v)}" x2="${x(v)}" y1="34" y2="46" stroke="#B9C0C9"/><text x="${x(v)}" y="62" text-anchor="middle" font-size="11" fill="#5A6675" font-family="IBM Plex Mono,monospace">${v}</text>`).join("");
+  const m = n==null?"":`<line x1="${x(n)}" x2="${x(n)}" y1="18" y2="48" stroke="#B4862B" stroke-width="2"/><circle cx="${x(n)}" cy="18" r="5" fill="#B4862B"/><text x="${x(n)}" y="10" text-anchor="middle" font-size="11.5" font-weight="600" fill="#0A2C44" font-family="IBM Plex Mono,monospace">${n}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${n==null?"Headcount not yet stated":n+" employees on the California threshold ladder"}"><line x1="${L}" x2="${W-R}" y1="40" y2="40" stroke="#D9DEE5" stroke-width="2"/>${ticks}${m}</svg>`;
+}
+function splitBar(parts){
+  const total=parts.reduce((s,p)=>s+p.value,0); if(!total) return '<svg viewBox="0 0 520 14" width="100%" height="14" aria-hidden="true"><rect x="0" y="0" width="520" height="14" rx="3" fill="#EEF0F3"/></svg>';
+  let x=0; const W=520;
+  const segs=parts.filter(p=>p.value>0).map(p=>{ const w=Math.max(0,(p.value/total)*W-2); const r=`<rect x="${x}" y="0" width="${w}" height="14" rx="3" fill="${p.color}"/>`; x+=w+2; return r; }).join("");
+  return `<svg viewBox="0 0 ${W} 14" width="100%" height="14" aria-hidden="true">${segs}</svg>`;
+}
+function lineBar(r){
+  const W=520,H=44,L=8,R=8, max=r.max||Math.max((r.line||0)*1.5, r.value*1.2, 1), x=v=>L+Math.min(Math.max(v,0),max)/max*(W-L-R);
+  const col = r.status==="ok"?"#3E7D5B":r.status==="flag"?"#A9430F":"#9AA3AE";
+  const lx = r.line==null?0:x(r.line), anchor = lx<60?"start":lx>W-60?"end":"middle";
+  const line = (r.line==null)?"":`<line x1="${lx}" x2="${lx}" y1="6" y2="30" stroke="#0A2C44" stroke-width="1.5" stroke-dasharray="3 2"/><text x="${lx}" y="42" text-anchor="${anchor}" font-size="9.5" fill="#0A2C44" font-family="IBM Plex Mono,monospace">${esc(r.lineLabel||"the line")}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(r.label)}: ${esc(r.display)}"><line x1="${L}" x2="${W-R}" y1="18" y2="18" stroke="#D9DEE5" stroke-width="2"/><rect x="${L}" y="14" width="${Math.max(2,x(r.value)-L)}" height="8" rx="3" fill="${col}"/>${line}</svg>`;
+}
+function statedChecks(){
+  const c = id=>ansChoice(id);
+  const rule = (v, okSet, unkSet)=> !v ? "unk" : okSet.some(s=>v.startsWith(s)) ? "ok" : (unkSet||[]).some(s=>v.startsWith(s)) ? "unk" : "flag";
+  return [
+    {label:"Payroll system", val:c("A9")||"—", st: c("A9")?"ok":"unk"},
+    {label:"Timekeeping", val:c("C1")||"—", st: rule(c("C1"),["QuickBooks","ADP","Paychex","Gusto","Homebase","When I Work","Deputy","POS","Biometric","Through our PEO","Other"],[]) },
+    {label:"Employee handbook", val:c("F1")||"—", st: rule(c("F1"),["Last revised 2024"],["Being revised"])},
+    {label:"Injury & Illness Prevention Program", val:c("H1")||"—", st: rule(c("H1"),["Yes"],["Don't know"])},
+    {label:"Workplace Violence Prevention Plan", val:c("H2")||"—", st: rule(c("H2"),["Yes"],["Don't know"])},
+    {label:"Harassment-prevention training", val:c("H3")||"—", st: rule(c("H3"),["Done within 2 years, records kept"],["Don't know"])},
+    {label:"Workers' compensation", val:c("H4")||"—", st: rule(c("H4"),["State Fund","Private carrier","Through our PEO"],["Not sure","Don't know"])},
+    {label:"Retirement program (CalSavers)", val:c("H6")||"—", st: rule(c("H6"),["CalSavers — registered","401(k)","SEP","Certified exempt"],["Don't know"])},
+  ];
+}
+function renderDashboard(){
+  const ft=ansNum("A2",0), pt=ansNum("A2",1), out=ansNum("A2",2), peak=ansNum("A3",0);
+  const ca = (ft==null&&pt==null)?null:(ft||0)+(pt||0);
+  const onRungs = LADDER.map(r=>({...r, on: ca!=null && ca>=r.n}));
+  const next = LADDER.find(r=>ca!=null && ca<r.n);
+  const mix = ((state.answers.B0||{}).multi)||[];
+  const act = requests.filter(r=>r.status!=="waived");
+  const ev = { verified: act.filter(r=>r.status==="reviewed").length, review: act.filter(r=>r.status==="received").length,
+               attention: act.filter(r=>r.status==="replace").length, open: act.filter(r=>r.status==="open").length };
+  const checks = statedChecks();
+  const m = metrics||{};
+  const delivered = !!m.delivered && Array.isArray(m.ratios);
+  const updated = m.updated ? `Analysis updated ${esc(m.updated)}` : (submitted ? `Intake submitted ${esc(submitted.at)}` : "Intake in progress");
+  stage.innerHTML = `<div class="card">
+    <h2>Audit Dashboard</h2>
+    <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · ${updated}</p>
+    <div class="why"><b>How to read this</b>Each measure is shown against the line California draws, not against a score. <span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. <span class="tag analysis">In analysis</span> is shared here with your report at the readback. This page informs; it does not render legal advice.</div>
+    <div class="dash">
+      <div class="tile wide">
+        <span class="k">Threshold position <span class="tag">As stated</span></span>
+        <h3>${ca==null?"Headcount not yet stated":`${ca} employees in California`}</h3>
+        <p class="sub">${ca==null?"Answer A2 to place your company on the ladder.":`${ft??0} full-time · ${pt??0} part-time / seasonal${out?` · ${out} outside California`:""}${peak!=null?` · peak ${peak} in the last 12 months`:""}`}</p>
+        ${ladderSVG(ca)}
+        <ul class="rungs">${onRungs.map(r=>`<li class="${r.on?"on":""}"><b>${r.n}+</b><span>${r.on?"On — ":""}${esc(r.tag)}</span></li>`).join("")}</ul>
+        ${next?`<p class="sub" style="margin-top:8px">Next rung: <b>${next.n}</b> employees${peak!=null&&peak>=next.n?` — your stated peak of ${peak} already crosses it.`:"."}</p>`:""}
+      </div>
+      <div class="tile">
+        <span class="k">Workforce shape <span class="tag">As stated</span></span>
+        <h3>${mix.length?`${mix.length} pay types in play`:"Not yet stated"}</h3>
+        <p class="sub">Each type switches on its own set of rules.</p>
+        ${splitBar([{value:ft||0,color:"#B4862B"},{value:pt||0,color:"#D8AC4E"},{value:out||0,color:"#EEE3C6"}])}
+        <div class="legend"><span><i style="background:#B4862B"></i>Full-time ${ft??"—"}</span><span><i style="background:#D8AC4E"></i>Part-time / seasonal ${pt??"—"}</span>${out?`<span><i style="background:#EEE3C6"></i>Outside CA ${out}</span>`:""}</div>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">${mix.map(x=>`<span class="tag" style="text-transform:none;letter-spacing:0;font-family:'Public Sans',sans-serif;font-size:12px">${esc(x)}</span>`).join("")||'<span class="sub">Select the workforce types in Section B.</span>'}</div>
+      </div>
+      <div class="tile">
+        <span class="k">Evidence <span class="tag verified">Verified</span></span>
+        <h3>${act.length?`${ev.verified} of ${act.length} documents verified`:"No documents requested yet"}</h3>
+        <p class="sub">A document counts only once a person has opened it and checked it against your answers.</p>
+        ${splitBar([{value:ev.verified,color:"#3E7D5B"},{value:ev.review,color:"#9DB2AD"},{value:ev.attention,color:"#A9430F"},{value:ev.open,color:"#D9DEE5"}])}
+        <div class="legend"><span><i style="background:#3E7D5B"></i>Verified ${ev.verified}</span><span><i style="background:#9DB2AD"></i>In review ${ev.review}</span><span><i style="background:#A9430F"></i>Needs attention ${ev.attention}</span><span><i style="background:#D9DEE5"></i>Outstanding ${ev.open}</span></div>
+        ${delivered&&m.documented_headcount?`<div class="chk" style="margin-top:12px">${stIcon(ca!=null&&ca===m.documented_headcount?"ok":"flag")}<span class="lbl">Record coverage — stated vs. documented</span><span class="val">${ca??"—"} stated · ${m.documented_headcount} on the roster</span></div>`:""}
+        ${delivered&&m.contradictions!=null?`<div class="chk">${stIcon(m.contradictions?"flag":"ok")}<span class="lbl">Answers the documents disagree with</span><span class="val">${m.contradictions}</span></div>`:""}
+      </div>
+      <div class="tile wide">
+        <span class="k">Systems &amp; policies <span class="tag">As stated</span></span>
+        <h3>What you told us is in place</h3>
+        <p class="sub">"Review" means the answer itself puts this on the audit's list — not a finding yet.</p>
+        ${checks.map(c=>`<div class="chk">${stIcon(c.st)}<span class="lbl">${esc(c.label)} <span class="sub" style="display:inline;margin:0">· ${stWord(c.st)}</span></span><span class="val">${esc(c.val)}</span></div>`).join("")}
+      </div>
+      <div class="tile wide">
+        <span class="k">Measures against the line <span class="tag analysis">In analysis</span></span>
+        ${delivered ? `
+          <h3>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length} measures cross a line</h3>
+          <p class="sub">Each bar is your number; the dashed mark is where California draws the line. Details and fixes are in your report.</p>
+          ${m.ratios.map(r=>`<div class="ratio"><div class="row"><span>${stIcon(r.status)}${esc(r.label)} <span class="tag ${r.evidence==="verified"?"verified":"analysis"}">${esc(r.evidence||"analysis")}</span></span><span class="v">${esc(r.display)}</span></div>${lineBar(r)}${r.note?`<div class="n">${esc(r.note)}</div>`:""}</div>`).join("")}
+          ${m.exposure?`<div class="chk" style="margin-top:14px;border-top:1px solid var(--line-lt);padding-top:12px"><span class="lbl"><b>Illustrative exposure</b>${m.exposure.note?`<div class="n" style="font-size:12.5px;color:var(--slate)">${esc(m.exposure.note)}</div>`:""}</span><span class="big" style="font-size:22px;margin:0">${esc(m.exposure.display)}</span></div>`:""}
+          ${m.findings?`<div class="legend" style="margin-top:10px"><span><i style="background:#A9430F"></i>Critical ${m.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${m.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${m.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${m.findings.minor||0}</span></div>`:""}
+        ` : `
+          <h3>In analysis</h3>
+          <div class="dashlock" style="margin-top:8px"><b>Shared with your report</b>The measures that depend on your documents — overtime paid against overtime owed, exempt salaries against the floor, meal periods, deductions, and the exposure range — appear here the day your report is delivered, so you read them with the findings and the fixes beside them. Nothing on this page is final until then.</div>
+        `}
+      </div>
+    </div>
+    <p class="note" style="margin-top:16px">Measures are computed from your answers and from documents a person has verified. Where evidence is still outstanding, a measure stays blank rather than estimated.</p>
+  </div>`;
 }
 
 /* ============ input wiring ============ */
@@ -688,6 +850,20 @@ function assembleAnswers(){
   }));
   return answers;
 }
+/* A2 splits headcount three ways: [0] CA full-time · [1] CA part-time/temp/seasonal ·
+   [2] outside California. The California number is the first two added together — it
+   is what the 5 / 15 / 25 / 50 / 100+ ladder reads, and part-timers count on every
+   rung of it. Taking field [0] alone undercounted every client with a part-time bench. */
+function caHeadcountTotal(){
+  const parts = (state.answers.A2||{}).parts || {};
+  const raw = [0,1].map(i => String(parts[i] ?? "").trim());
+  if (!raw.some(s => s !== "")) return "";
+  const n = raw.reduce((sum, s) => {
+    const v = parseFloat(s.replace(/[^0-9.]/g, ""));
+    return sum + (isFinite(v) ? v : 0);
+  }, 0);
+  return String(n);
+}
 async function completeAll(){
   await flushSaves();
   const btn=document.getElementById("submitBtn"); btn.disabled=true; btn.textContent="Submitting…";
@@ -698,7 +874,7 @@ async function completeAll(){
     const payload = {action:"submit", token,
       company:document.getElementById("cCompany").value, contact:document.getElementById("cName").value+(me?" — "+me.role:""),
       email:document.getElementById("cEmail").value, phone:document.getElementById("cPhone").value,
-      caHeadcount:((state.answers.A2||{}).parts||{})[0]||"", totalHeadcount:((state.answers.A3||{}).parts||{})[0]||"",
+      caHeadcount: caHeadcountTotal(), totalHeadcount:((state.answers.A3||{}).parts||{})[0]||"",
       sectionsComplete: SECTIONS.map(s=>{const [a,t]=sectionAnswered(s.k);return s.k+":"+a+"/"+t;}).join(" "),
       answers: assembleAnswers()};
     const sub = PREVIEW ? {ok:true, submissionId:"AI-PREVIEW"} : await api(payload);
@@ -726,6 +902,22 @@ async function completeAll(){
     if (PREVIEW_DONE){
       submitted = { id:"AI-PREVIEW", at:"Aug 15" };
       state.meta.C2 = { by:"Sam — Controller", at:"Aug 18 11:40", amended:true };
+      state.answers.A2 = { parts:{0:"14",1:"9",2:"0"} }; state.answers.A3 = { parts:{0:"32"} };
+      state.answers.B0 = { multi:["Salaried exempt staff","Hourly full-time","Hourly part-time","Piece-rate workers","Tipped employees","Seasonal workers"] };
+      state.answers.A9 = { choice:"Gusto" }; state.answers.C1 = { choice:"Other", text:"FieldClock app + paper sheets" };
+      state.answers.F1 = { choice:"Revised 2020–2023" }; state.answers.H1 = { choice:"Yes" }; state.answers.H2 = { choice:"Don't know" };
+      state.answers.H3 = { choice:"Done, but more than 2 years ago" }; state.answers.H4 = { choice:"Private carrier" }; state.answers.H6 = { choice:"CalSavers — registered and remitting" };
+      metrics = { delivered:true, updated:"Aug 20", by:"California Fractional HR", documented_headcount:29, contradictions:4,
+        exposure:{ display:"$41K – $96K", note:"Illustrative range across the findings below, before any fix." },
+        findings:{ critical:2, serious:5, moderate:6, minor:3 },
+        ratios:[
+          { key:"exempt_floor", label:"Lowest exempt salary vs. the 2×minimum-wage floor", value:0.74, display:"74% of floor", line:1, max:1.5, status:"flag", evidence:"verified", note:"Two of three salaried roles sit below $70,304; duties also read hourly." },
+          { key:"ot_field", label:"Overtime paid vs. owed — field crew", value:0.51, display:"51% paid", line:1, max:1.2, status:"flag", evidence:"verified", note:"Daily-over-8 hours on harvest days paid as straight time." },
+          { key:"ot_cellar", label:"Overtime paid vs. owed — cellar", value:1.0, display:"100% paid", line:1, max:1.2, status:"ok", evidence:"verified", note:"Daily and weekly overtime both correct." },
+          { key:"meals", label:"Meal periods recorded on 5+ hour shifts", value:0.62, display:"62%", line:1, max:1, status:"flag", evidence:"verified", note:"Paper sign-in sheets carry no meal column; 7 of 19 long field days took the meal after the sixth hour." },
+          { key:"time_fidelity", label:"Hours paid vs. hours on the original time records", value:0.989, display:"98.9%", line:1, max:1.05, status:"flag", evidence:"verified", note:"Weekly totals rounded down a quarter-hour per person before payroll." },
+          { key:"deductions", label:"Non-statutory deductions (two pay periods)", value:2, display:"2 · $18", line:0, max:4, status:"flag", evidence:"verified", note:"\"Glass breakage\" on two pourers' stubs." }
+        ] };
     }
     requests = [
       {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing is where the expensive findings surface.", status:"received", requested:"Aug 12", received:"Aug 15", section:"C", files_list:[{name:"register-jul.pdf", date:"Aug 15"}]},
@@ -741,7 +933,7 @@ async function completeAll(){
   try{
     const st = await api({action:"state", token});
     if(!st.ok) return; // gate stays
-    company = st.company||""; submitted = st.submitted||null; requests = st.requests||[];
+    company = st.company||""; submitted = st.submitted||null; requests = st.requests||[]; metrics = st.metrics||null;
     Object.entries(st.answers||{}).forEach(([qid,rec])=>{
       try{ state.answers[qid]=JSON.parse(rec.v||"{}"); }catch(e){ state.answers[qid]={text:String(rec.v||"")}; }
       state.meta[qid]={by:rec.by, at:rec.at, amended:!!rec.amended};
@@ -752,7 +944,7 @@ async function completeAll(){
     render();
     // refresh on focus so simultaneous editors converge
     window.addEventListener("focus", async ()=>{
-      try{ const f=await api({action:"state", token}); if(f.ok){ requests=f.requests||requests; } }catch(e){}
+      try{ const f=await api({action:"state", token}); if(f.ok){ requests=f.requests||requests; metrics=f.metrics||metrics; } }catch(e){}
     });
   }catch(e){ /* endpoint unreachable — gate stays */ }
 })();
