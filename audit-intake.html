@@ -162,11 +162,20 @@
   .xp{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
   .xp th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);padding:8px 8px;border-bottom:2px solid var(--ink);white-space:nowrap}
   .xp td{padding:11px 8px;border-bottom:1px solid var(--line-lt);vertical-align:top;line-height:1.45}
-  .xp td.f{width:25%} .xp td.f b{display:block;color:var(--ink);font-size:13.5px} .xp td.f small{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass);letter-spacing:.04em;margin-top:3px}
+  .xp td.f{width:30%} .xp td.f b{display:block;color:var(--ink);font-size:13.5px} .xp td.f small{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass);letter-spacing:.04em;margin-top:3px}
   .xp td.r{white-space:nowrap;font-weight:600;text-align:right;color:var(--ink);font-size:14px}
   .xp td .as{display:block;color:var(--slate);font-size:12px;margin-top:4px}
   .xp tr.tot td{border-top:2px solid var(--ink);border-bottom:0;font-weight:600;color:var(--ink)}
   .xp-h4{font-size:16px;margin:22px 0 6px;color:var(--ink)}
+  .sub4{display:flex;align-items:baseline;gap:10px;margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
+  .sub4 b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--brass)} .sub4 h4{font-size:17px;margin:0;color:var(--ink)} .sub4 span{font-size:12.5px;color:var(--slate);margin-left:auto;white-space:nowrap}
+  .xp.tight td{padding:9px 8px;font-size:12.8px} .xp.tight th{font-size:10px}
+  .xp td.n{white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink)} .xp td.nr{white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:var(--ink)}
+  .xp td.bar{width:40%;min-width:220px;padding-top:12px} .xp td.bar svg{display:block;width:100%}
+  .xp tr.axis td{padding:2px 8px 10px;border-bottom:0} .xp tr.axis svg{display:block;width:100%}
+  .xp.kv td:first-child{width:22%;font-weight:600;color:var(--ink);white-space:nowrap}
+  .xp-ul.tight li{padding:3px 0 3px 18px;font-size:13px}
+  .pg-note{font-size:13px;line-height:1.5;color:#2F3A47;margin:10px 0 0}
   .xp-ol{margin:0;padding-left:22px;font-size:13.5px;line-height:1.55;color:#2F3A47} .xp-ol li{margin:6px 0} .xp-ol b{color:var(--ink)}
   .xp-ul{margin:0;padding-left:0;list-style:none;font-size:13.5px;line-height:1.5;color:#2F3A47} .xp-ul li{padding:5px 0 5px 18px;position:relative} .xp-ul li::before{content:"—";position:absolute;left:0;color:var(--brass)}
   .dash-lead{font-size:17px;line-height:1.5;color:var(--ink);margin:14px 0 4px}
@@ -748,21 +757,54 @@ function secClose(){ return `</details>`; }
 function setAllSections(open){ document.querySelectorAll(".secwrap").forEach(d=>{ d.open = open; }); }
 function exposureSection(x){
   const items=x.items||[], lo=items.reduce((s,i)=>s+(+i.low||0),0), hi=items.reduce((s,i)=>s+(+i.high||0),0);
+  const axisMax = Math.max(...items.map(i=>+i.high||0), 1), W=520;
+  const px = v=>Math.round(Math.min(Math.max(v,0),axisMax)/axisMax*(W-4))+2;
+  const rangeBar = i=>`<svg viewBox="0 0 ${W} 18" height="18" aria-hidden="true"><rect x="2" y="4" width="${W-4}" height="10" rx="3" fill="#EEF0F3"/><rect x="${px(i.low)}" y="2" width="${Math.max(4,px(i.high)-px(i.low))}" height="14" rx="3" fill="#B4862B"/></svg>`;
+  const ticks=[0,.25,.5,.75,1].map(t=>`<line x1="${2+t*(W-4)}" x2="${2+t*(W-4)}" y1="0" y2="5" stroke="#B9C0C9"/><text x="${2+t*(W-4)}" y="16" text-anchor="${t===0?"start":t===1?"end":"middle"}" font-size="10" fill="#5A6675" font-family="IBM Plex Mono,monospace">${fmtK(Math.round(axisMax*t))}</text>`).join("");
+  const axis=`<tr class="axis"><td></td><td class="bar"><svg viewBox="0 0 ${W} 18" height="18" aria-hidden="true">${ticks}</svg></td><td></td></tr>`;
+  // PAGA
+  const pg=x.paga||null, pgRow=i=>i.paga?{...i.paga, total:(+i.paga.employees||0)*(+i.paga.periods||0)*(+i.paga.rate||0)*(+i.paga.types||1)}:null;
+  const pgItems=items.map(i=>({...i, pg:pgRow(i)})).filter(i=>i.pg);
+  const pgTotal=pgItems.reduce((s,i)=>s+i.pg.total,0);
+  const caps=(pg&&pg.caps)||[];
+  const capBar=(c)=>{ const v=pgTotal*c.factor, w=Math.max(4,Math.round(v/Math.max(pgTotal,1)*(W-4))); return `<svg viewBox="0 0 ${W} 18" height="18" aria-hidden="true"><rect x="2" y="4" width="${W-4}" height="10" rx="3" fill="#EEF0F3"/><rect x="2" y="2" width="${w}" height="14" rx="3" fill="${c.factor<1?"#D8AC4E":"#B4862B"}"/></svg>`; };
+  const capLo = caps.length?Math.min(...caps.map(c=>c.factor)):1;
+  const headline = x.display||`${fmtK(lo)} – ${fmtK(hi)}`;
+  const peek = pg&&pgTotal?`${headline} + PAGA ${fmtK(Math.round(pgTotal*capLo))}–${fmtK(pgTotal)}`:headline;
   return `
-      ${secOpen(4,"What it could cost","the illustrative exposure — where each number comes from, and what it leaves out", x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}
+      ${secOpen(4,"What it could cost","the findings, then PAGA on top — and what the company can do about each", peek)}
       <div class="tile wide">
         <span class="k">Illustrative exposure <span class="tag analysis">In analysis</span></span>
-        <h3>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}</h3>
+        <h3>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}${pg&&pgTotal?` <span style="font-size:15px;font-weight:400;color:var(--slate)">+ PAGA ${fmtK(Math.round(pgTotal*capLo))} – ${fmtK(pgTotal)}</span>`:""}</h3>
         <p class="ask">${esc(x.note||"")}</p>
-        ${items.length?`<div class="xpwrap"><table class="xp">
-          <thead><tr><th>Finding</th><th>What the record shows</th><th>The arithmetic</th><th style="text-align:right">Range</th></tr></thead>
-          <tbody>${items.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.title)}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.shows||"")}</td><td>${esc(i.math||"")}${i.assumption?`<span class="as">Assumes: ${esc(i.assumption)}</span>`:""}</td><td class="r">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
-          <tr class="tot"><td colspan="3">Together, before penalties and before any fix</td><td class="r">${fmtK(lo)} – ${fmtK(hi)}</td></tr></tbody></table></div>`:""}
-        ${x.unscored&&x.unscored.length?`<h4 class="xp-h4">Carried without a number</h4><ul class="xp-ul">${x.unscored.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
-        ${x.method&&x.method.length?`<h4 class="xp-h4">How the range is built</h4><ol class="xp-ol">${x.method.map(t=>{const i=t.indexOf(". ");return `<li>${i>0&&i<40?`<b>${esc(t.slice(0,i+1))}</b>${esc(t.slice(i+1))}`:esc(t)}</li>`;}).join("")}</ol>`:""}
-        ${x.excluded&&x.excluded.length?`<h4 class="xp-h4">What the range leaves out</h4><ul class="xp-ul">${x.excluded.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
-        ${x.findings?`<h4 class="xp-h4">Findings by severity</h4><div class="legend"><span><i style="background:#A9430F"></i>Critical ${x.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${x.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${x.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${x.findings.minor||0}</span></div>`:""}
-        ${x.guardrail?`<div class="why" style="margin:18px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}
+
+        ${items.length?`<div class="sub4"><b>4A</b><h4>The findings</h4><span>low to high, before penalties</span></div>
+        <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>Range</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
+          ${items.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td class="bar">${rangeBar(i)}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
+          ${axis}
+          <tr class="tot"><td colspan="2">Together, before penalties and before any fix</td><td class="nr">${fmtK(lo)} – ${fmtK(hi)}</td></tr></tbody></table></div>
+
+        <div class="sub4"><b>4B</b><h4>The arithmetic</h4><span>how each range was built</span></div>
+        <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>In the sample</th><th>Scaled</th><th>Over the lookback</th><th>Assumes</th></tr></thead><tbody>
+          ${items.map(i=>`<tr><td class="n"><b>${esc(i.id)}</b></td><td>${esc(i.sample||i.shows||"")}</td><td>${esc(i.scale||"")}</td><td>${esc(i.lookback||"")}</td><td>${esc(i.assumption||"")}</td></tr>`).join("")}
+        </tbody></table></div>`:""}
+
+        ${pg&&pgItems.length?`<div class="sub4"><b>4C</b><h4>Then PAGA</h4><span>civil penalties on top of the findings</span></div>
+        <p class="pg-note">${esc(pg.display_note||"")}</p>
+        <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>Employees</th><th>Pay periods</th><th>Rate</th><th>Violations</th><th style="text-align:right">Unmitigated</th></tr></thead><tbody>
+          ${pgItems.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.pg.basis?`<small style="color:var(--slate);font-family:'Public Sans',sans-serif;letter-spacing:0;font-size:11.5px">${esc(i.pg.basis)}</small>`:""}</td><td class="n">${i.pg.employees}</td><td class="n">${i.pg.periods}</td><td class="n">$${i.pg.rate}</td><td class="n">${i.pg.types||1}</td><td class="nr">${fmtK(i.pg.total)}</td></tr>`).join("")}
+          <tr class="tot"><td colspan="5">Before any cap</td><td class="nr">${fmtK(pgTotal)}</td></tr></tbody></table></div>
+        ${caps.length?`<div class="xpwrap" style="margin-top:14px"><table class="xp tight"><thead><tr><th>What the company does</th><th>Penalty</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+          ${caps.map(c=>`<tr><td class="f"><b>${esc(c.label)}</b><small style="color:var(--slate);font-family:'Public Sans',sans-serif;letter-spacing:0;font-size:11.5px">${esc(c.words||"")}</small></td><td class="bar">${capBar(c)}</td><td class="nr">${fmtK(Math.round(pgTotal*c.factor))}</td></tr>`).join("")}
+        </tbody></table></div>`:""}
+        ${pg.split?`<p class="pg-note"><b>${esc(pg.split)}</b></p>`:""}
+        ${pg.notes&&pg.notes.length?`<ul class="xp-ul tight" style="margin-top:8px">${pg.notes.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}`:""}
+
+        ${x.unscored&&x.unscored.length?`<div class="sub4"><b>4D</b><h4>Carried without a number</h4></div><ul class="xp-ul tight">${x.unscored.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
+        ${x.method&&x.method.length?`<div class="sub4"><b>4E</b><h4>How the range is built</h4></div><div class="xpwrap"><table class="xp tight kv"><tbody>${x.method.map(t=>{const i=t.indexOf(". ");return `<tr><td>${esc(i>0&&i<40?t.slice(0,i):"—")}</td><td>${esc(i>0&&i<40?t.slice(i+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
+        ${x.excluded&&x.excluded.length?`<div class="sub4"><b>4F</b><h4>Left out of every number above</h4></div><ul class="xp-ul tight">${x.excluded.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
+        ${x.findings?`<div class="sub4"><b>4G</b><h4>Findings by severity</h4></div><div class="legend"><span><i style="background:#A9430F"></i>Critical ${x.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${x.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${x.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${x.findings.minor||0}</span></div>`:""}
+        ${x.guardrail?`<div class="why" style="margin:22px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}
       </div>
       ${secClose()}`;
 }
