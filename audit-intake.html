@@ -143,8 +143,22 @@
   .tile .k{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:4px}
   .tile .ask{font-size:14.5px;line-height:1.5;color:#2F3A47;margin:0 0 12px}
   .tile:not(.wide) .chk .val{white-space:normal}
-  .cap{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;margin-top:10px;padding-bottom:6px;border-bottom:1px solid var(--line-lt);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
-  .cap:first-child{margin-top:0} .cap b{color:var(--brass);font-weight:600} .cap span{font-family:'Public Sans',sans-serif;font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--slate)}
+  .sec{grid-column:1/-1;display:flex;align-items:flex-start;gap:14px;margin-top:34px;padding-top:18px;border-top:3px solid var(--ink)}
+  .sec:first-child{margin-top:6px}
+  .sec .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--brass);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:3px}
+  .sec h3{font-size:24px;line-height:1.15;margin:0;color:var(--ink)}
+  .sec p{margin:4px 0 0;font-size:14px;color:var(--slate)}
+  .xpwrap{overflow-x:auto;margin:6px 0 4px}
+  .xp{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+  .xp th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);padding:8px 8px;border-bottom:2px solid var(--ink);white-space:nowrap}
+  .xp td{padding:11px 8px;border-bottom:1px solid var(--line-lt);vertical-align:top;line-height:1.45}
+  .xp td.f{width:25%} .xp td.f b{display:block;color:var(--ink);font-size:13.5px} .xp td.f small{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass);letter-spacing:.04em;margin-top:3px}
+  .xp td.r{white-space:nowrap;font-weight:600;text-align:right;color:var(--ink);font-size:14px}
+  .xp td .as{display:block;color:var(--slate);font-size:12px;margin-top:4px}
+  .xp tr.tot td{border-top:2px solid var(--ink);border-bottom:0;font-weight:600;color:var(--ink)}
+  .xp-h4{font-size:16px;margin:22px 0 6px;color:var(--ink)}
+  .xp-ol{margin:0;padding-left:22px;font-size:13.5px;line-height:1.55;color:#2F3A47} .xp-ol li{margin:6px 0} .xp-ol b{color:var(--ink)}
+  .xp-ul{margin:0;padding-left:0;list-style:none;font-size:13.5px;line-height:1.5;color:#2F3A47} .xp-ul li{padding:5px 0 5px 18px;position:relative} .xp-ul li::before{content:"—";position:absolute;left:0;color:var(--brass)}
   .dash-lead{font-size:17px;line-height:1.5;color:var(--ink);margin:14px 0 4px}
   .tile .big{font-size:30px;font-weight:600;color:var(--ink);line-height:1.05;margin:6px 0 2px}
   .tile .sub{font-size:13px;color:var(--slate);margin:0 0 8px}
@@ -715,6 +729,27 @@ const QUESTIONS = {
   time_fidelity:"Are people paid for the hours on the original time records?",
   deductions:"Are there deductions from pay that California doesn't allow?",
   heat_training:"Has everyone who works in heat been trained?"};
+function fmtK(v){ if(v==null||!isFinite(v)) return "—"; return v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1000?`$${Math.round(v/1000)}K`:`$${v}`; }
+function secHead(n,title,subtitle){ return `<div class="sec"><span class="num">${n}</span><div><h3>${esc(title)}</h3>${subtitle?`<p>${esc(subtitle)}</p>`:""}</div></div>`; }
+function exposureSection(x){
+  const items=x.items||[], lo=items.reduce((s,i)=>s+(+i.low||0),0), hi=items.reduce((s,i)=>s+(+i.high||0),0);
+  return `
+      ${secHead(4,"What it could cost","the illustrative exposure — where each number comes from, and what it leaves out")}
+      <div class="tile wide">
+        <span class="k">Illustrative exposure <span class="tag analysis">In analysis</span></span>
+        <h3>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}</h3>
+        <p class="ask">${esc(x.note||"")}</p>
+        ${items.length?`<div class="xpwrap"><table class="xp">
+          <thead><tr><th>Finding</th><th>What the record shows</th><th>The arithmetic</th><th style="text-align:right">Range</th></tr></thead>
+          <tbody>${items.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.title)}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.shows||"")}</td><td>${esc(i.math||"")}${i.assumption?`<span class="as">Assumes: ${esc(i.assumption)}</span>`:""}</td><td class="r">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
+          <tr class="tot"><td colspan="3">Together, before penalties and before any fix</td><td class="r">${fmtK(lo)} – ${fmtK(hi)}</td></tr></tbody></table></div>`:""}
+        ${x.unscored&&x.unscored.length?`<h4 class="xp-h4">Carried without a number</h4><ul class="xp-ul">${x.unscored.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
+        ${x.method&&x.method.length?`<h4 class="xp-h4">How the range is built</h4><ol class="xp-ol">${x.method.map(t=>{const i=t.indexOf(". ");return `<li>${i>0&&i<40?`<b>${esc(t.slice(0,i+1))}</b>${esc(t.slice(i+1))}`:esc(t)}</li>`;}).join("")}</ol>`:""}
+        ${x.excluded&&x.excluded.length?`<h4 class="xp-h4">What the range leaves out</h4><ul class="xp-ul">${x.excluded.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
+        ${x.findings?`<h4 class="xp-h4">Findings by severity</h4><div class="legend"><span><i style="background:#A9430F"></i>Critical ${x.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${x.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${x.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${x.findings.minor||0}</span></div>`:""}
+        ${x.guardrail?`<div class="why" style="margin:18px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}
+      </div>`;
+}
 function ratioQuestion(r){ return r.question || QUESTIONS[r.key] || (r.key&&r.key.startsWith("ot_") ? "Was this crew paid the overtime it worked?" : r.label); }
 function ratioRead(r){
   const where = r.status==="ok" ? "At or past the line" : r.status==="flag" ? (r.line!=null && r.value<r.line ? "Below the line" : "Past the line") : "Not yet measurable";
@@ -757,7 +792,7 @@ function renderDashboard(){
       : `What you told us, what we have verified, and — the day your report is delivered — what the analysis found. Nothing here is a score; every measure is your number against the line California draws.`}</p>
     <div class="why"><b>How to read this</b><span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. <span class="tag analysis">In analysis</span> is shared here with your report at the readback. This page informs; it does not render legal advice.</div>
     <div class="dash">
-      <div class="cap"><b>1</b> What you told us <span>from your answers — appears at once</span></div>
+      ${secHead(1,"What you told us","from your answers — appears the moment you answer")}
       <div class="tile wide">
         <span class="k">Threshold position <span class="tag">As stated</span></span>
         <h3>${ca==null?"Headcount not yet stated":`${ca} employees in California`}</h3>
@@ -781,7 +816,7 @@ function renderDashboard(){
         <p class="ask">"Review" means the answer itself puts this on the audit's list — not a finding yet.</p>
         ${checks.map(c=>`<div class="chk">${stIcon(c.st)}<span class="lbl">${esc(c.label)} <span class="sub" style="display:inline;margin:0">· ${stWord(c.st)}</span></span><span class="val">${esc(c.val)}</span></div>`).join("")}
       </div>
-      <div class="cap"><b>2</b> What we verified <span>checked against your documents</span></div>
+      ${secHead(2,"What we verified","each document opened and checked against your answers by a person")}
       <div class="tile wide">
         <span class="k">Evidence <span class="tag verified">Verified</span></span>
         <h3>${act.length?`${ev.verified} of ${act.length} documents verified`:"No documents requested yet"}</h3>
@@ -791,21 +826,20 @@ function renderDashboard(){
         ${delivered&&m.documented_headcount?`<div class="chk" style="margin-top:12px">${stIcon(ca!=null&&ca===m.documented_headcount?"ok":"flag")}<span class="lbl">Record coverage — stated vs. documented</span><span class="val">${ca??"—"} stated · ${m.documented_headcount} on the roster</span></div>`:""}
         ${delivered&&m.contradictions!=null?`<div class="chk">${stIcon(m.contradictions?"flag":"ok")}<span class="lbl">Answers the documents disagree with</span><span class="val">${m.contradictions}</span></div>`:""}
       </div>
-      <div class="cap"><b>3</b> What the analysis found <span>shared with your report</span></div>
+      ${secHead(3,"What the analysis found","your numbers against the lines California draws — shared with your report")}
       <div class="tile wide">
         <span class="k">Measures against the line <span class="tag analysis">In analysis</span></span>
         ${delivered ? `
           <h3>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length} measures cross a line</h3>
           <p class="ask">The brass bar is your number; the navy mark is where California draws the line. Details and fixes are in your report.</p>
           ${m.ratios.map(r=>`<div class="ratio"><div class="row"><h4>${stIcon(r.status)}${esc(ratioQuestion(r))}</h4><span class="v">${esc(r.display)}</span></div><div class="m">${esc(r.label)} <span class="tag ${r.evidence==="verified"?"verified":"analysis"}">${esc(r.evidence||"analysis")}</span></div>${lineBar(r)}${ratioRead(r)}${r.note?`<div class="n">${esc(r.note)}</div>`:""}</div>`).join("")}
-          ${m.exposure?`<div class="chk" style="margin-top:14px;border-top:1px solid var(--line-lt);padding-top:12px"><span class="lbl"><b>Illustrative exposure</b>${m.exposure.note?`<div class="n" style="font-size:12.5px;color:var(--slate)">${esc(m.exposure.note)}</div>`:""}</span><span class="big" style="font-size:22px;margin:0">${esc(m.exposure.display)}</span></div>`:""}
-          ${m.findings?`<div class="legend" style="margin-top:10px"><span><i style="background:#A9430F"></i>Critical ${m.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${m.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${m.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${m.findings.minor||0}</span></div>`:""}
         ` : `
           <h3>In analysis</h3>
           <div class="dashlock" style="margin-top:8px"><b>Shared with your report</b>The measures that depend on your documents — overtime paid against overtime owed, exempt salaries against the floor, meal periods, deductions, and the exposure range — appear here the day your report is delivered, so you read them with the findings and the fixes beside them. Nothing on this page is final until then.</div>
         `}
       </div>
     </div>
+    ${delivered&&m.exposure?exposureSection({...m.exposure, findings:m.findings}):""}
     <p class="note" style="margin-top:16px">Measures are computed from your answers and from documents a person has verified. Where evidence is still outstanding, a measure stays blank rather than estimated.</p>
   </div>`;
 }
