@@ -82,13 +82,19 @@
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
 
   /* section documents (the merged Document Center) */
-  .docblock{margin-top:34px;border-top:1px solid var(--line-lt);padding-top:22px}
-  .docblock .dhead{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;color:#8A6D1F;text-transform:uppercase;margin-bottom:14px}
+  /* Section headers on the Documents page match the dashboard's: a navy rule, a
+     serif title you cannot miss, the section letter as a small brass eyebrow. */
+  .docblock{margin-top:36px;border-top:3px solid var(--ink);padding-top:16px}
+  .docblock .dhead{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:23px;line-height:1.15;letter-spacing:-.02em;color:var(--ink);margin-bottom:16px}
+  .docblock .dhead small{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.18em;color:var(--brass);text-transform:uppercase;margin-bottom:5px}
+  .docstand{margin:0 0 6px;padding-top:16px;border-top:3px solid var(--ink);font-size:23px}
   .req{border:1px solid var(--line-lt);border-radius:4px;padding:16px 18px;margin-bottom:12px;background:#fff}
-  .req.is-done{border-left:3px solid var(--ok)}
+  /* A verified request reads as settled: the same light green as the Intake Complete
+     banner fills the card; the files inside stay white. */
+  .req.is-done{background:#EFF5F0;border-color:rgba(62,125,91,.4);border-left:3px solid var(--ok)}
   .req.is-open{border-left:3px solid var(--brass)}
   .req-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-  .req-top h3{font-size:1.02rem;flex:1;min-width:180px}
+  .req-top h3{font-size:19px;line-height:1.3;flex:1;min-width:180px}
   .chip{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;border-radius:2px;padding:4px 10px;white-space:nowrap}
   .chip.open{color:#fff;background:var(--brass);border:1px solid var(--brass);font-weight:500}
   .chip.done{color:#fff;background:var(--ok);border:1px solid var(--ok);font-weight:500}
@@ -681,7 +687,7 @@ function docSummary(){
   if (allVerified) lead = `<b>${verified.length} of ${active.length}</b> documents verified. Collection is complete — every document has been opened, checked against your intake record, and confirmed by ${esc(reviewer)}. Analysis proceeds on a verified record.`;
   else if (allIn) lead = `<b>All ${active.length}</b> requested documents are in — ${verified.length} verified, ${inReview.length} under review. We open and check every document against your intake record before analysis begins; anything that needs a second look comes back here with a note. Nothing more is needed from you right now — you'll see each item flip to VERIFIED as we confirm it.`;
   else lead = `<b>${inCount} of ${active.length}</b> requested documents are in · ${verified.length} verified. <b>${obstacles.length}</b> item${obstacles.length===1?" stands":"s stand"} between you and a complete record:`;
-  return `<h2 style="font-size:1.15rem">Where your document collection stands</h2>
+  return `<h2 class="docstand">Where your document collection stands</h2>
     <p class="note" style="margin-top:4px">${lead}</p>
     <div class="progressbar" style="display:flex"><i style="width:${pctV}%;background:var(--ok)"></i><i style="width:${pctR}%;background:#9DB2AD"></i></div>
     ${obstacles.length?`<ul class="obstacles">${obstacles.map(r=>`<li><button onclick="jumpReq('${esc(r.id)}')"><span class="chip ${r.status==="replace"?"replace":"open"}">${r.status==="replace"?"REPLACE":"SEND"}</span><span><b>${esc(r.title)}</b>${r.status==="replace"&&(r.review_note||r.note)?` — ${esc(r.review_note||r.note)}`:""}</span><span class="arrow">↓</span></button></li>`).join("")}</ul>
@@ -702,7 +708,7 @@ function renderDocsView(){
     <div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. New document requests appear here — same link, any device. Remembered something? Any section's answers can still be corrected; changes are filed as dated amendments.</div>
     ${docSummary()}
     <h2 style="margin-top:24px">Documents</h2>
-    ${Object.entries(bySec).map(([k,list])=>`<div class="docblock"><div class="dhead">${k==="—"?"General":"Section "+esc(k)}</div>${list.map(reqCard).join("")}</div>`).join("") || "<p class='note'>Nothing requested right now.</p>"}
+    ${Object.entries(bySec).map(([k,list])=>{ const sec=SECTIONS.find(x=>x.k===k); const title=sec?sec.t.split(":")[0].trim():"General"; return `<div class="docblock"><div class="dhead">${k==="—"?"":`<small>Section ${esc(k)}</small>`}${esc(title)}</div>${list.map(reqCard).join("")}</div>`; }).join("") || "<p class='note'>Nothing requested right now.</p>"}
     <div class="drop" data-req="MISC" data-title="Additional documents" style="margin-top:20px">Something we didn't ask for? Drop it here, or <b>browse</b></div>
     <ul class="filelist" data-list="MISC"></ul>
     <p class="note">Prefer email? Attachments to <a href="mailto:connect@calfractionalhr.com" style="color:var(--brass);font-weight:600">connect@calfractionalhr.com</a> work just as well.</p>
