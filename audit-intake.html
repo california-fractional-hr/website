@@ -582,7 +582,7 @@ function docBlock(sectionKey){
   if (!list.length) return "";
   const vN = list.filter(r=>r.status==="reviewed").length;
   const inN = list.filter(r=>r.status!=="open").length;
-  const title = vN===list.length ? `All ${list.length} verified` : inN===list.length ? `All ${list.length} in · ${vN} verified` : `${inN} of ${list.length} in · ${vN} verified`;
+  const title = vN===list.length ? `All documents verified` : inN===list.length ? `All ${list.length} in · ${vN} verified` : `${inN} of ${list.length} in · ${vN} verified`;
   return `<div class="docblock"><div class="dhead"><small>Documents for this section</small>${title}</div>
     ${list.map(reqCard).join("")}</div>`;
 }
