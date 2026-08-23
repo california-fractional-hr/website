@@ -555,7 +555,7 @@ function qHtml(q){
 
 /* ============ render: section documents ============ */
 function reqCard(r){
-  // Three client-visible states (v2.3): received means a person is checking it;
+  // Three client-visible states (v2.3): received means it is being checked;
   // the checkmark belongs to the review, not the upload.
   const verified = r.status==="reviewed";
   const inReview = r.status==="received";
@@ -727,7 +727,7 @@ function renderDocsView(){
 // One view, three evidence states. AS STATED = computed here from the client's own
 // answers (safe to show at once). VERIFIED / IN ANALYSIS = the metrics record the
 // analysis writes; the receiver withholds those ratios until the report is delivered,
-// so nothing reaches the client before the readback. Marks: one hue (brass) for
+// so nothing reaches the client before the readout. Marks: one hue (brass) for
 // magnitude; status colors only with an icon and a word, never color alone.
 const LADDER = [
   {n:5,   tag:"harassment-prevention training · family & pregnancy leave"},
@@ -903,7 +903,7 @@ function renderDashboard(){
     <p class="dash-lead">${delivered
       ? `<b>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length}</b> measures cross a line California draws. Each one is explained, with its fix, in your report — this page is the picture in numbers.`
       : `What you told us, and what we have verified so far. Nothing here is a score; every measure is your number against the line California draws.`}</p>
-    <div class="why"><b>How to read this</b><span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. <span class="tag analysis">In analysis</span> is shared here with your report at the readback. This page informs; it does not render legal advice.</div>
+    <div class="why"><b>How to read this</b><span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. <span class="tag analysis">In analysis</span> is shared here with your report at the readout. This page informs; it does not render legal advice.</div>
     <div class="secctl"><button type="button" onclick="setAllSections(true)">Expand all</button><button type="button" onclick="setAllSections(false)">Collapse all</button></div>
     <div class="dash">
       ${secOpen(1,"What you told us","from your answers — appears the moment you answer", [ca!=null?`${ca} employees`:"headcount not stated", mix.length?`${mix.length} pay types`:"", `${checks.filter(c=>c.st!=="ok").length} to review`].filter(Boolean).join(" · "))}
@@ -931,11 +931,11 @@ function renderDashboard(){
         ${checks.map(c=>`<div class="chk">${stIcon(c.st)}<span class="lbl">${esc(c.label)} <span class="sub" style="display:inline;margin:0">· ${stWord(c.st)}</span></span><span class="val">${esc(c.val)}</span></div>`).join("")}
       </div>
       ${secClose()}
-      ${secOpen(2,"What we verified","each document opened and checked against your answers by a person", [act.length?`${ev.verified} of ${act.length} verified`:"nothing requested yet", delivered&&m.contradictions!=null?`${m.contradictions} contradictions`:""].filter(Boolean).join(" · "))}
+      ${secOpen(2,"What we verified","each document opened and checked against your answers", [act.length?`${ev.verified} of ${act.length} verified`:"nothing requested yet", delivered&&m.contradictions!=null?`${m.contradictions} contradictions`:""].filter(Boolean).join(" · "))}
       <div class="tile wide">
         <span class="k">Evidence <span class="tag verified">Verified</span></span>
         <h3>${act.length?`${ev.verified} of ${act.length} documents verified`:"No documents requested yet"}</h3>
-        <p class="ask">A document counts only once a person has opened it and checked it against your answers.</p>
+        <p class="ask">A document counts only once it has been opened and checked against your answers.</p>
         ${splitBar([{value:ev.verified,color:"#3E7D5B"},{value:ev.review,color:"#9DB2AD"},{value:ev.attention,color:"#A9430F"},{value:ev.open,color:"#D9DEE5"}])}
         <div class="legend"><span><i style="background:#3E7D5B"></i>Verified ${ev.verified}</span><span><i style="background:#9DB2AD"></i>In review ${ev.review}</span><span><i style="background:#A9430F"></i>Needs attention ${ev.attention}</span><span><i style="background:#D9DEE5"></i>Outstanding ${ev.open}</span></div>
         ${act.length?`<div style="margin-top:14px">${act.map(r=>{
@@ -962,8 +962,8 @@ function renderDashboard(){
       ${secClose()}` : ``}
     </div>
     ${delivered&&m.exposure?exposureSection({...m.exposure, findings:m.findings}):""}
-    ${delivered ? "" : `<div class="dashlock" style="margin-top:14px"><b>At your readback</b>What the analysis found, and what it could cost, are shared in person with your report — the fix beside every finding. Nothing from the analysis is posted here before then.</div>`}
-    <p class="note" style="margin-top:16px">Measures are computed from your answers and from documents a person has verified. Where evidence is still outstanding, a measure stays blank rather than estimated.</p>
+    ${delivered ? "" : `<div class="dashlock" style="margin-top:14px"><b>At your readout</b>What the analysis found, and what it could cost, are shared in person with your report — the fix beside every finding. Nothing from the analysis is posted here before then.</div>`}
+    <p class="note" style="margin-top:16px">Measures are computed from your answers and from documents we have verified. Where evidence is still outstanding, a measure stays blank rather than estimated.</p>
   </div>`;
 }
 
