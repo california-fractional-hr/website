@@ -581,7 +581,9 @@ function go(i){
   // answer is ever recorded unattributed.
   step=i; remember(); render(); window.scrollTo({top:0});
 }
+let returnStep = null;   // where the name step sends you back to — the brass box promises it
 function requireIdentity(){
+  if (step > 0) returnStep = step;
   needIdentity = true; step = 0; remember(); render(); window.scrollTo({top:0});
   const el = document.getElementById("meName"); if (el) el.focus();
 }
@@ -703,7 +705,8 @@ function startGo(){
   needIdentity = false;
   remember();
   flushSaves();          // anything held for a name goes now, attributed
-  go(1);
+  const back = returnStep; returnStep = null;
+  go(back || 1);         // "you'll go straight back" — kept literally
 }
 
 function renderReview(){
@@ -1115,7 +1118,11 @@ function wireInputs(sec){
   autosizeAll();
   sec.qs.forEach(q=>{
     const id = q[0];
-    const upd = ()=>{ collectQ(id); queueSave(id, sec.k); };
+    // Only a real change queues a save. Blur alone must stay silent: on a phone,
+    // tapping into a field and out again would otherwise queue a no-op save — and
+    // on a device with no stored name, that save's identity demand yanks the
+    // visitor to the start screen for having merely touched the page.
+    const upd = ()=>{ const before = answerNorm(state.answers[id]); collectQ(id); if (answerNorm(state.answers[id]) !== before) queueSave(id, sec.k); };
     // "Saves the moment you type" is the promise on the page, so typing itself
     // queues the save (debounced in queueSave) — blur is kept as a belt-and-braces
     // flush for browsers that swallow the last input event on navigation.
@@ -1125,6 +1132,14 @@ function wireInputs(sec){
     stage.querySelectorAll(`[data-qmulti="${id}"]`).forEach(el=>el.addEventListener("change", upd));
     stage.querySelectorAll(`input[data-qnum^="${id}:"]`).forEach(el=>{ el.addEventListener("blur", upd); el.addEventListener("input", upd); });
   });
+}
+// Comparable fingerprint of an answer: empty text and blank number parts count as
+// nothing, so an untouched field collects to the same fingerprint as no answer.
+function answerNorm(o){
+  o = o || {};
+  const parts = {};
+  Object.entries(o.parts||{}).forEach(([k,x])=>{ if(String(x??"").trim()!=="") parts[k]=x; });
+  return JSON.stringify({t:o.text||"", c:o.choice||"", m:o.multi||[], parts});
 }
 function collectQ(id){
   const v = {};
