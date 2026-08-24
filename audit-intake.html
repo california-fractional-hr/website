@@ -233,6 +233,25 @@
   .ratio .read{font-size:13.5px;color:var(--ink);margin-top:4px} .ratio .read b{font-weight:600}
   .ratio .read.flag b{color:var(--warn)} .ratio .read.ok b{color:var(--ok)}
   .ratio .n{font-size:12.5px;color:var(--slate);margin-top:3px}
+  /* Compliance Calendar (v2.8 — principal only) */
+  .calsoon{display:flex;flex-direction:column;gap:8px;margin:14px 0 18px}
+  .calsoon .row{display:flex;align-items:center;gap:10px;background:#EEF2F4;border-radius:4px;padding:9px 12px}
+  .calsoon .days{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink);min-width:78px;font-variant-numeric:tabular-nums}
+  .calsoon .urgent .days{color:var(--warn);font-weight:600}
+  .calsoon .what{font-size:13.5px}
+  .caldot{width:8px;height:8px;border-radius:50%;flex:none}
+  .caltl-wrap{overflow-x:auto;padding-bottom:6px}
+  .caltl{position:relative;min-width:700px;height:216px}
+  .caltl .axis{position:absolute;left:0;right:0;bottom:26px;height:2px;background:var(--ink)}
+  .caltl .month{position:absolute;bottom:4px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--slate);transform:translateX(-50%)}
+  .caltl .grid{position:absolute;top:8px;bottom:28px;width:1px;background:var(--line-lt);opacity:.5}
+  .caltl .lane-line{position:absolute;left:0;right:0;height:1px;background:var(--line-lt)}
+  .caltl .lane-tag{position:absolute;left:2px;transform:translateY(-140%);font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--slate);background:#fff;padding:0 3px}
+  .caltl .ev{position:absolute;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #fff}
+  .caltl .today{position:absolute;top:2px;bottom:26px;width:2px;background:var(--brass)}
+  .caltl .today::before{content:"TODAY";position:absolute;top:-2px;left:6px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--brass)}
+  .callegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--slate)}
+  .callegend span{display:flex;align-items:center;gap:6px}
   /* Retainer Dashboard — row-aligned lanes (one strip per finding, beside its row) */
   .ohead{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-lt)}
   .ohead h5{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;font-weight:600}
@@ -306,8 +325,9 @@ const ENDPOINT = "https://script.google.com/macros/s/AKfycbxvD_IyGgKoxJ4LZzyOL6i
 // A directly opened local file is an owner/design preview, never a live client route.
 // The deployed HTTPS page still requires its private engagement token unless an
 // explicit preview hash is present.
-const PREVIEW = location.protocol === "file:" || location.hash === "#preview" || location.hash === "#preview-done";
-const PREVIEW_DONE = location.hash === "#preview-done"; // preview the post-submit (amendment-lane) state
+const PREVIEW = location.protocol === "file:" || location.hash === "#preview" || location.hash === "#preview-done" || location.hash === "#preview-principal";
+const PREVIEW_DONE = location.hash === "#preview-done" || location.hash === "#preview-principal"; // preview the post-submit (amendment-lane) state
+const PREVIEW_PRINCIPAL = location.hash === "#preview-principal"; // v2.8: preview the principal door (deliverables unlocked)
 const token = new URLSearchParams(location.search).get("t") || "";
 const MAX = 25*1024*1024;
 const SCALE = ["Yes","No","Sometimes / varies","Don't know","Not applicable"];
@@ -436,10 +456,12 @@ let state = { answers:{}, meta:{} }; // answers[qid] = structured value; meta[qi
 let requests = [];                   // server requests incl. section + files_list
 let submitted = null;                // {id, at} once complete
 let metrics = null;                  // Audit Dashboard record (receiver-gated: analysis ratios only once delivered)
-let findings = null;                 // Findings ledger (v2.7 — rides the same delivered gate; powers the Retainer Dashboard)
+let findings = null;                 // Findings ledger (v2.7 — principal-only since v2.8; powers the Retainer Dashboard)
+let principal = false;               // v2.8: true only on the principal (CEO) token — unlocks analysis, findings, calendar
+let calendar = null;                 // v2.8: Compliance Calendar entries [{date,lane,label,ref}] — principal-only
 let company = "", contactSeed = "";
 let step = 0;
-const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard", "retainer"];
+const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard", "retainer", "calendar", "repdoc", "stepsdoc"];
 let dirty = {}, saveTimer = null, activeDropReq = null, pendingNotify = [], notifyTimer = null;
 let pendingAmend = {}, amendTimer = null;   // post-submit changes awaiting the one quiet email
 let needIdentity = false;                   // true once a save or a jump was held for a name
@@ -543,11 +565,15 @@ function renderRail(){
   const items = [{key:"start", label: submitted ? "Overview" : "Start here"},
     ...SECTIONS.map(s=>({key:s.k, label:`${s.k} · ${s.t.split(":")[0].split("&")[0].trim()}`})),
     {key:"review", label: submitted ? "Documents" : "Review & complete"},
-    {key:"dashboard", label:"Audit Dashboard"}];
-    // The Retainer Dashboard (findings ledger) no longer renders on the shared
-    // workspace link (Troy, 2026-08-24 — the two-door model): like analysis and
-    // exposure, it is delivered to the engagement principal. renderRetainer()
-    // stays defined; the principal build re-homes it behind the principal token.
+    {key:"dashboard", label:"Audit Dashboard"},
+    // v2.8 two-door model (Troy, 2026-08-24): the Retainer group renders ONLY on
+    // the principal token — the receiver never serves findings or the calendar to
+    // the shared workspace link, so these entries cannot exist there.
+    ...(retainerOn() ? [{key:"retainer", label:"Retainer Dashboard"}] : []),
+    ...(principalOn() ? [
+      {key:"calendar", label:"Compliance Calendar"},
+      {key:"repdoc", label:"Audit Report"},
+      {key:"stepsdoc", label:"Steps File"}] : [])];
   const buttons = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
@@ -560,7 +586,10 @@ function renderRail(){
               || (it.key==="review" && submitted && docsComplete())
               || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)))
               || (it.key==="retainer" && retainerOn() && findings.every(f=>f.closed));
-    return `<button class="${i===step?"active":""} ${done?"done":""}" onclick="go(${i})">
+    // v2.8: navigate by the key's position in the STATIC steps list, not the item's
+    // index — the rail's tail entries are conditional, so positions no longer align.
+    const si = steps.indexOf(it.key);
+    return `<button class="${si===step?"active":""} ${done?"done":""}" onclick="go(${si})">
       <svg class="tick" viewBox="0 0 14 14" fill="none"><path d="M2 7.5 L5.5 11 L12 3.5" stroke="#3E7D5B" stroke-width="2"/></svg>
       ${esc(it.label)}${cnt}</button>`;
   }).join("");
@@ -568,7 +597,8 @@ function renderRail(){
     let count = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); count = ` (${a}/${t})`; }
     if (it.key==="review" && submitted){ const [v,t]=docsVerified(); if (t) count = ` (${v}/${t})`; }
-    return `<option value="${i}" ${i===step?"selected":""}>${esc(it.label+count)}</option>`;
+    const si = steps.indexOf(it.key);
+    return `<option value="${si}" ${si===step?"selected":""}>${esc(it.label+count)}</option>`;
   }).join("");
   rail.innerHTML = `<div class="rail-select-wrap">
     <label for="sectionPicker">Workspace page</label>
@@ -653,6 +683,74 @@ function docBlock(sectionKey){
     ${list.map(reqCard).join("")}</div>`;
 }
 
+/* ============ compliance calendar + document pages (v2.8 — principal only) ============ */
+const CAL_LANES = [["statute","#0A2C44","STATUTORY"],["season","#A9430F","SEASON & SAFETY"],
+                   ["training","#B4862B","TRAINING"],["engagement","#3E7D5B","ENGAGEMENT"]];
+function renderCalendar(){
+  const entries = (calendar||[]).filter(e=>e.date&&e.label);
+  const laneColor = {}; CAL_LANES.forEach(l=>laneColor[l[0]]=l[1]);
+  const D = s => { const [y,m,d]=String(s).split("-").map(Number); return (y&&m&&d)?new Date(y,m-1,d,12):null; };
+  const now = new Date();
+  const soon = entries.map(e=>({...e, d:D(e.date)})).filter(e=>e.d&&e.d>=now).slice(0,3);
+  const dts = entries.map(e=>D(e.date)).filter(Boolean);
+  const t0 = new Date(Math.min(now, ...dts)); t0.setDate(t0.getDate()-10);
+  const t1 = new Date(Math.max(...dts, now)); t1.setDate(t1.getDate()+30);
+  const span = t1-t0; const pct = d => Math.min(99, Math.max(0.5, (d-t0)/span*100));
+  const laneY = {statute:34, season:84, training:134, engagement:178};
+  const MON=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  let months = "";
+  for (let d=new Date(t0.getFullYear(),t0.getMonth()+1,1); d<t1; d=new Date(d.getFullYear(),d.getMonth()+1,1)){
+    const mid=new Date(d.getFullYear(),d.getMonth(),15);
+    months += `<div class="grid" style="left:${pct(d)}%"></div>`;
+    months += `<div class="month" style="left:${pct(mid)}%">${MON[mid.getMonth()]}${mid.getMonth()===0?" '"+String(mid.getFullYear()).slice(2):""}</div>`;
+  }
+  stage.innerHTML = `<div class="card">
+    <h2>Compliance Calendar</h2>
+    <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · the year ahead, with today's line drawn now</p>
+    <p class="dash-lead">Every entry restates a route line in your report — the calendar invents nothing. Obligations approach, cross, and recede each time you visit.</p>
+    <div class="calsoon">${soon.map(e=>{
+      const days=Math.ceil((e.d-now)/864e5);
+      return `<div class="row${days<=14?" urgent":""}"><span class="caldot" style="background:${laneColor[e.lane]||"#42535A"}"></span><span class="days">${days<=0?"today":"in "+days+(days===1?" day":" days")}</span><span class="what">${esc(e.label)}</span></div>`;
+    }).join("")||`<div class="row"><span class="what">No upcoming entries posted yet.</span></div>`}</div>
+    <div class="caltl-wrap"><div class="caltl">
+      ${CAL_LANES.map(l=>`<div class="lane-line" style="top:${laneY[l[0]]}px"></div><div class="lane-tag" style="top:${laneY[l[0]]}px">${l[2]}</div>`).join("")}
+      ${months}
+      <div class="axis"></div>
+      ${entries.map(e=>{const d=D(e.date); if(!d)return""; return `<div class="ev" style="left:${pct(d)}%;top:${laneY[e.lane]??100}px;background:${laneColor[e.lane]||"#42535A"}" title="${esc(e.date)} — ${esc(e.label)}${e.ref?" ("+esc(e.ref)+")":""}"></div>`;}).join("")}
+      <div class="today" style="left:${pct(now)}%"></div>
+    </div></div>
+    <div class="callegend">${CAL_LANES.map(l=>`<span><span class="caldot" style="background:${l[1]}"></span>${l[2].charAt(0)+l[2].slice(1).toLowerCase()}</span>`).join("")}</div>
+    <p class="note" style="margin-top:16px">Keyed to your documented headcount; a threshold crossing re-runs the applicability review. Entries retire as obligations close and the next year's are added on the statutory reset.</p>
+  </div>`;
+}
+
+function renderDeliverableDoc(kind){
+  const meta = (metrics && metrics.deliverables) ? (metrics.deliverables[kind]||{}) : {};
+  if (kind === "report"){
+    const c = meta.counts || {};
+    stage.innerHTML = `<div class="card">
+      <h2>Compliance Audit Report</h2>
+      <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · document of record${meta.version?` · Version ${esc(String(meta.version))}`:""}${meta.date?` · ${esc(meta.date)}`:""}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px">
+        ${c.high!=null?`<span class="tag" style="background:#F6E3D7;color:#A9430F;border:0">${c.high} HIGH</span>`:""}
+        ${c.medium!=null?`<span class="tag" style="background:#F5EBD2;color:#8A6D1F;border:0">${c.medium} MEDIUM</span>`:""}
+        ${c.low!=null?`<span class="tag" style="background:#EEF2F4;color:#42535A;border:0">${c.low} LOWER</span>`:""}
+      </div>
+      <p style="font-size:14.5px;max-width:66ch">${esc(meta.lead||"Every finding carries its statute, evidence, exposure, fix, and owner — with the 90-day roadmap that closes them.")}</p>
+      <div class="why" style="margin-top:16px"><b>The record</b>The portrait PDF delivered at your readout is the document of record. The Retainer Dashboard is its visual layer; the two always carry the same version stamp. New material evidence reopens the register and a new version is delivered the same way.</div>
+    </div>`;
+  } else {
+    const rec = meta.recent || [];
+    stage.innerHTML = `<div class="card">
+      <h2>Reasonable-Steps File</h2>
+      <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · standing record${meta.version?` · Version ${esc(String(meta.version))}`:""}${meta.opened?` · opened ${esc(meta.opened)}`:""}</p>
+      <p style="font-size:14.5px;max-width:66ch;margin-top:12px">The dated ledger of every reasonable step taken${meta.entries?` — ${esc(String(meta.entries))} entries and growing`:""}. Kept deliberately plain: this file is built to be credible outside this room.</p>
+      ${rec.length?`<div style="border-top:1px solid var(--line-lt);margin-top:14px">${rec.map(r=>`<div style="display:flex;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line-lt);font-size:13px;align-items:baseline;flex-wrap:wrap"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--slate-lt);min-width:52px">${esc(r[0]||"")}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;min-width:64px;color:var(--brass)">${esc(String(r[1]||"").toUpperCase())}</span><span>${esc(r[2]||"")}</span></div>`).join("")}</div>`:""}
+      <p class="note" style="margin-top:14px">The full ledger is in the PDF of record, delivered with your report and regenerated with every version.</p>
+    </div>`;
+  }
+}
+
 /* ============ render: steps ============ */
 function render(){
   renderRail();
@@ -661,6 +759,9 @@ function render(){
   if (key === "review") return renderReview();
   if (key === "dashboard") return renderDashboard();
   if (key === "retainer") return retainerOn() ? renderRetainer() : renderDashboard();
+  if (key === "calendar") return principalOn() ? renderCalendar() : renderDashboard();
+  if (key === "repdoc") return principalOn() ? renderDeliverableDoc("report") : renderDashboard();
+  if (key === "stepsdoc") return principalOn() ? renderDeliverableDoc("steps") : renderDashboard();
   const sec = SECTIONS.find(s=>s.k===key);
   const [a,t] = sectionAnswered(key);
   stage.innerHTML = `<div class="card">
@@ -968,8 +1069,12 @@ function renderDashboard(){
   stage.innerHTML = `<div class="card">
     <h2>Audit Dashboard</h2>
     <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · ${updated}</p>
-    <p class="dash-lead">What you told us and what we have verified — your answers and your documents, side by side. Nothing here is a score.</p>
-    <div class="why"><b>How to read this</b><span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. The analysis and the findings are not part of this page — they are delivered with your report, to the engagement principal. This page informs; it does not render legal advice.</div>
+    <p class="dash-lead">${(delivered && principal)
+      ? `<b>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length}</b> measures cross a line California draws. Each one is explained, with its fix, in your report — this page is the picture in numbers.`
+      : `What you told us and what we have verified — your answers and your documents, side by side. Nothing here is a score.`}</p>
+    <div class="why"><b>How to read this</b><span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. ${principal
+      ? `<span class="tag analysis">In analysis</span> is shared here with your report at the readout.`
+      : `The analysis and the findings are not part of this page — they are delivered with your report, to the engagement principal.`} This page informs; it does not render legal advice.</div>
     <div class="secctl"><button type="button" onclick="setAllSections(true)">Expand all</button><button type="button" onclick="setAllSections(false)">Collapse all</button></div>
     <div class="dash">
       ${secOpen(1,"What you told us","from your answers — appears the moment you answer", [ca!=null?`${ca} employees`:"headcount not stated", mix.length?`${mix.length} pay types`:"", `${checks.filter(c=>c.st!=="ok").length} to review`].filter(Boolean).join(" · "))}
@@ -1017,15 +1122,32 @@ function renderDashboard(){
           ${Array.isArray(m.contradiction_items)&&m.contradiction_items.length?`<details class="drill"><summary>Show the ${m.contradiction_items.length} answers</summary><div><div class="xpwrap"><table class="xp tight"><thead><tr><th>Question</th><th>You said</th><th>The documents show</th></tr></thead><tbody>${m.contradiction_items.map(c=>`<tr><td class="f" style="width:22%"><b>${esc(c.topic||c.q)}</b>${c.q?`<small>${esc(c.q)}</small>`:""}</td><td>${esc(c.said||"")}</td><td>${esc(c.shows||"")}</td></tr>`).join("")}</tbody></table></div></div></details>`:""}`:""}
       </div>
       ${secClose()}
+      ${(delivered && principal) ? `
+      ${secOpen(3,"What the analysis found","your numbers against the lines California draws — shared with your report", `${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length} cross a line`)}
+      <div class="tile wide">
+        <span class="k">Measures against the line <span class="tag analysis">In analysis</span></span>
+        <h3>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length} measures cross a line</h3>
+        <p class="ask">The brass bar is your number; the navy mark is where California draws the line. Details and fixes are in your report.</p>
+        ${m.ratios.map(r=>`<div class="ratio"><div class="row"><h4>${stIcon(r.status)}${esc(ratioQuestion(r))}</h4><span class="v">${esc(r.display)}</span></div><div class="m">${esc(r.label)} <span class="tag ${r.evidence==="verified"?"verified":"analysis"}">${esc(r.evidence||"analysis")}</span></div>${lineBar(r)}${ratioRead(r)}${r.note?`<div class="n">${esc(r.note)}</div>`:""}</div>`).join("")}
+      </div>
+      ${secClose()}` : ``}
     </div>
-    <div class="dashlock" style="margin-top:14px"><b>Delivered separately</b>What the analysis found, and what it could cost, are delivered with your report — in person at the readout, to the engagement principal. They are not posted on this page.</div>
-    <p class="note" style="margin-top:16px">Everything on this page comes from your answers and from documents we have verified — nothing is estimated.</p>
+    ${(delivered && principal && m.exposure) ? exposureSection({...m.exposure, findings:m.findings}) : ""}
+    ${principal
+      ? (delivered ? "" : `<div class="dashlock" style="margin-top:14px"><b>At your readout</b>What the analysis found, and what it could cost, are shared in person with your report — the fix beside every finding. Nothing from the analysis is posted here before then.</div>`)
+      : `<div class="dashlock" style="margin-top:14px"><b>Delivered separately</b>What the analysis found, and what it could cost, are delivered with your report — in person at the readout, to the engagement principal. They are not posted on this page.</div>`}
+    <p class="note" style="margin-top:16px">${(delivered && principal)
+      ? `Measures are computed from your answers and from documents we have verified. Where evidence is still outstanding, a measure stays blank rather than estimated.`
+      : `Everything on this page comes from your answers and from documents we have verified — nothing is estimated.`}</p>
   </div>`;
 }
 
 /* ============ retainer dashboard (v2.7 — the findings ledger, delivered-gated) ============ */
 const SEVC = { critical:"#A9430F", serious:"#C9783F", moderate:"#D8AC4E", minor:"#D9DEE5" };
-function retainerOn(){ return !!(metrics && metrics.delivered && Array.isArray(findings) && findings.length); }
+function retainerOn(){ return !!(principal && metrics && metrics.delivered && Array.isArray(findings) && findings.length); }
+// v2.8: the principal door is open and the engagement is delivered — the state in
+// which the Compliance Calendar and the two document pages exist.
+function principalOn(){ return !!(principal && metrics && metrics.delivered); }
 function renderRetainer(){
   const D = s => { if(!s) return null; const [y,m,d] = String(s).split("-").map(Number); return (y&&m&&d) ? new Date(y,m-1,d) : null; };
   const MONS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -1299,6 +1421,36 @@ async function completeAll(){
         { id:"F-08", severity:"minor", title:"Non-statutory \"glass breakage\" deductions", found:"2026-08-20", target:"2026-09-12", closed:"2026-08-21", exposure:1000, note:"stopped and repaid — corrective record on the Aug 21 run" },
         { id:"F-09", severity:"minor", title:"New-hire packets carried an outdated wage notice", found:"2026-08-20", target:"2026-09-18", closed:"2026-08-22", exposure:0, note:"corrective record in onboarding files" }
       ];
+      // v2.8: #preview-done previews the CREW door (delivered, but no analysis, no
+      // findings, no calendar — matching what the receiver now serves that token
+      // class). The metrics slice below mirrors crewMetricsSlice(); findings stay
+      // seeded above only for #preview-principal, which claims them next.
+      if (!PREVIEW_PRINCIPAL){
+        metrics = { delivered:true, updated:metrics.updated, by:metrics.by,
+                    documented_headcount:metrics.documented_headcount, contradictions:metrics.contradictions };
+        findings = null;
+      }
+      // v2.8: #preview-principal previews the PRINCIPAL door — analysis, findings
+      // ledger, calendar, and the two document pages, all unlocked.
+      if (PREVIEW_PRINCIPAL){
+        principal = true;
+        metrics.deliverables = {
+          report:{ version:3, date:"Aug 20", counts:{high:2, medium:5, low:2},
+                   lead:"Nine findings on a complete evidentiary record — each with its statute, evidence, exposure, fix, and owner — and the 90-day roadmap that closes them." },
+          steps:{ version:3, opened:"Aug 12", entries:14, recent:[
+            ["Aug 20","CFHR","Report and Steps File Version 3 delivered at the readback"],
+            ["Aug 19","Client","All requested documents fulfilled across review passes"],
+            ["Aug 12","CFHR","Engagement opened; document requests seeded"]] } };
+        calendar = [
+          { date:"2026-09-14", lane:"training",   label:"Harassment-prevention training — all staff", ref:"F-07" },
+          { date:"2026-09-30", lane:"season",     label:"Heat plan adopted; crews trained", ref:"F-04" },
+          { date:"2026-10-09", lane:"engagement", label:"Day-60 checkpoint — back-pay decision", ref:"F-02" },
+          { date:"2026-11-15", lane:"engagement", label:"Day-90 retest — fresh payroll sample", ref:"F-01" },
+          { date:"2026-12-05", lane:"statute",    label:"Year-end payroll cutover confirmed", ref:"F-06" },
+          { date:"2027-01-05", lane:"statute",    label:"January statutory review + salary floors", ref:"" },
+          { date:"2027-04-01", lane:"season",     label:"Heat-season readiness review", ref:"" },
+          { date:"2027-07-01", lane:"statute",    label:"July statutory review — the mid-year reset", ref:"" } ];
+      }
     }
     requests = [
       {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing is where the expensive findings surface.", status:"received", requested:"Aug 12", received:"Aug 15", section:"C", files_list:[{name:"register-jul.pdf", date:"Aug 15"}]},
@@ -1315,6 +1467,7 @@ async function completeAll(){
     const st = await api({action:"state", token});
     if(!st.ok){ gateShow(st.error==="revoked_token" ? "revoked" : "invalid"); return; }
     company = st.company||""; submitted = st.submitted||null; requests = st.requests||[]; metrics = st.metrics||null; findings = st.findings||null;
+    principal = !!st.principal; calendar = st.calendar||null;
     Object.entries(st.answers||{}).forEach(([qid,rec])=>{
       try{ state.answers[qid]=JSON.parse(rec.v||"{}"); }catch(e){ state.answers[qid]={text:String(rec.v||"")}; }
       state.meta[qid]={by:rec.by, at:rec.at, amended:!!rec.amended};
@@ -1329,8 +1482,9 @@ async function completeAll(){
     // unsaved work and a focused field both veto the redraw.
     window.addEventListener("focus", async ()=>{
       try{ const f=await api({action:"state", token}); if(f.ok){
-        const changed = JSON.stringify([f.requests,f.metrics,f.findings]) !== JSON.stringify([requests,metrics,findings]);
+        const changed = JSON.stringify([f.requests,f.metrics,f.findings,f.calendar]) !== JSON.stringify([requests,metrics,findings,calendar]);
         requests=f.requests||requests; metrics=f.metrics||metrics; findings=f.findings||findings;
+        principal = !!f.principal; calendar=f.calendar||calendar;
         const ae=document.activeElement;
         const typing = ae && (ae.tagName==="TEXTAREA"||ae.tagName==="INPUT"||ae.tagName==="SELECT");
         if(changed && !Object.keys(dirty).length && !typing) render();
