@@ -219,6 +219,20 @@
   .ratio .read{font-size:13.5px;color:var(--ink);margin-top:4px} .ratio .read b{font-weight:600}
   .ratio .read.flag b{color:var(--warn)} .ratio .read.ok b{color:var(--ok)}
   .ratio .n{font-size:12.5px;color:var(--slate);margin-top:3px}
+  /* Retainer Dashboard — row-aligned lanes (one strip per finding, beside its row) */
+  .ohead{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-lt)}
+  .ohead h5{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;font-weight:600}
+  .orow{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;align-items:center;border-bottom:1px solid var(--line-lt)}
+  .orow.axis,.orow:last-of-type{border-bottom:0}
+  .orow .chk{border-bottom:0}
+  .orow .chk .lbl small{display:block;color:var(--slate-lt);font-size:12px;line-height:1.45}
+  .orow .chk .val{font-family:'IBM Plex Mono',monospace;font-size:11.5px;max-width:34%}
+  .sevchip{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
+  .navytile{background:var(--ink);border-radius:4px;color:#fff;padding:18px 20px;margin-top:16px}
+  .navytile .k{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-2)}
+  .navytile h4{font-family:'Spectral',Georgia,serif;color:#fff;font-size:19px;margin:6px 0 6px}
+  .navytile p{color:#CBD8D3;font-size:13.5px}
+  .navytile .dot{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--brass-2);margin-top:12px}
   .dashlock{background:#FBF6EA;border-left:3px solid var(--brass);border-radius:2px;padding:13px 17px;font-size:14px;color:#6B5A2A;line-height:1.55}
   .dashlock b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--brass)}
   .rungs{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px;color:var(--slate)} .rungs li{display:flex;gap:8px;padding:3px 0} .rungs b{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--ink);min-width:34px}
@@ -405,9 +419,10 @@ let state = { answers:{}, meta:{} }; // answers[qid] = structured value; meta[qi
 let requests = [];                   // server requests incl. section + files_list
 let submitted = null;                // {id, at} once complete
 let metrics = null;                  // Audit Dashboard record (receiver-gated: analysis ratios only once delivered)
+let findings = null;                 // Findings ledger (v2.7 — rides the same delivered gate; powers the Retainer Dashboard)
 let company = "", contactSeed = "";
 let step = 0;
-const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard"];
+const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard", "retainer"];
 let dirty = {}, saveTimer = null, activeDropReq = null, pendingNotify = [], notifyTimer = null;
 let pendingAmend = {}, amendTimer = null;   // post-submit changes awaiting the one quiet email
 let needIdentity = false;                   // true once a save or a jump was held for a name
@@ -494,7 +509,10 @@ function renderRail(){
   const items = [{key:"start", label: submitted ? "Overview" : "Start here"},
     ...SECTIONS.map(s=>({key:s.k, label:`${s.k} · ${s.t.split(":")[0].split("&")[0].trim()}`})),
     {key:"review", label: submitted ? "Documents" : "Review & complete"},
-    {key:"dashboard", label:"Audit Dashboard"}];
+    {key:"dashboard", label:"Audit Dashboard"},
+    // The Retainer Dashboard appears the moment the delivered gate opens — the same
+    // moment sections 3 & 4 do — and not before. Its tick is every finding closed.
+    ...(retainerOn() ? [{key:"retainer", label:"Retainer Dashboard"}] : [])];
   rail.innerHTML = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
@@ -505,7 +523,8 @@ function renderRail(){
     // layer only once the report is in the client's hands, so "delivered" is the state.
     const done = (it.key.length===1 && sectionAnswered(it.key)[0]===sectionAnswered(it.key)[1])
               || (it.key==="review" && submitted && docsComplete())
-              || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)));
+              || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)))
+              || (it.key==="retainer" && retainerOn() && findings.every(f=>f.closed));
     return `<button class="${i===step?"active":""} ${done?"done":""}" onclick="go(${i})">
       <svg class="tick" viewBox="0 0 14 14" fill="none"><path d="M2 7.5 L5.5 11 L12 3.5" stroke="#3E7D5B" stroke-width="2"/></svg>
       ${esc(it.label)}${cnt}</button>`;
@@ -594,6 +613,7 @@ function render(){
   if (key === "start") return renderStart();
   if (key === "review") return renderReview();
   if (key === "dashboard") return renderDashboard();
+  if (key === "retainer") return retainerOn() ? renderRetainer() : renderDashboard();
   const sec = SECTIONS.find(s=>s.k===key);
   const [a,t] = sectionAnswered(key);
   stage.innerHTML = `<div class="card">
@@ -967,6 +987,79 @@ function renderDashboard(){
   </div>`;
 }
 
+/* ============ retainer dashboard (v2.7 — the findings ledger, delivered-gated) ============ */
+const SEVC = { critical:"#A9430F", serious:"#C9783F", moderate:"#D8AC4E", minor:"#D9DEE5" };
+function retainerOn(){ return !!(metrics && metrics.delivered && Array.isArray(findings) && findings.length); }
+function renderRetainer(){
+  const D = s => { if(!s) return null; const [y,m,d] = String(s).split("-").map(Number); return (y&&m&&d) ? new Date(y,m-1,d) : null; };
+  const MONS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const fd = t => t ? `${MONS[t.getMonth()]} ${t.getDate()}` : "—";
+  const today = new Date(); today.setHours(0,0,0,0);
+  const fs = findings;
+  const closedN = fs.filter(f=>f.closed).length;
+
+  // The shared axis: readout (earliest found) to the latest target/close, padded.
+  const dates = fs.flatMap(f=>[D(f.found), D(f.target), D(f.closed)]).filter(Boolean).concat([today]);
+  const from = new Date(Math.min(...dates)), to = new Date(Math.max(...dates));
+  from.setDate(from.getDate()-4); to.setDate(to.getDate()+10);
+  const X = t => 6 + (t-from)/(to-from)*534;
+  const readout = fs.map(f=>D(f.found)).filter(Boolean).sort((a,b)=>a-b)[0];
+  const ticks = []; { const t0=new Date(from.getFullYear(), from.getMonth()+1, 1);
+    for(let t=t0; t<=to; t=new Date(t.getFullYear(), t.getMonth()+1, 1)) ticks.push(t); }
+  const TXT = (x,y,s,c,a,w)=>`<text x="${x}" y="${y}" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="${c||"#6E837F"}" text-anchor="${a||"start"}" letter-spacing=".08em" font-weight="${w||400}">${esc(s)}</text>`;
+  const axis = (()=>{ let s=`<line x1="6" y1="22" x2="540" y2="22" stroke="#0A2C44" stroke-opacity=".3"/>`;
+    ticks.forEach(t=>{ s+=`<line x1="${X(t)}" y1="18" x2="${X(t)}" y2="26" stroke="#0A2C44" stroke-opacity=".5"/>`+TXT(X(t)+4,14,MONS[t.getMonth()].toUpperCase()); });
+    // The readout keeps its tick always, its label only with clear air from TODAY.
+    if(readout){ s+=`<line x1="${X(readout)}" y1="12" x2="${X(readout)}" y2="32" stroke="#B4862B" stroke-width="3"/>`;
+      if(!(today>=from&&today<=to) || Math.abs(X(today)-X(readout))>64) s+=TXT(X(readout),46,"READOUT","#B4862B","middle",600); }
+    if(today>=from&&today<=to){ s+=`<line x1="${X(today)}" y1="12" x2="${X(today)}" y2="32" stroke="#0A2C44" stroke-width="2"/>`+TXT(X(today)+5,46,"TODAY","#0A2C44","start",600); }
+    return `<svg viewBox="0 0 560 50" width="100%" style="display:block">${s}</svg>`; })();
+  const strip = f => { const a=D(f.found)||readout||today, b=D(f.closed)||D(f.target)||to;
+    let s=`<line x1="6" y1="15" x2="540" y2="15" stroke="#0A2C44" stroke-opacity=".12"/>`;
+    if(readout) s+=`<line x1="${X(readout)}" y1="0" x2="${X(readout)}" y2="30" stroke="#B4862B" stroke-opacity=".18" stroke-width="1.5"/>`;
+    if(today>=from&&today<=to) s+=`<line x1="${X(today)}" y1="0" x2="${X(today)}" y2="30" stroke="#0A2C44" stroke-opacity=".45" stroke-width="2"/>`;
+    const x0=X(a), x1=X(b), c=SEVC[f.severity]||"#B4862B";
+    s+=`<rect x="${Math.min(x0,x1)}" y="8" width="${Math.max(3,Math.abs(x1-x0))}" height="14" rx="3" fill="${c}"${f.severity==="minor"?' stroke="#0A2C44" stroke-opacity=".25"':""}/>`;
+    return `<svg viewBox="0 0 560 30" width="100%" style="display:block">${s}</svg>`; };
+
+  // Per-finding status: closed → ok; past its target unclosed → flag; else open.
+  const fstat = f => f.closed ? "ok" : (D(f.target) && D(f.target) < today ? "flag" : "unk");
+  const fword = f => f.closed ? `Closed ${fd(D(f.closed))}` : (fstat(f)==="flag" ? `Past its line — ${fd(D(f.target))}` : (f.target ? `Target ${fd(D(f.target))}` : "Scheduled"));
+
+  // The pace line: where the plan says the count should stand today.
+  const span = Math.max(1, to-from), pace = Math.min(1, Math.max(0,(today-from)/span)) * fs.length;
+  const behind = closedN < pace - 0.5, overdue = fs.filter(f=>fstat(f)==="flag");
+  const expTotal = fs.reduce((n,f)=>n+(f.exposure||0),0), expClosed = fs.filter(f=>f.closed).reduce((n,f)=>n+(f.exposure||0),0);
+  const nextUp = fs.filter(f=>!f.closed && D(f.target)).sort((a,b)=>D(a.target)-D(b.target))[0];
+
+  stage.innerHTML = `<div class="card">
+    <h2>Retainer Dashboard</h2>
+    <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · from your audit readout${readout?` of ${fd(readout)}`:""}</p>
+    <p class="dash-lead">${fs.length} findings from your audit, <b>${closedN} closed</b>${expTotal?`, ${fmtK(expClosed)} of ${fmtK(expTotal)} exposure retired`:""}. Everything below is your record moving.</p>
+    <div class="why"><b>How to read this</b><span class="tag verified">Closed</span> means the fix is verified in your documents — never just promised. <span class="tag">The line</span> is the pace your plan set at the readout. This page informs; it does not render legal advice.</div>
+    <div class="tile wide">
+      <span class="k">Findings closing <span class="tag verified">Verified</span></span>
+      <h3>${closedN} of ${fs.length} findings closed${overdue.length?` · ${overdue.length} past its line`:""}</h3>
+      <p class="ask">Each finding is a window on the line — found to verified-closed; the color is severity as your report grades it.</p>
+      ${lineBar({value:closedN, line:pace, max:fs.length, label:"Findings closed against the pace the plan set", display:`${closedN} of ${fs.length}`, lineLabel:"the pace your plan set"})}
+      <p class="sub" style="margin-top:2px">${behind?`Behind the line — the plan has ${Math.round(pace)} closed by today.`:`${overdue.length?`On count, but ${overdue.length} individual finding${overdue.length>1?"s are":" is"} past its own line.`:"On or ahead of the line."}`}</p>
+      <div class="ohead"><h5>On the line</h5><h5>Detail</h5></div>
+      <div class="orow axis"><div>${axis}</div><div></div></div>
+      ${fs.map(f=>`<div class="orow"><div>${strip(f)}</div><div class="chk">${stIcon(fstat(f))}<span class="lbl"><span class="sevchip" style="background:${SEVC[f.severity]||"#B4862B"}${f.severity==="minor"?";border:1px solid rgba(10,44,68,.3)":""}"></span><span class="sub" style="display:inline;margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em">${esc(f.id)}</span> · ${esc(f.title)}<small>${esc((f.severity||"").toUpperCase())}${f.note?` · ${esc(f.note)}`:""}</small></span><span class="val" style="white-space:normal">${esc(fword(f))}</span></div></div>`).join("")}
+      <p class="note" style="margin-top:10px">Today is the navy line; a finding closes only when its fix is verified in your documents — the same standard your audit used.</p>
+    </div>
+    ${expTotal?`<div class="tile wide" style="margin-top:16px">
+      <span class="k">Exposure retired <span class="tag analysis">In analysis</span></span>
+      <h3>${fmtK(expTotal-expClosed)} remains of ${fmtK(expTotal)} at the readout</h3>
+      <p class="ask">Dollars retire as their findings close — your report's method, one finding at a time.</p>
+      ${lineBar({value:expClosed, line:expTotal, max:expTotal, label:"Exposure retired", display:fmtK(expClosed), lineLabel:`${fmtK(expTotal)} at readout`})}
+      <p class="sub" style="margin-top:2px">${fmtK(expClosed)} retired across ${closedN} closing${closedN===1?"":"s"}.</p>
+    </div>`:""}
+    ${nextUp?`<div class="navytile"><div class="k">Next to close</div><h4>${esc(nextUp.id)} — ${esc(nextUp.title)}</h4><p>${esc((nextUp.severity||"").charAt(0).toUpperCase()+(nextUp.severity||"").slice(1))} · target ${fd(D(nextUp.target))}${nextUp.exposure?` · holds ${fmtK(nextUp.exposure)} of the remaining exposure`:""}.</p><div class="dot">${closedN} OF ${fs.length} CLOSED · UPDATED WITH YOUR RECORD</div></div>`:""}
+    <p class="note" style="margin-top:16px">Measures are computed from the findings ledger your engagement maintains. Where a fix is not yet verified, a finding stays open rather than estimated.</p>
+  </div>`;
+}
+
 /* ============ input wiring ============ */
 // Every answer box grows to fit its text — on load, on every keystroke, and when the
 // window changes width — so a long answer is read in full, never scrolled inside a
@@ -1132,6 +1225,19 @@ async function completeAll(){
           { key:"time_fidelity", label:"Hours paid vs. hours on the original time records", value:0.989, display:"98.9%", line:1, max:1.05, status:"flag", evidence:"verified", note:"Weekly totals rounded down a quarter-hour per person before payroll." },
           { key:"deductions", label:"Non-statutory deductions (two pay periods)", value:2, display:"2 · $18", line:0, max:4, status:"flag", evidence:"verified", note:"\"Glass breakage\" on two pourers' stubs." }
         ] };
+      // Seeded three days after the preview's Aug 20 readout: the quick wins are
+      // closed, everything else is a window still open on the line.
+      findings = [
+        { id:"F-01", severity:"critical", title:"Meal periods not recorded for field crews", found:"2026-08-20", target:"2026-11-15", closed:"", exposure:150000, note:"timekeeping fix scheduled with the November check-in" },
+        { id:"F-02", severity:"critical", title:"Overtime underpaid on harvest days", found:"2026-08-20", target:"2026-10-09", closed:"", exposure:64000, note:"back-pay calculation in progress" },
+        { id:"F-03", severity:"serious", title:"Two exempt salaries below the 2× floor", found:"2026-08-20", target:"2026-10-23", closed:"", exposure:41000, note:"reclassification decision due at the October check-in" },
+        { id:"F-04", severity:"serious", title:"No written heat-illness prevention plan", found:"2026-08-20", target:"2026-09-30", closed:"", exposure:18000, note:"plan in draft — crew training follows" },
+        { id:"F-05", severity:"moderate", title:"Wage statements missing sick-leave balance", found:"2026-08-20", target:"2026-09-25", closed:"", exposure:9000, note:"payroll provider ticket open" },
+        { id:"F-06", severity:"moderate", title:"Quarter-hour rounding on weekly totals", found:"2026-08-20", target:"2026-12-05", closed:"", exposure:12000, note:"payroll cutover scheduled November" },
+        { id:"F-07", severity:"moderate", title:"Handbook missing CFRA / PDL leave language", found:"2026-08-20", target:"2026-12-12", closed:"", exposure:0, note:"December handbook cycle" },
+        { id:"F-08", severity:"minor", title:"Non-statutory \"glass breakage\" deductions", found:"2026-08-20", target:"2026-09-12", closed:"2026-08-21", exposure:1000, note:"stopped and repaid — verified on the Aug 21 run" },
+        { id:"F-09", severity:"minor", title:"New-hire packets carried an outdated wage notice", found:"2026-08-20", target:"2026-09-18", closed:"2026-08-22", exposure:0, note:"verified in onboarding files" }
+      ];
     }
     requests = [
       {id:"R-01", title:"Payroll register — last 3 pay periods", note:"Sample testing is where the expensive findings surface.", status:"received", requested:"Aug 12", received:"Aug 15", section:"C", files_list:[{name:"register-jul.pdf", date:"Aug 15"}]},
@@ -1147,7 +1253,7 @@ async function completeAll(){
   try{
     const st = await api({action:"state", token});
     if(!st.ok) return; // gate stays
-    company = st.company||""; submitted = st.submitted||null; requests = st.requests||[]; metrics = st.metrics||null;
+    company = st.company||""; submitted = st.submitted||null; requests = st.requests||[]; metrics = st.metrics||null; findings = st.findings||null;
     Object.entries(st.answers||{}).forEach(([qid,rec])=>{
       try{ state.answers[qid]=JSON.parse(rec.v||"{}"); }catch(e){ state.answers[qid]={text:String(rec.v||"")}; }
       state.meta[qid]={by:rec.by, at:rec.at, amended:!!rec.amended};
@@ -1158,7 +1264,7 @@ async function completeAll(){
     render();
     // refresh on focus so simultaneous editors converge
     window.addEventListener("focus", async ()=>{
-      try{ const f=await api({action:"state", token}); if(f.ok){ requests=f.requests||requests; metrics=f.metrics||metrics; } }catch(e){}
+      try{ const f=await api({action:"state", token}); if(f.ok){ requests=f.requests||requests; metrics=f.metrics||metrics; findings=f.findings||findings; } }catch(e){}
     });
   }catch(e){ /* endpoint unreachable — gate stays */ }
 })();
