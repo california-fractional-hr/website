@@ -558,10 +558,12 @@ function renderRail(){
   </div>${buttons}`;
 }
 function go(i){
-  // Identity is the door. Every answer is stamped with who gave it, so no route into
-  // the sections may skip the name step — the rail jumps straight here, which is how
-  // a shared link used to reach the questions unattributed.
-  if (i > 0 && !me) return requireIdentity();
+  // Identity is the door to the answer sections — every answer is stamped with who
+  // gave it, so no route into the questions may skip the name step. The read surfaces
+  // (review/Documents, both dashboards) stay open without a name: a device that has
+  // never stored one (a phone opening the shared link) must still reach the record,
+  // and autosave separately holds any unattributed answer until a name is given.
+  if (steps[i] && steps[i].length === 1 && !me) return requireIdentity();
   step=i; remember(); render(); window.scrollTo({top:0});
 }
 function requireIdentity(){
