@@ -336,6 +336,37 @@
   @media (max-width:640px){.vm-close{top:-44px}}
   @media (prefers-reduced-motion:reduce){.video-modal,.vm-frame{transition:none}}
 
+  /* document viewer — PDFs stay on CFHR hosting */
+  .document-modal[hidden]{display:none}
+  .document-modal{position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;padding:3vmin;opacity:0;transition:opacity .2s ease}
+  .document-modal.open{opacity:1}
+  .dm-backdrop{position:absolute;inset:0;background:rgba(6,20,32,.9);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+  .dm-frame{position:relative;width:min(1280px,96vw);height:min(920px,94vh);background:var(--paper);border:1px solid rgba(216,172,78,.55);border-radius:5px;box-shadow:0 30px 90px -28px rgba(0,0,0,.8);display:flex;flex-direction:column;overflow:hidden;transform:translateY(8px) scale(.99);transition:transform .2s ease}
+  .document-modal.open .dm-frame{transform:none}
+  .dm-head{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 20px 18px 24px;background:var(--deep);color:var(--paper);border-bottom:1px solid rgba(216,172,78,.35)}
+  .dm-heading{min-width:0}
+  .dm-kicker{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--brass-2);margin-bottom:3px}
+  .dm-title{font-family:'Spectral',serif;font-size:clamp(1.05rem,2vw,1.35rem);font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dm-actions{display:flex;align-items:center;gap:9px;flex:none}
+  .dm-action{display:inline-flex;align-items:center;justify-content:center;padding:9px 13px;border:1px solid rgba(216,172,78,.55);border-radius:2px;font-family:'Public Sans',sans-serif;font-size:12.5px;font-weight:600;color:var(--paper);transition:background .15s,border-color .15s,color .15s}
+  .dm-action:hover,.dm-action:focus-visible{background:var(--brass);border-color:var(--brass);color:var(--deep);outline:none}
+  .dm-close{width:38px;height:38px;border:0;background:transparent;color:var(--paper);font-size:28px;line-height:1;cursor:pointer;opacity:.82}
+  .dm-close:hover,.dm-close:focus-visible{color:var(--brass-2);opacity:1;outline:none}
+  .dm-view{position:relative;flex:1;min-height:0;background:#D9DEE5}
+  .dm-view iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+  .dm-fallback{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:1;background:rgba(6,28,46,.92);color:var(--paper);padding:8px 12px;border-radius:2px;font-size:12px;white-space:nowrap;pointer-events:none}
+  @media(max-width:700px){
+    .document-modal{padding:0}
+    .dm-frame{width:100vw;height:100dvh;max-height:none;border:0;border-radius:0}
+    .dm-head{align-items:flex-start;gap:10px;padding:14px 12px 13px 16px;flex-wrap:wrap}
+    .dm-heading{width:calc(100% - 48px)}
+    .dm-actions{order:3;width:100%;display:grid;grid-template-columns:1fr 1fr}
+    .dm-action{padding:9px 8px}
+    .dm-close{position:absolute;top:8px;right:8px}
+    .dm-fallback{bottom:8px;font-size:10.5px;max-width:calc(100% - 16px);white-space:normal;text-align:center}
+  }
+  @media(prefers-reduced-motion:reduce){.document-modal,.dm-frame{transition:none}}
+
   /* ---------- audit spotlight (entry point, inside the offer) ---------- */
   .audit-spot{margin-top:60px;background:var(--deep);border:1px solid var(--brass);border-radius:4px;padding:48px 44px;display:grid;grid-template-columns:1.1fr .9fr;gap:52px;align-items:center}
   .audit-spot .eyebrow{margin-bottom:16px}
@@ -464,25 +495,25 @@
         <span class="bk">BEARING 01 · DIAGNOSE</span>
         <h3>See where you stand</h3>
         <p>A fixed-fee audit maps your California exposure and traces every gap to the law — a clear picture and a ranked plan, not a stack of maybes.</p>
-        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Compliance Audit video" data-video="compliance-audit-ad.mp4" data-poster="compliance-audit-poster.jpg">Compliance Audit <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Fixed fee · from $4,500 · start here</em><span class="docs"><a href="/compliance-audit-overview.pdf" target="_blank" rel="noopener" aria-label="Open the Compliance Audit overview (PDF)">Overview (PDF) <span class="arr">→</span></a><a href="/compliance-audit-overview.pdf" download="The Compliance Audit — Overview.pdf" aria-label="Download the Compliance Audit overview (PDF)">Download <span class="arr">↓</span></a></span></span>
+        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Compliance Audit video" data-video="compliance-audit-ad.mp4" data-poster="compliance-audit-poster.jpg">Compliance Audit <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Fixed fee · from $4,500 · start here</em><span class="docs"><a href="/compliance-audit-overview.pdf" class="doc-view" data-doc-title="The Compliance Audit — Overview" data-doc-download="The Compliance Audit — Overview.pdf" aria-haspopup="dialog" aria-label="View the Compliance Audit overview (PDF)">View (PDF) <span class="arr">→</span></a><a href="/compliance-audit-overview.pdf" download="The Compliance Audit — Overview.pdf" aria-label="Download the Compliance Audit overview (PDF)">Download <span class="arr">↓</span></a></span></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 02 · STABILIZE</span>
         <h3>Reach safe ground</h3>
         <p>We work down every finding from the audit and close it — required plans, pay transparency, your handbook — before any becomes a demand letter.</p>
-        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the First 90 Days video" data-video="first-90-days-ad.mp4" data-poster="first-90-days-poster.jpg">The First 90 Days <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Retainer · from $3,500/mo</em><span class="docs"><a href="/first-90-days-overview.pdf" target="_blank" rel="noopener" aria-label="Open The First 90 Days overview (PDF)">Overview (PDF) <span class="arr">→</span></a><a href="/first-90-days-overview.pdf" download="The First 90 Days — Overview.pdf" aria-label="Download The First 90 Days overview (PDF)">Download <span class="arr">↓</span></a></span></span>
+        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the First 90 Days video" data-video="first-90-days-ad.mp4" data-poster="first-90-days-poster.jpg">The First 90 Days <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Retainer · from $3,500/mo</em><span class="docs"><a href="/first-90-days-overview.pdf" class="doc-view" data-doc-title="The First 90 Days — Overview" data-doc-download="The First 90 Days — Overview.pdf" aria-haspopup="dialog" aria-label="View The First 90 Days overview (PDF)">View (PDF) <span class="arr">→</span></a><a href="/first-90-days-overview.pdf" download="The First 90 Days — Overview.pdf" aria-label="Download The First 90 Days overview (PDF)">Download <span class="arr">↓</span></a></span></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 03 · SYSTEMATIZE</span>
         <h3>Build the system</h3>
         <p>We install the frameworks your managers run — coaching, documentation, escalation — while the risk, the reset, and the record stay with us.</p>
-        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Fractional HR Director video" data-video="hr-director-ad.mp4" data-poster="hr-director-poster.jpg">Fractional HR Director <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Retainer · from $3,500/mo</em><span class="docs"><a href="/hr-director-overview.pdf" target="_blank" rel="noopener" aria-label="Open the Fractional HR Director overview (PDF)">Overview (PDF) <span class="arr">→</span></a><a href="/hr-director-overview.pdf" download="The Fractional HR Director — Overview.pdf" aria-label="Download the Fractional HR Director overview (PDF)">Download <span class="arr">↓</span></a></span></span>
+        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Fractional HR Director video" data-video="hr-director-ad.mp4" data-poster="hr-director-poster.jpg">Fractional HR Director <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Retainer · from $3,500/mo</em><span class="docs"><a href="/hr-director-overview.pdf" class="doc-view" data-doc-title="The Fractional HR Director — Overview" data-doc-download="The Fractional HR Director — Overview.pdf" aria-haspopup="dialog" aria-label="View the Fractional HR Director overview (PDF)">View (PDF) <span class="arr">→</span></a><a href="/hr-director-overview.pdf" download="The Fractional HR Director — Overview.pdf" aria-label="Download the Fractional HR Director overview (PDF)">Download <span class="arr">↓</span></a></span></span>
       </div>
       <div class="bearing">
         <span class="bk">BEARING 04 · ELEVATE</span>
         <h3>Chart forward</h3>
         <p>Org design, people strategy, and an executive scoreboard — CHRO-level guidance that turns a compliant company into a stronger one.</p>
-        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Fractional CHRO video" data-video="fractional-chro-ad.mp4" data-poster="fractional-chro-poster.jpg">Fractional CHRO <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Scoped to the engagement</em><span class="docs"><a href="/fractional-chro-overview.pdf" target="_blank" rel="noopener" aria-label="Open the Fractional CHRO overview (PDF)">Overview (PDF) <span class="arr">→</span></a><a href="/fractional-chro-overview.pdf" download="The Fractional CHRO — Overview.pdf" aria-label="Download the Fractional CHRO overview (PDF)">Download <span class="arr">↓</span></a></span></span>
+        <span class="tie"><b class="video-trigger" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Watch the Fractional CHRO video" data-video="fractional-chro-ad.mp4" data-poster="fractional-chro-poster.jpg">Fractional CHRO <span class="vt-play" aria-hidden="true">▶</span></b><em class="pr">Scoped to the engagement</em><span class="docs"><a href="/fractional-chro-overview.pdf" class="doc-view" data-doc-title="The Fractional CHRO — Overview" data-doc-download="The Fractional CHRO — Overview.pdf" aria-haspopup="dialog" aria-label="View the Fractional CHRO overview (PDF)">View (PDF) <span class="arr">→</span></a><a href="/fractional-chro-overview.pdf" download="The Fractional CHRO — Overview.pdf" aria-label="Download the Fractional CHRO overview (PDF)">Download <span class="arr">↓</span></a></span></span>
       </div>
     </div>
     <p class="compass-path reveal">see where you stand &nbsp;<b>→</b>&nbsp; reach safe ground &nbsp;<b>→</b>&nbsp; build the system &nbsp;<b>→</b>&nbsp; chart forward</p>
@@ -494,7 +525,7 @@
         <h3>Turn compliance from a liability into a <em>discount.</em></h3>
         <p>California's 2024 PAGA reform rewards employers who take "all reasonable steps" — documented steps can cap PAGA penalties at 15% of the statutory amount, and, paired with a cure, potentially eliminate them. The Compliance Audit produces the documented proof — the file your attorney wants to see, and the litigation-value asset most providers never mention.</p>
         <span class="cap">DOCUMENTED STEPS CAN CAP PAGA PENALTIES AT 15%</span>
-        <div class="spot-cta"><a href="#audit-request" class="btn btn-primary">Request the audit <span class="arr">→</span></a><a href="/compliance-audit-what-to-expect.pdf" class="btn btn-ghost" target="_blank" rel="noopener">See what to expect <span class="arr">→</span></a></div>
+        <div class="spot-cta"><a href="#audit-request" class="btn btn-primary">Request the audit <span class="arr">→</span></a><a href="/compliance-audit-what-to-expect.pdf" class="btn btn-ghost doc-view" data-doc-title="The Compliance Audit — What to Expect" data-doc-download="The Compliance Audit — What to Expect.pdf" aria-haspopup="dialog">View what to expect <span class="arr">→</span></a></div>
       </div>
       <div class="checklist">
         <div class="ct">What the audit delivers</div>
@@ -805,6 +836,28 @@
   </div>
 </div>
 
+<!-- On-site PDF viewer — no third-party document service -->
+<div class="document-modal" id="documentModal" role="dialog" aria-modal="true" aria-labelledby="documentTitle" hidden>
+  <div class="dm-backdrop" data-doc-close></div>
+  <section class="dm-frame">
+    <header class="dm-head">
+      <div class="dm-heading">
+        <span class="dm-kicker">CALIFORNIA FRACTIONAL HR · DOCUMENT VIEWER</span>
+        <h2 class="dm-title" id="documentTitle">Document</h2>
+      </div>
+      <div class="dm-actions">
+        <a class="dm-action" id="documentDownload" href="#" download>Download PDF ↓</a>
+        <a class="dm-action" id="documentOpen" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+      </div>
+      <button class="dm-close" type="button" data-doc-close aria-label="Close document viewer">×</button>
+    </header>
+    <div class="dm-view">
+      <iframe id="documentFrame" title="PDF document preview" src="about:blank"></iframe>
+      <p class="dm-fallback">If the preview does not load on your device, use “Open in new tab” or “Download PDF.”</p>
+    </div>
+  </section>
+</div>
+
 <script>
   // mobile menu
   const menuBtn=document.getElementById('menuBtn');
@@ -862,6 +915,66 @@
   });
   vModal.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',closeVideo));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!vModal.hidden)closeVideo();});
+
+  // On-site PDF viewer — local files on CFHR hosting, never a Google viewer
+  const dModal=document.getElementById('documentModal');
+  const dFrame=document.getElementById('documentFrame');
+  const dTitle=document.getElementById('documentTitle');
+  const dDownload=document.getElementById('documentDownload');
+  const dOpen=document.getElementById('documentOpen');
+  const dClose=dModal.querySelector('.dm-close');
+  let dLastFocus=null;
+  function documentPath(path){
+    return window.location.protocol==='file:'?path.replace(/^\/+/, ''):path;
+  }
+  function openDocument(trigger){
+    const raw=trigger.getAttribute('href');
+    if(!raw)return;
+    dLastFocus=trigger;
+    const src=documentPath(raw);
+    const title=trigger.dataset.docTitle||'CFHR document';
+    dTitle.textContent=title;
+    dFrame.title=`${title} — PDF preview`;
+    dFrame.src=`${src}#view=FitH`;
+    dOpen.href=src;
+    dDownload.href=src;
+    dDownload.setAttribute('download',trigger.dataset.docDownload||'California Fractional HR.pdf');
+    dModal.hidden=false;
+    void dModal.offsetWidth;
+    dModal.classList.add('open');
+    document.body.style.overflow='hidden';
+    dClose.focus();
+  }
+  function closeDocument(){
+    if(dModal.hidden)return;
+    dModal.classList.remove('open');
+    document.body.style.overflow='';
+    let finished=false;
+    const done=()=>{
+      if(finished)return;
+      finished=true;
+      dModal.hidden=true;
+      dFrame.src='about:blank';
+      dModal.removeEventListener('transitionend',done);
+      if(dLastFocus)dLastFocus.focus();
+    };
+    dModal.addEventListener('transitionend',done);
+    setTimeout(done,260);
+  }
+  document.querySelectorAll('.doc-view').forEach(link=>{
+    link.addEventListener('click',e=>{e.preventDefault();openDocument(link);});
+  });
+  dModal.querySelectorAll('[data-doc-close]').forEach(el=>el.addEventListener('click',closeDocument));
+  document.addEventListener('keydown',e=>{
+    if(dModal.hidden)return;
+    if(e.key==='Escape'){e.preventDefault();closeDocument();return;}
+    if(e.key==='Tab'){
+      const focusable=[dDownload,dOpen,dClose];
+      const first=focusable[0],last=focusable[focusable.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
+  });
 
 </script>
 
