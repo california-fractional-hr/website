@@ -558,12 +558,10 @@ function renderRail(){
   </div>${buttons}`;
 }
 function go(i){
-  // Identity is the door to the answer sections — every answer is stamped with who
-  // gave it, so no route into the questions may skip the name step. The read surfaces
-  // (review/Documents, both dashboards) stay open without a name: a device that has
-  // never stored one (a phone opening the shared link) must still reach the record,
-  // and autosave separately holds any unattributed answer until a name is given.
-  if (steps[i] && steps[i].length === 1 && !me) return requireIdentity();
+  // Navigation is free — every page of the workspace opens on any device, named or
+  // not. Identity is demanded at the moment of writing instead: autosave holds any
+  // answer typed without a name (flushSaves) and routes to the name step, so no
+  // answer is ever recorded unattributed.
   step=i; remember(); render(); window.scrollTo({top:0});
 }
 function requireIdentity(){
