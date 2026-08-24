@@ -13,7 +13,7 @@
 <style>
   :root{
     --ink:#0A2C44; --deep:#061C2E; --paper:#F2EFE5; --brass:#B4862B; --brass-2:#D8AC4E;
-    --slate:#42535A; --slate-lt:#6E837F; --line-lt:rgba(10,38,35,.24); --maxw:1080px;
+    --slate:#42535A; --slate-lt:#6E837F; --line-lt:rgba(10,44,68,.24); --maxw:1080px;
     --ok:#3E7D5B; --live:#22C55E; --live-ink:#1B7C44; --warn:#A9430F;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -146,7 +146,7 @@
   .gate .card{padding:44px 40px}
   .gate a{color:var(--brass);font-weight:600}
   .done-seal{width:64px;height:64px;margin:0 auto 18px}
-  .progressbar{height:5px;background:rgba(10,38,35,.16);border-radius:2px;overflow:hidden;margin:16px 0}
+  .progressbar{height:5px;background:rgba(10,44,68,.16);border-radius:2px;overflow:hidden;margin:16px 0}
   .progressbar i{display:block;height:100%;background:var(--brass);width:0;transition:width .3s}
   .banner{background:#EFF5F0;border:1px solid rgba(62,125,91,.4);border-left:3px solid var(--ok);border-radius:3px;padding:14px 18px;margin-bottom:22px;font-size:14px;color:#2B4A3A}
   .banner b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--ok)}
@@ -262,7 +262,7 @@
       <svg class="rose" viewBox="0 0 40 40" fill="none" aria-hidden="true">
         <circle cx="20" cy="20" r="18.5" stroke="#B4862B" stroke-width="1"/>
         <path d="M20 2 L23 20 L20 38 L17 20 Z" fill="#B4862B"/>
-        <path d="M2 20 L20 17 L38 20 L20 23 Z" fill="#0A2623" stroke="#B4862B" stroke-width="1"/>
+        <path d="M2 20 L20 17 L38 20 L20 23 Z" fill="#0A2C44" stroke="#B4862B" stroke-width="1"/>
         <circle cx="20" cy="20" r="2.4" fill="#B4862B"/>
       </svg>
       <span>California Fractional HR<small>COMPLIANCE-FIRST · STATEWIDE</small></span>
@@ -503,7 +503,24 @@ function flushAmendNotify(useBeacon){
   if(useBeacon && navigator.sendBeacon){ navigator.sendBeacon(ENDPOINT, payload); return; }
   try{ fetch(ENDPOINT, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: payload, keepalive: true}); }catch(e){}
 }
-window.addEventListener("pagehide", ()=>flushAmendNotify(true));
+/* ============ leave-page flush (Dana's bug, board round 2) ============
+   The debounce means up to ~a second of typing can be in `dirty` when the tab
+   closes or the phone switches apps. sendBeacon survives page teardown, so the
+   last keystrokes are written instead of lost. Answers still held for a name
+   stay held — the no-unattributed-write invariant outranks the flush. */
+function flushSavesBeacon(){
+  if(!Object.keys(dirty).length || !me || PREVIEW) return;
+  clearTimeout(saveTimer);
+  const batch = Object.entries(dirty).map(([qid, section]) => ({ qid, section, v: JSON.stringify(state.answers[qid] || {}) }));
+  dirty = {};
+  const payload = JSON.stringify({action:"saveAnswers", token, by:`${me.name} — ${me.role}`, answers: batch});
+  if(submitted) batch.forEach(b => pendingAmend[b.qid] = b.section); // the quiet amendment email still learns of it
+  if(navigator.sendBeacon){ navigator.sendBeacon(ENDPOINT, payload); return; }
+  try{ fetch(ENDPOINT, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: payload, keepalive: true}); }catch(e){}
+}
+function leaveFlush(){ flushSavesBeacon(); flushAmendNotify(true); }
+window.addEventListener("pagehide", leaveFlush);
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") leaveFlush(); });
 
 /* ============ answered logic ============ */
 function isAnswered(v){
@@ -712,9 +729,9 @@ function renderReview(){
       <button class="btn primary" id="submitBtn" onclick="completeAll()">Mark complete & submit</button>
     </div></div>`;
   ["cCompany","cName","cEmail","cPhone"].forEach((id,i)=>{
-    document.getElementById(id).addEventListener("blur", e=>{
-      state.answers["CT"+(i+1)] = { text: e.target.value }; queueSave("CT"+(i+1), "CT");
-    });
+    const save = e=>{ state.answers["CT"+(i+1)] = { text: e.target.value }; queueSave("CT"+(i+1), "CT"); };
+    const el = document.getElementById(id);
+    el.addEventListener("input", save); el.addEventListener("blur", save);
   });
 }
 
@@ -765,7 +782,7 @@ function renderDocsView(){
     ${Object.entries(bySec).map(([k,list])=>{ const sec=SECTIONS.find(x=>x.k===k); const title=sec?sec.t.split(":")[0].trim():"General"; return `<div class="docblock"><div class="dhead">${k==="—"?"":`<small>Section ${esc(k)}</small>`}${esc(title)}</div>${list.map(reqCard).join("")}</div>`; }).join("") || "<p class='note'>Nothing requested right now.</p>"}
     <div class="drop" data-req="MISC" data-title="Additional documents" style="margin-top:20px">Something we didn't ask for? Drop it here, or <b>browse</b></div>
     <ul class="filelist" data-list="MISC"></ul>
-    <p class="note">Prefer email? Attachments to <a href="mailto:connect@calfractionalhr.com" style="color:var(--brass);font-weight:600">connect@calfractionalhr.com</a> work just as well.</p>
+    <p class="note">Can't upload something? Email it to <a href="mailto:connect@calfractionalhr.com" style="color:var(--brass);font-weight:600">connect@calfractionalhr.com</a> and we'll file it into this workspace for you — every document joins the same reviewed record, however it arrives.</p>
   </div>`;
   wireDrops();
 }
@@ -1099,11 +1116,14 @@ function wireInputs(sec){
   sec.qs.forEach(q=>{
     const id = q[0];
     const upd = ()=>{ collectQ(id); queueSave(id, sec.k); };
-    stage.querySelectorAll(`[data-qtext="${id}"]`).forEach(el=>{ el.addEventListener("blur", upd); el.addEventListener("input", ()=>autosize(el)); });
+    // "Saves the moment you type" is the promise on the page, so typing itself
+    // queues the save (debounced in queueSave) — blur is kept as a belt-and-braces
+    // flush for browsers that swallow the last input event on navigation.
+    stage.querySelectorAll(`[data-qtext="${id}"]`).forEach(el=>{ el.addEventListener("blur", upd); el.addEventListener("input", ()=>{ autosize(el); upd(); }); });
     stage.querySelectorAll(`[data-qsel="${id}"]`).forEach(el=>el.addEventListener("change", upd));
     stage.querySelectorAll(`input[name="yn-${id}"]`).forEach(el=>el.addEventListener("change", upd));
     stage.querySelectorAll(`[data-qmulti="${id}"]`).forEach(el=>el.addEventListener("change", upd));
-    stage.querySelectorAll(`input[data-qnum^="${id}:"]`).forEach(el=>el.addEventListener("blur", upd));
+    stage.querySelectorAll(`input[data-qnum^="${id}:"]`).forEach(el=>{ el.addEventListener("blur", upd); el.addEventListener("input", upd); });
   });
 }
 function collectQ(id){
@@ -1129,7 +1149,7 @@ document.getElementById("fileInput").onchange = function(){ if(activeDropReq) ha
 async function handleFiles(dropEl, fileList){
   const reqId = dropEl.dataset.req, title = dropEl.dataset.title;
   const ul = stage.querySelector(`.filelist[data-list="${reqId}"]`) || dropEl.nextElementSibling;
-  const files = [...fileList].filter(f=>{ if(f.size>MAX){ alert(f.name+" is over 25 MB — email it instead."); return false; } return true; });
+  const files = [...fileList].filter(f=>{ if(f.size>MAX){ alert(f.name+" is over 25 MB — email it to connect@calfractionalhr.com and we'll file it into this workspace for you."); return false; } return true; });
   if(!files.length) return;
   chipMsg("UPLOADING…", false);
   const sent = [];
@@ -1230,6 +1250,13 @@ async function completeAll(){
 /* ============ boot ============ */
 (async function(){
   if(PREVIEW){
+    // The fiction banner: this route is a demonstration, and every number on it is
+    // invented. Anyone the shared link reaches must be able to tell at a glance.
+    const strip=document.createElement("div");
+    strip.setAttribute("role","note");
+    strip.style.cssText="background:#FBF6EA;border-bottom:1px solid rgba(180,134,43,.35);padding:10px 24px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;color:#8A6D1F";
+    strip.innerHTML="<b style='color:#B4862B'>SAMPLE WORKSPACE</b> · A demonstration with a fictional company and illustrative numbers — not a live engagement";
+    document.querySelector("header.nav").insertAdjacentElement("afterend", strip);
     company="Sample Client Co."; me = me || {name:"Preview User", role:"Owner"};
     state.answers = { A1:{choice:"LLC", text:"Sample Client Co, LLC"}, C2:{choice:"System auto-deducts 30 minutes", text:"Lunch gets skipped on delivery days."} };
     state.meta = { A1:{by:"Jordan — Owner", at:"Aug 18 10:02"}, C2:{by:"Sam — Controller", at:"Aug 18 11:40"} };
@@ -1241,9 +1268,12 @@ async function completeAll(){
       state.answers.A9 = { choice:"Gusto" }; state.answers.C1 = { choice:"Other", text:"FieldClock app + paper sheets" };
       state.answers.F1 = { choice:"Revised 2020–2023" }; state.answers.H1 = { choice:"Yes" }; state.answers.H2 = { choice:"Don't know" };
       state.answers.H3 = { choice:"Done, but more than 2 years ago" }; state.answers.H4 = { choice:"Private carrier" }; state.answers.H6 = { choice:"CalSavers — registered and remitting" };
+      // Seed arithmetic foots (board round 2): the severity counts match the
+      // 9-row findings ledger below, and the per-finding exposure allocations
+      // sum to $96K — the top of the illustrative range shown here.
       metrics = { delivered:true, updated:"Aug 20", by:"California Fractional HR", documented_headcount:29, contradictions:4,
         exposure:{ display:"$41K – $96K", note:"Illustrative range across the findings below, before any fix." },
-        findings:{ critical:2, serious:5, moderate:6, minor:3 },
+        findings:{ critical:2, serious:2, moderate:3, minor:2 },
         ratios:[
           { key:"exempt_floor", label:"Lowest exempt salary vs. the 2×minimum-wage floor", value:0.74, display:"74% of floor", line:1, max:1.5, status:"flag", evidence:"verified", note:"Two of three salaried roles sit below $70,304; duties also read hourly." },
           { key:"ot_field", label:"Overtime paid vs. owed — field crew", value:0.51, display:"51% paid", line:1, max:1.2, status:"flag", evidence:"verified", note:"Daily-over-8 hours on harvest days paid as straight time." },
@@ -1255,12 +1285,12 @@ async function completeAll(){
       // Seeded three days after the preview's Aug 20 readout: the quick wins are
       // closed, everything else is a window still open on the line.
       findings = [
-        { id:"F-01", severity:"critical", title:"Meal periods not recorded for field crews", found:"2026-08-20", target:"2026-11-15", closed:"", exposure:150000, note:"timekeeping fix scheduled with the November check-in" },
-        { id:"F-02", severity:"critical", title:"Overtime underpaid on harvest days", found:"2026-08-20", target:"2026-10-09", closed:"", exposure:64000, note:"back-pay calculation in progress" },
-        { id:"F-03", severity:"serious", title:"Two exempt salaries below the 2× floor", found:"2026-08-20", target:"2026-10-23", closed:"", exposure:41000, note:"reclassification decision due at the October check-in" },
-        { id:"F-04", severity:"serious", title:"No written heat-illness prevention plan", found:"2026-08-20", target:"2026-09-30", closed:"", exposure:18000, note:"plan in draft — crew training follows" },
-        { id:"F-05", severity:"moderate", title:"Wage statements missing sick-leave balance", found:"2026-08-20", target:"2026-09-25", closed:"", exposure:9000, note:"payroll provider ticket open" },
-        { id:"F-06", severity:"moderate", title:"Quarter-hour rounding on weekly totals", found:"2026-08-20", target:"2026-12-05", closed:"", exposure:12000, note:"payroll cutover scheduled November" },
+        { id:"F-01", severity:"critical", title:"Meal periods not recorded for field crews", found:"2026-08-20", target:"2026-11-15", closed:"", exposure:34000, note:"timekeeping fix scheduled with the November check-in" },
+        { id:"F-02", severity:"critical", title:"Overtime underpaid on harvest days", found:"2026-08-20", target:"2026-10-09", closed:"", exposure:24000, note:"back-pay calculation in progress" },
+        { id:"F-03", severity:"serious", title:"Two exempt salaries below the 2× floor", found:"2026-08-20", target:"2026-10-23", closed:"", exposure:15000, note:"reclassification decision due at the October check-in" },
+        { id:"F-04", severity:"serious", title:"No written heat-illness prevention plan", found:"2026-08-20", target:"2026-09-30", closed:"", exposure:9000, note:"plan in draft — crew training follows" },
+        { id:"F-05", severity:"moderate", title:"Wage statements missing sick-leave balance", found:"2026-08-20", target:"2026-09-25", closed:"", exposure:5000, note:"payroll provider ticket open" },
+        { id:"F-06", severity:"moderate", title:"Quarter-hour rounding on weekly totals", found:"2026-08-20", target:"2026-12-05", closed:"", exposure:8000, note:"payroll cutover scheduled November" },
         { id:"F-07", severity:"moderate", title:"Handbook missing CFRA / PDL leave language", found:"2026-08-20", target:"2026-12-12", closed:"", exposure:0, note:"December handbook cycle" },
         { id:"F-08", severity:"minor", title:"Non-statutory \"glass breakage\" deductions", found:"2026-08-20", target:"2026-09-12", closed:"2026-08-21", exposure:1000, note:"stopped and repaid — corrective record on the Aug 21 run" },
         { id:"F-09", severity:"minor", title:"New-hire packets carried an outdated wage notice", found:"2026-08-20", target:"2026-09-18", closed:"2026-08-22", exposure:0, note:"corrective record in onboarding files" }
@@ -1276,10 +1306,10 @@ async function completeAll(){
     document.getElementById("app").classList.remove("hidden");
     render(); return;
   }
-  if(!token) return;
+  if(!token) return; // no link at all — the default "needs your engagement link" gate stands
   try{
     const st = await api({action:"state", token});
-    if(!st.ok) return; // gate stays
+    if(!st.ok){ gateShow(st.error==="revoked_token" ? "revoked" : "invalid"); return; }
     company = st.company||""; submitted = st.submitted||null; requests = st.requests||[]; metrics = st.metrics||null; findings = st.findings||null;
     Object.entries(st.answers||{}).forEach(([qid,rec])=>{
       try{ state.answers[qid]=JSON.parse(rec.v||"{}"); }catch(e){ state.answers[qid]={text:String(rec.v||"")}; }
@@ -1289,12 +1319,34 @@ async function completeAll(){
     document.getElementById("app").classList.remove("hidden");
     if(submitted && steps[step]==="start") step=0;
     render();
-    // refresh on focus so simultaneous editors converge
+    // refresh on focus so simultaneous editors converge — and re-render when the
+    // record actually moved (a verdict posted, a request added), so returning to
+    // the tab shows the new state without a manual reload. Never mid-typing:
+    // unsaved work and a focused field both veto the redraw.
     window.addEventListener("focus", async ()=>{
-      try{ const f=await api({action:"state", token}); if(f.ok){ requests=f.requests||requests; metrics=f.metrics||metrics; findings=f.findings||findings; } }catch(e){}
+      try{ const f=await api({action:"state", token}); if(f.ok){
+        const changed = JSON.stringify([f.requests,f.metrics,f.findings]) !== JSON.stringify([requests,metrics,findings]);
+        requests=f.requests||requests; metrics=f.metrics||metrics; findings=f.findings||findings;
+        const ae=document.activeElement;
+        const typing = ae && (ae.tagName==="TEXTAREA"||ae.tagName==="INPUT"||ae.tagName==="SELECT");
+        if(changed && !Object.keys(dirty).length && !typing) render();
+      } }catch(e){}
     });
-  }catch(e){ /* endpoint unreachable — gate stays */ }
+  }catch(e){ gateShow("outage"); }
 })();
+
+/* ============ gate failure states (board round 2: outage ≠ invalid ≠ revoked) ============ */
+function gateShow(kind){
+  const card = document.querySelector("#gate .card");
+  if(!card) return;
+  const write = (h,p,retry)=>{ card.innerHTML = `<h2>${h}</h2><p style="margin:12px 0 0;color:var(--slate);font-size:14.5px">${p}</p>${retry?'<p style="margin:16px 0 0"><button class="btn primary" onclick="location.reload()">Try again</button></p>':""}`; };
+  if(kind==="invalid") write("This link isn't recognized",
+    'Links sometimes lose characters when they are copied or forwarded. Open the link exactly as it appears in your engagement email — or write to <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a> and we\'ll send you a fresh one.');
+  else if(kind==="revoked") write("This link has been retired",
+    'Workspace links are retired when an engagement closes or a new link is issued. Nothing about your record is lost. Write to <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a> and we\'ll confirm where things stand and send a current link if one applies.');
+  else if(kind==="outage") write("The workspace can't be reached right now",
+    'Your link is fine and nothing has been lost — the connection to the workspace didn\'t go through. Give it a moment and try again; if it keeps happening, write to <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a>.', true);
+}
 </script>
 </body>
 </html>

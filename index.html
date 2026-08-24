@@ -9,8 +9,13 @@
 <meta property="og:description" content="The HR executives California companies keep on their side of the table. Fixed-fee compliance audits and fractional HR leadership for 20–100-employee companies.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://calfractionalhr.com/">
+<meta property="og:image" content="https://calfractionalhr.com/share-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="California Fractional HR — compliance-first fractional HR leadership">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://calfractionalhr.com/share-card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%2308283D%22/%3E%3Cpath d=%22M20 4 L23 20 L20 36 L17 20 Z%22 fill=%22%23B4862B%22/%3E%3Cpath d=%22M4 20 L20 17 L36 20 L20 23 Z%22 fill=%22%23B4862B%22/%3E%3C/svg%3E">
-<meta name="description" content="Senior, compliance-first fractional HR leadership for California companies of 20–100 employees. Ventura & Santa Barbara Counties, statewide virtual. SHRM-SCP · MBA · Veteran-owned." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -26,7 +31,7 @@
     --slate:#576965;      /* fog slate */
     --slate-lt:#9DB2AD;   /* muted on dark */
     --line-dk:rgba(180,134,43,.16);
-    --line-lt:rgba(10,38,35,.12);
+    --line-lt:rgba(10,44,68,.12);
     --maxw:1180px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -164,7 +169,7 @@
     background:var(--paper);border:1px solid var(--line-lt);border-radius:3px;
     padding:34px 30px;display:flex;flex-direction:column;position:relative;transition:transform .25s, box-shadow .25s;
   }
-  .tier:hover{transform:translateY(-5px);box-shadow:0 18px 40px -22px rgba(10,38,35,.4)}
+  .tier:hover{transform:translateY(-5px);box-shadow:0 18px 40px -22px rgba(10,44,68,.4)}
   .tier.feature{background:var(--ink);color:var(--paper);border-color:var(--brass)}
   .tier .kicker{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);margin-bottom:18px}
   .tier.feature .kicker{color:var(--brass-2)}
@@ -264,7 +269,7 @@
   /* three ways to begin */
   .start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:60px}
   .start-card{background:var(--paper);border:1px solid var(--line-lt);border-radius:3px;padding:32px 28px;display:flex;flex-direction:column;transition:transform .25s, box-shadow .25s, border-color .25s}
-  .start-card:hover{transform:translateY(-5px);box-shadow:0 18px 40px -22px rgba(10,38,35,.4)}
+  .start-card:hover{transform:translateY(-5px);box-shadow:0 18px 40px -22px rgba(10,44,68,.4)}
   .start-card.feature{border-color:var(--brass)}
   .start-card .sc-n{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--brass);margin-bottom:16px}
   .start-card h3{font-size:1.4rem;margin-bottom:10px}
@@ -430,7 +435,7 @@
       <svg class="rose" viewBox="0 0 40 40" fill="none" aria-hidden="true">
         <circle cx="20" cy="20" r="18.5" stroke="#B4862B" stroke-width="1"/>
         <path d="M20 2 L23 20 L20 38 L17 20 Z" fill="#B4862B"/>
-        <path d="M2 20 L20 17 L38 20 L20 23 Z" fill="#0A2623" stroke="#B4862B" stroke-width="1"/>
+        <path d="M2 20 L20 17 L38 20 L20 23 Z" fill="#0A2C44" stroke="#B4862B" stroke-width="1"/>
         <circle cx="20" cy="20" r="2.4" fill="#B4862B"/>
       </svg>
       <span>California Fractional HR<small>COMPLIANCE-FIRST · STATEWIDE</small></span>
@@ -700,8 +705,12 @@
             <span class="brass">AREA</span>&nbsp;&nbsp;Ventura · Santa Barbara · Statewide CA
           </div>
         </div>
-        <form id="auditForm" name="audit-request" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
-          <input type="hidden" name="form-name" value="audit-request">
+        <!-- Submits as the Netlify form named "contact" — email notifications to
+             connect@ are scoped to that name; a new form name silently gets none.
+             request-type tells the two routes apart in the notification. -->
+        <form id="auditForm" name="contact" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="contact">
+          <input type="hidden" name="request-type" value="Compliance Audit request">
           <p style="display:none"><label>Leave this empty: <input name="bot-field"></label></p>
           <div class="frow">
             <div><label for="audit-name">Name</label><input type="text" id="audit-name" name="name" autocomplete="name" required></div>
@@ -770,6 +779,7 @@
         <p>Send a message and I'll get back to you personally — usually within one business day.</p>
         <form name="contact" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
           <input type="hidden" name="form-name" value="contact">
+          <input type="hidden" name="request-type" value="General question">
           <p style="display:none"><label>Leave this empty: <input name="bot-field"></label></p>
           <div><label>Name</label><input type="text" name="name" required></div>
           <div><label>Email</label><input type="email" name="email" required></div>
@@ -792,7 +802,7 @@
           <svg class="rose" viewBox="0 0 40 40" fill="none" aria-hidden="true">
             <circle cx="20" cy="20" r="18.5" stroke="#B4862B" stroke-width="1"/>
             <path d="M20 2 L23 20 L20 38 L17 20 Z" fill="#B4862B"/>
-            <path d="M2 20 L20 17 L38 20 L20 23 Z" fill="#061A18" stroke="#B4862B" stroke-width="1"/>
+            <path d="M2 20 L20 17 L38 20 L20 23 Z" fill="#061C2E" stroke="#B4862B" stroke-width="1"/>
             <circle cx="20" cy="20" r="2.4" fill="#B4862B"/>
           </svg>
           California Fractional HR
@@ -816,7 +826,7 @@
         <a href="#audit-request">Request an audit</a>
         <a href="/book.html">Book a call</a>
         <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a>
-        
+        <a href="/privacy.html">Privacy policy</a>
       </div>
     </div>
     <p class="disclaimer">California Fractional HR provides human-resources and compliance advisory services. It is not a law firm and does not provide legal advice or legal representation; engagements are designed to work alongside your own employment counsel. Statutes, penalties, and market rates referenced here change — figures are current as of 2026 and should be re-verified before relying on any specific number.</p>
