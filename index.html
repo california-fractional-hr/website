@@ -408,7 +408,7 @@
       <a href="#method">What we do</a>
       <a href="#sectors">Sectors</a>
       <a href="#about">The Practice</a>
-      <a href="#contact" class="btn btn-dark nav-cta">Contact Us</a>
+      <a href="#audit-request" class="btn btn-dark nav-cta">Request an audit</a>
     </nav>
     <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
   </div>
@@ -438,8 +438,8 @@
     <h1>The HR executives California companies keep <em>on their side of the table.</em></h1>
     <p class="lede">Senior, compliance-first HR leadership for companies of 20 to 100 employees — the judgment of a Chief HR Officer, without the full-time hire.</p>
     <div class="hero-actions">
-      <a href="/book.html" class="btn btn-primary">Book a 15-min call <span class="arr">→</span></a>
-      <a href="#contact" class="btn btn-ghost">Request More Information</a>
+      <a href="#audit-request" class="btn btn-primary">Request a compliance audit <span class="arr">→</span></a>
+      <a href="/book.html" class="btn btn-ghost">Book a 15-min call</a>
     </div>
     <div class="stamp">
       <span><b>SHRM-SCP</b> certified</span>
@@ -494,7 +494,7 @@
         <h3>Turn compliance from a liability into a <em>discount.</em></h3>
         <p>California's 2024 PAGA reform rewards employers who take "all reasonable steps" — documented steps can cap PAGA penalties at 15% of the statutory amount, and, paired with a cure, potentially eliminate them. The Compliance Audit produces the documented proof — the file your attorney wants to see, and the litigation-value asset most providers never mention.</p>
         <span class="cap">DOCUMENTED STEPS CAN CAP PAGA PENALTIES AT 15%</span>
-        <div class="spot-cta"><a href="/compliance-audit-what-to-expect.pdf" class="btn btn-primary" target="_blank" rel="noopener">Learn more <span class="arr">→</span></a><a href="/compliance-audit-what-to-expect.pdf" class="btn btn-ghost" download="The Compliance Audit — What to Expect.pdf">Download the PDF <span class="arr">↓</span></a></div>
+        <div class="spot-cta"><a href="#audit-request" class="btn btn-primary">Request the audit <span class="arr">→</span></a><a href="/compliance-audit-what-to-expect.pdf" class="btn btn-ghost" target="_blank" rel="noopener">See what to expect <span class="arr">→</span></a></div>
       </div>
       <div class="checklist">
         <div class="ct">What the audit delivers</div>
@@ -653,12 +653,81 @@
   <div class="wrap">
     <div class="sec-head reveal" style="max-width:720px;margin-bottom:44px;">
       <span class="eyebrow">Start here</span>
-      <h2>Let's talk.</h2>
-      <p class="intro">Two easy ways to begin — book a quick call, or have me send the overview. No prep, no pitch.</p>
+      <h2>Choose how to begin.</h2>
+      <p class="intro">Request the fixed-fee Compliance Audit, book a quick call, or send a question. Every route reaches the practice directly.</p>
+    </div>
+
+    <div class="start-card audit-box feature reveal" id="audit-request" style="scroll-margin-top:96px;margin-bottom:22px;">
+      <div class="sc-n">START HERE · FIXED FEE FROM $4,500</div>
+      <h3>Request a California Compliance Audit</h3>
+      <div class="audit-box-grid">
+        <div class="audit-box-intro">
+          <p>Tell us what brought you here and the size of your California workforce. We’ll reply within one business day with the right next conversation—not an automated sales sequence.</p>
+          <div class="detail">
+            <span class="brass">SCOPE</span>&nbsp;&nbsp;20–100 employees<br>
+            <span class="brass">DELIVERY</span>&nbsp;&nbsp;Four-week engagement<br>
+            <span class="brass">AREA</span>&nbsp;&nbsp;Ventura · Santa Barbara · Statewide CA
+          </div>
+        </div>
+        <form id="auditForm" name="audit-request" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field">
+          <input type="hidden" name="form-name" value="audit-request">
+          <p style="display:none"><label>Leave this empty: <input name="bot-field"></label></p>
+          <div class="frow">
+            <div><label for="audit-name">Name</label><input type="text" id="audit-name" name="name" autocomplete="name" required></div>
+            <div><label for="audit-company">Company</label><input type="text" id="audit-company" name="company" autocomplete="organization" required></div>
+          </div>
+          <div class="frow">
+            <div><label for="audit-email">Work email</label><input type="email" id="audit-email" name="email" autocomplete="email" required></div>
+            <div>
+              <label for="audit-headcount">California headcount</label>
+              <select id="audit-headcount" name="headcount" required>
+                <option value="" selected disabled>Select range</option>
+                <option>Under 20</option>
+                <option>20–49</option>
+                <option>50–100</option>
+                <option>More than 100</option>
+              </select>
+            </div>
+          </div>
+          <div class="frow">
+            <div>
+              <label for="audit-intent">What brings you here?</label>
+              <select id="audit-intent" name="intent" required>
+                <option value="" selected disabled>Select one</option>
+                <option>Ready to scope the Compliance Audit</option>
+                <option>Exploring whether the audit is the right fit</option>
+                <option>A current compliance concern needs attention</option>
+                <option>Planning ahead for a future audit</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="audit-source">How did you hear about us?</label>
+              <select id="audit-source" name="source" required>
+                <option value="" selected disabled>Select one</option>
+                <option>Employment attorney</option>
+                <option>CPA or accountant</option>
+                <option>Benefits broker</option>
+                <option>Colleague or peer</option>
+                <option>LinkedIn</option>
+                <option>Web search</option>
+                <option>Event or publication</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="audit-situation">What should we know?</label>
+            <textarea id="audit-situation" name="situation" placeholder="A recent change, a specific concern, or what you want the audit to clarify…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-dark" style="justify-content:center;">Request the audit <span class="arr">→</span></button>
+          <p class="form-note">Confidential request. We reply personally within one business day.</p>
+        </form>
+      </div>
     </div>
 
     <div class="start-grid two reveal">
-      <div class="start-card feature">
+      <div class="start-card">
         <div class="sc-n">BOOK A CALL</div>
         <h3>Book a 15-minute call</h3>
         <p>A free 15-minute video call — no prep, no pitch. Bring one question and we'll figure out the right next step together.</p>
@@ -713,6 +782,7 @@
       </div>
       <div class="foot-col">
         <h5>Contact</h5>
+        <a href="#audit-request">Request an audit</a>
         <a href="/book.html">Book a call</a>
         <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a>
         
