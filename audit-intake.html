@@ -543,10 +543,11 @@ function renderRail(){
   const items = [{key:"start", label: submitted ? "Overview" : "Start here"},
     ...SECTIONS.map(s=>({key:s.k, label:`${s.k} · ${s.t.split(":")[0].split("&")[0].trim()}`})),
     {key:"review", label: submitted ? "Documents" : "Review & complete"},
-    {key:"dashboard", label:"Audit Dashboard"},
-    // The Retainer Dashboard appears the moment the delivered gate opens — the same
-    // moment sections 3 & 4 do — and not before. Its tick is every finding closed.
-    ...(retainerOn() ? [{key:"retainer", label:"Retainer Dashboard"}] : [])];
+    {key:"dashboard", label:"Audit Dashboard"}];
+    // The Retainer Dashboard (findings ledger) no longer renders on the shared
+    // workspace link (Troy, 2026-08-24 — the two-door model): like analysis and
+    // exposure, it is delivered to the engagement principal. renderRetainer()
+    // stays defined; the principal build re-homes it behind the principal token.
   const buttons = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
