@@ -42,11 +42,20 @@
   .page-head p{color:#C9D6D1;max-width:680px;margin-top:8px;font-size:1.02rem}
 
   .layout{display:grid;grid-template-columns:230px 1fr;gap:36px;padding:34px 0 70px}
-  @media (max-width:860px){.layout{grid-template-columns:1fr;gap:20px}}
+  @media (max-width:860px){
+    .layout{grid-template-columns:minmax(0,1fr);gap:20px;padding:20px 16px 60px}
+    .rail,.layout main{min-width:0}
+  }
   .rail{position:sticky;top:92px;align-self:start}
-  @media (max-width:860px){.rail{position:static;display:flex;overflow-x:auto;gap:6px;padding-bottom:4px}}
+  .rail-select-wrap{display:none}
+  @media (max-width:860px){
+    .rail{position:sticky;top:70px;z-index:40;background:rgba(242,239,229,.96);padding:10px 0;border-bottom:1px solid var(--line-lt);backdrop-filter:blur(10px)}
+    .rail-select-wrap{display:block}
+    .rail-select-wrap label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--slate);margin-bottom:5px}
+    .rail-select{min-height:44px;background-color:#fff;font-weight:600;border-color:var(--brass)}
+  }
   .rail button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-left:2px solid var(--line-lt);padding:9px 12px;font-family:'Public Sans',sans-serif;font-size:13.5px;color:var(--slate);cursor:pointer;transition:color .15s,border-color .15s;white-space:nowrap}
-  @media (max-width:860px){.rail button{width:auto;border-left:0;border-bottom:2px solid var(--line-lt);padding:7px 10px}}
+  @media (max-width:860px){.rail button{display:none}}
   .rail button.active{color:var(--ink);font-weight:600;border-color:var(--brass)}
   .rail button.done .tick{opacity:1}
   .rail .tick{width:14px;height:14px;flex:none;opacity:.18}
@@ -146,14 +155,14 @@
   .foot-bottom{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em}
   footer a{color:var(--brass-2)}
   /* Audit Dashboard */
-  .dash{display:grid;grid-template-columns:1fr;gap:0;margin-top:18px}
+  .dash{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin-top:18px}
   .tile{border:1px solid var(--line-lt);border-radius:4px;padding:16px 18px;background:#fff;min-width:0}
   .tile.wide{grid-column:1/-1}
   .tile h3{font-size:23px;line-height:1.2;margin:4px 0 4px;color:var(--ink)}
   .tile .k{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);display:flex;align-items:center;gap:8px;margin-bottom:4px}
   .tile .ask{font-size:14.5px;line-height:1.5;color:#2F3A47;margin:0 0 12px}
   .tile:not(.wide) .chk .val{white-space:normal}
-  .secwrap{grid-column:1/-1;margin-top:0}
+  .secwrap{grid-column:1/-1;min-width:0;margin-top:0}
   .secwrap > .tile{margin-top:16px} .secwrap[open]{padding-bottom:28px}
   .sec{display:flex;align-items:flex-start;gap:14px;padding:18px 0 14px;border-top:3px solid var(--ink);cursor:pointer;list-style:none;user-select:none}
   .sec::-webkit-details-marker{display:none}
@@ -209,6 +218,11 @@
   .si.ok{background:#EFF5F0;color:var(--ok)} .si.flag{background:rgba(169,67,15,.09);color:var(--warn)} .si.unk{background:#EEF0F3;color:#6B7684}
   .chk{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line-lt);font-size:13.5px}
   .chk:last-child{border-bottom:0} .chk .lbl{flex:1;min-width:0} .chk .val{color:var(--slate);font-size:12.5px;text-align:right;max-width:56%;white-space:nowrap}
+  @media (max-width:640px){
+    .chk{align-items:flex-start}
+    .chk .lbl,.chk .val{overflow-wrap:anywhere}
+    .chk .val{white-space:normal}
+  }
   .legend{display:flex;flex-wrap:wrap;gap:12px 16px;font-size:12px;color:var(--slate);margin-top:8px}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
   .ratio{padding:14px 0;border-bottom:1px solid var(--line-lt)} .ratio:last-child{border-bottom:0}
@@ -289,7 +303,10 @@
 <script>
 /* ============ config ============ */
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbxvD_IyGgKoxJ4LZzyOL6ilPxXdkz9FR1vZm2fPyHaUcIpb-WjuTeoZ7ZWkrC4PF7ZZ5w/exec";
-const PREVIEW = location.hash === "#preview" || location.hash === "#preview-done";
+// A directly opened local file is an owner/design preview, never a live client route.
+// The deployed HTTPS page still requires its private engagement token unless an
+// explicit preview hash is present.
+const PREVIEW = location.protocol === "file:" || location.hash === "#preview" || location.hash === "#preview-done";
 const PREVIEW_DONE = location.hash === "#preview-done"; // preview the post-submit (amendment-lane) state
 const token = new URLSearchParams(location.search).get("t") || "";
 const MAX = 25*1024*1024;
@@ -513,7 +530,7 @@ function renderRail(){
     // The Retainer Dashboard appears the moment the delivered gate opens — the same
     // moment sections 3 & 4 do — and not before. Its tick is every finding closed.
     ...(retainerOn() ? [{key:"retainer", label:"Retainer Dashboard"}] : [])];
-  rail.innerHTML = items.map((it,i)=>{
+  const buttons = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
     // Documents earns its tick the same way a section does — when the count reads
@@ -529,6 +546,16 @@ function renderRail(){
       <svg class="tick" viewBox="0 0 14 14" fill="none"><path d="M2 7.5 L5.5 11 L12 3.5" stroke="#3E7D5B" stroke-width="2"/></svg>
       ${esc(it.label)}${cnt}</button>`;
   }).join("");
+  const options = items.map((it,i)=>{
+    let count = "";
+    if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); count = ` (${a}/${t})`; }
+    if (it.key==="review" && submitted){ const [v,t]=docsVerified(); if (t) count = ` (${v}/${t})`; }
+    return `<option value="${i}" ${i===step?"selected":""}>${esc(it.label+count)}</option>`;
+  }).join("");
+  rail.innerHTML = `<div class="rail-select-wrap">
+    <label for="sectionPicker">Workspace page</label>
+    <select class="rail-select" id="sectionPicker" onchange="go(Number(this.value))">${options}</select>
+  </div>${buttons}`;
 }
 function go(i){
   // Identity is the door. Every answer is stamped with who gave it, so no route into
