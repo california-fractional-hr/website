@@ -1068,8 +1068,10 @@ function renderDocsView(){
 
 /* ============ Audit Dashboard ============ */
 // One view, three evidence states. AS STATED = computed here from the client's own
-// answers (safe to show at once). VERIFIED / IN ANALYSIS = the metrics record the
+// answers (safe to show at once). VERIFIED / FROM ANALYSIS = the metrics record the
 // analysis writes; the receiver withholds those ratios until the report is delivered,
+// ("From analysis" is an evidence class — computed by us from the verified record —
+// not a workflow stage; renamed from "In analysis" 2026-08-25, which read as unfinished.)
 // so nothing reaches the client before the readout. Marks: one hue (brass) for
 // magnitude; status colors only with an icon and a word, never color alone.
 const LADDER = [
@@ -1163,7 +1165,7 @@ function exposureSection(x){
   return `
       ${secOpen(4,"What it could cost","the findings, then PAGA on top — and what the company can do about each", peek)}
       <div class="tile wide">
-        <span class="k">Illustrative exposure <span class="tag analysis">In analysis</span></span>
+        <span class="k">Illustrative exposure <span class="tag analysis">From analysis</span></span>
         <h3>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}${pg&&pgTotal?` <span style="font-size:15px;font-weight:400;color:var(--slate)">+ PAGA ${fmtK(Math.round(pgTotal*capLo))} – ${fmtK(pgTotal)}</span>`:""}</h3>
         <p class="ask">${esc(x.note||"")}</p>
 
@@ -1247,7 +1249,7 @@ function renderDashboard(){
       ? `<b>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length}</b> measures cross a line California draws. Each one is explained, with its fix, in your report — this page is the picture in numbers.`
       : `What you told us and what we have verified — your answers and your documents, side by side. Nothing here is a score.`}</p>
     <div class="why"><b>How to read this</b><span class="tag">As stated</span> comes from your own answers and appears at once. <span class="tag verified">Verified</span> has been checked against your documents. ${principal
-      ? `<span class="tag analysis">In analysis</span> is shared here with your report at the readout.`
+      ? `<span class="tag analysis">From analysis</span> is a figure we computed from that verified record — shared here with your report at the readout.`
       : `The analysis and the findings are not part of this page — they are delivered with your report, to the engagement principal.`} This page informs; it does not render legal advice.</div>
     <div class="secctl"><button type="button" onclick="setAllSections(true)">Expand all</button><button type="button" onclick="setAllSections(false)">Collapse all</button></div>
     <div class="dash">
@@ -1299,10 +1301,10 @@ function renderDashboard(){
       ${(delivered && principal) ? `
       ${secOpen(3,"What the analysis found","your numbers against the lines California draws — shared with your report", `${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length} cross a line`)}
       <div class="tile wide">
-        <span class="k">Measures against the line <span class="tag analysis">In analysis</span></span>
+        <span class="k">Measures against the line <span class="tag analysis">From analysis</span></span>
         <h3>${m.ratios.filter(r=>r.status==="flag").length} of ${m.ratios.length} measures cross a line</h3>
         <p class="ask">The brass bar is your number; the navy mark is where California draws the line. Details and fixes are in your report.</p>
-        ${m.ratios.map(r=>`<div class="ratio"><div class="row"><h4>${stIcon(r.status)}${esc(ratioQuestion(r))}</h4><span class="v">${esc(r.display)}</span></div><div class="m">${esc(r.label)} <span class="tag ${r.evidence==="verified"?"verified":"analysis"}">${esc(r.evidence||"analysis")}</span></div>${lineBar(r)}${ratioRead(r)}${r.note?`<div class="n">${esc(r.note)}</div>`:""}</div>`).join("")}
+        ${m.ratios.map(r=>`<div class="ratio"><div class="row"><h4>${stIcon(r.status)}${esc(ratioQuestion(r))}</h4><span class="v">${esc(r.display)}</span></div><div class="m">${esc(r.label)} <span class="tag ${r.evidence==="verified"?"verified":"analysis"}">${r.evidence==="verified"?"verified":"from analysis"}</span></div>${lineBar(r)}${ratioRead(r)}${r.note?`<div class="n">${esc(r.note)}</div>`:""}</div>`).join("")}
       </div>
       ${secClose()}` : ``}
     </div>
