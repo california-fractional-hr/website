@@ -187,7 +187,8 @@
   .xp tr.tot td{border-top:2px solid var(--ink);border-bottom:0;font-weight:600;color:var(--ink)}
   .xp-h4{font-size:16px;margin:22px 0 6px;color:var(--ink)}
   .sub4{display:flex;align-items:baseline;gap:10px;margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
-  .sub4 b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--brass)} .sub4 h4{font-size:17px;margin:0;color:var(--ink)} .sub4 span{font-size:12.5px;color:var(--slate);margin-left:auto;white-space:nowrap}
+  .sub4 b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--brass);white-space:nowrap} .sub4 h4{font-size:17px;margin:0;color:var(--ink)} .sub4 span{font-size:12.5px;color:var(--slate);margin-left:auto;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  @media (max-width:640px){ .sub4 span{display:none} }
   .xp.tight td{padding:9px 8px;font-size:12.8px} .xp.tight th{font-size:10px}
   .xp td.n{white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink)} .xp td.nr{white-space:nowrap;font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right;color:var(--ink)}
   .xp td.bar{width:40%;min-width:220px;padding-top:12px} .xp td.bar svg{display:block;width:100%}
@@ -299,7 +300,7 @@
   .sp-freq{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--ink);background:#EEF2F4;border:1px solid var(--line-lt);border-radius:3px;padding:4px 9px;white-space:nowrap;flex:none;min-width:122px;text-align:center}
   .sp-desc{font-size:13px;line-height:1.5;flex:1;color:#2F3A47}
   .sp-ref{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;color:var(--brass);white-space:nowrap}
-  @media (max-width:640px){ .sp-row{flex-wrap:wrap} .sp-ref{margin-left:auto} }
+  @media (max-width:640px){ .sp-row{flex-wrap:wrap} .sp-desc{flex:1 1 100%;order:2} .sp-ref{margin-left:auto} }
   .sl{position:relative;margin-top:4px}
   .sl::before{content:"";position:absolute;left:73px;top:10px;bottom:10px;width:2px;background:var(--line-lt)}
   .sl-row{display:grid;grid-template-columns:56px 20px minmax(0,1fr) 200px;gap:8px;padding:8px 0;align-items:start}
