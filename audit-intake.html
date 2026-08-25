@@ -252,20 +252,74 @@
   .caltl .today::before{content:"TODAY";position:absolute;top:-2px;left:6px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--brass)}
   .callegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:11.5px;color:var(--slate)}
   .callegend span{display:flex;align-items:center;gap:6px}
-  /* Retainer Dashboard — row-aligned lanes (one strip per finding, beside its row) */
-  .ohead{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-lt)}
-  .ohead h5{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-bottom:8px;font-weight:600}
-  .orow{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;align-items:center;border-bottom:1px solid var(--line-lt)}
-  .orow.axis,.orow:last-of-type{border-bottom:0}
-  .orow .chk{border-bottom:0}
-  .orow .chk .lbl small{display:block;color:var(--slate-lt);font-size:12px;line-height:1.45}
-  .orow .chk .val{font-family:'IBM Plex Mono',monospace;font-size:11.5px;max-width:34%}
   .sevchip{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:baseline}
-  .navytile{background:var(--ink);border-radius:4px;color:#fff;padding:18px 20px;margin-top:16px}
-  .navytile .k{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-2)}
-  .navytile h4{font-family:'Spectral',Georgia,serif;color:#fff;font-size:19px;margin:6px 0 6px}
-  .navytile p{color:#CBD8D3;font-size:13.5px}
-  .navytile .dot{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--brass-2);margin-top:12px}
+
+  /* — the deliverable rows (5–8): the dashboard display language, rendered live — */
+  .riskmap svg{display:block;width:100%;height:auto}
+  .rk-list{border-top:2px solid var(--ink);margin-top:12px}
+  .rk-row{display:grid;grid-template-columns:30px minmax(0,1fr) 96px 150px 92px;gap:10px;align-items:baseline;padding:8px 2px;border-bottom:1px solid var(--line-lt);font-size:12.5px}
+  .rk-rank{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--slate-lt)}
+  .rk-t{color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rk-t .qid{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass);letter-spacing:.06em}
+  .rk-score{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--warn);white-space:nowrap}
+  .rk-eff{font-size:11.5px;color:var(--slate);white-space:nowrap}
+  .rk-exp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink);text-align:right;white-space:nowrap}
+  @media (max-width:700px){ .rk-row{grid-template-columns:24px minmax(0,1fr) 78px} .rk-eff,.rk-exp{display:none} .rk-t{white-space:normal} }
+  .hi-row{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line-lt);border-radius:4px;background:#fff;padding:13px 16px;margin-top:8px}
+  .hi-n{width:25px;height:25px;border-radius:50%;background:var(--brass);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:10.5px;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+  .hi-main{flex:1;min-width:0}
+  .hi-t{font-weight:600;font-size:13.5px;line-height:1.4;color:var(--ink)}
+  .hi-cite{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;color:var(--brass);margin-top:5px}
+  .hi-right{text-align:right;flex:none}
+  .hi-score{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--warn);white-space:nowrap}
+  .hi-exp{font-family:'Spectral',Georgia,serif;font-weight:600;font-size:17px;color:#8A6D1F;white-space:nowrap;margin-top:2px}
+  .hi-own{font-size:11px;color:var(--slate);white-space:nowrap;margin-top:3px}
+  @media (max-width:640px){ .hi-row{flex-wrap:wrap} .hi-right{text-align:left;width:100%;padding-left:39px} }
+  .rm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+  @media (max-width:820px){.rm-grid{grid-template-columns:1fr}}
+  .rm-col{border:1px solid var(--line-lt);border-radius:4px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+  .rm-head{background:var(--ink);padding:10px 14px 11px}
+  .rm-head.green{background:var(--ok)}
+  .rm-days{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--brass-2)}
+  .rm-theme{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:3px}
+  .rm-theme h4{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:17px;color:#fff;margin:0}
+  .rm-theme small{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--brass-2)}
+  .rm-col ul{list-style:none;margin:0;padding:12px 14px 10px}
+  .rm-col li{position:relative;padding:5px 0 5px 16px;font-size:12.5px;line-height:1.45;color:#2F3A47}
+  .rm-col li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--brass)}
+  .rm-more{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--slate-lt);padding:0 14px 12px;margin-top:auto}
+  .cy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+  @media (max-width:900px){.cy-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:480px){.cy-grid{grid-template-columns:1fr}}
+  .cy-card{border:1px solid var(--line-lt);border-radius:4px;background:#fff;padding:10px 12px}
+  .cy-m{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--brass);padding-bottom:6px;border-bottom:1px solid var(--line-lt);margin-bottom:7px}
+  .cy-it{display:flex;gap:8px;font-size:12px;line-height:1.4;color:#2F3A47;padding:3px 0}
+  .cy-it i{width:7px;height:7px;border-radius:50%;flex:none;margin-top:4px}
+  .sp-row{display:flex;gap:14px;align-items:baseline;border:1px solid var(--line-lt);border-radius:4px;background:#fff;padding:10px 14px;margin-top:8px}
+  .sp-freq{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--ink);background:#EEF2F4;border:1px solid var(--line-lt);border-radius:3px;padding:4px 9px;white-space:nowrap;flex:none;min-width:122px;text-align:center}
+  .sp-desc{font-size:13px;line-height:1.5;flex:1;color:#2F3A47}
+  .sp-ref{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.04em;color:var(--brass);white-space:nowrap}
+  @media (max-width:640px){ .sp-row{flex-wrap:wrap} .sp-ref{margin-left:auto} }
+  .sl{position:relative;margin-top:4px}
+  .sl::before{content:"";position:absolute;left:73px;top:10px;bottom:10px;width:2px;background:var(--line-lt)}
+  .sl-row{display:grid;grid-template-columns:56px 20px minmax(0,1fr) 200px;gap:8px;padding:8px 0;align-items:start}
+  .sl-date{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink);text-align:right;padding-top:3px}
+  .sl-dot{position:relative;height:100%}
+  .sl-dot i{position:absolute;left:5px;top:5px;width:9px;height:9px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(10,44,68,.18)}
+  .sl-chip{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:.08em;border:1px solid;border-radius:2px;padding:1px 6px;margin-right:8px;vertical-align:1px;background:#fff}
+  .sl-act{font-size:12.5px;line-height:1.5;color:#2F3A47}
+  .sl-ref{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.04em;line-height:1.6}
+  .sl-ref b{display:block;color:var(--brass);font-weight:500}
+  .sl-ref span{color:var(--slate-lt)}
+  @media (max-width:700px){
+    .sl::before{display:none}
+    .sl-row{grid-template-columns:56px minmax(0,1fr)}
+    .sl-dot{display:none}
+    .sl-ref{grid-column:2;text-align:left}
+    .sl-ref b,.sl-ref span{display:inline} .sl-ref span{margin-left:8px}
+  }
+  .pcap{margin-top:6px}
+  .pcap svg{display:block;width:100%;max-width:560px;height:auto}
   .dashlock{background:#FBF6EA;border-left:3px solid var(--brass);border-radius:2px;padding:13px 17px;font-size:14px;color:#6B5A2A;line-height:1.55}
   .dashlock b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--brass)}
   .rungs{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px;color:var(--slate)} .rungs li{display:flex;gap:8px;padding:3px 0} .rungs b{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--ink);min-width:34px}
@@ -461,7 +515,9 @@ let principal = false;               // v2.8: true only on the principal (CEO) t
 let calendar = null;                 // v2.8: Compliance Calendar entries [{date,lane,label,ref}] — principal-only
 let company = "", contactSeed = "";
 let step = 0;
-const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard", "retainer", "calendar", "repdoc", "stepsdoc"];
+// v2.9 (Troy, 2026-08-24): the deliverables live as rows 5–8 of the Audit Dashboard
+// itself — the retainer-era rail stops (retainer/calendar/repdoc/stepsdoc) are gone.
+const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard"];
 let dirty = {}, saveTimer = null, activeDropReq = null, pendingNotify = [], notifyTimer = null;
 let pendingAmend = {}, amendTimer = null;   // post-submit changes awaiting the one quiet email
 let needIdentity = false;                   // true once a save or a jump was held for a name
@@ -565,15 +621,10 @@ function renderRail(){
   const items = [{key:"start", label: submitted ? "Overview" : "Start here"},
     ...SECTIONS.map(s=>({key:s.k, label:`${s.k} · ${s.t.split(":")[0].split("&")[0].trim()}`})),
     {key:"review", label: submitted ? "Documents" : "Review & complete"},
-    {key:"dashboard", label:"Audit Dashboard"},
-    // v2.8 two-door model (Troy, 2026-08-24): the Retainer group renders ONLY on
-    // the principal token — the receiver never serves findings or the calendar to
-    // the shared workspace link, so these entries cannot exist there.
-    ...(retainerOn() ? [{key:"retainer", label:"Retainer Dashboard"}] : []),
-    ...(principalOn() ? [
-      {key:"calendar", label:"Compliance Calendar"},
-      {key:"repdoc", label:"Audit Report"},
-      {key:"stepsdoc", label:"Steps File"}] : [])];
+    // v2.9: one dashboard entry on both doors. The principal door's deliverables
+    // are rows 5–8 of the dashboard page itself, not separate rail stops — the
+    // receiver still never serves the analysis layer to the shared link.
+    {key:"dashboard", label:"Audit Dashboard"}];
   const buttons = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
@@ -584,8 +635,7 @@ function renderRail(){
     // layer only once the report is in the client's hands, so "delivered" is the state.
     const done = (it.key.length===1 && sectionAnswered(it.key)[0]===sectionAnswered(it.key)[1])
               || (it.key==="review" && submitted && docsComplete())
-              || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)))
-              || (it.key==="retainer" && retainerOn() && findings.every(f=>f.closed));
+              || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)));
     // v2.8: navigate by the key's position in the STATIC steps list, not the item's
     // index — the rail's tail entries are conditional, so positions no longer align.
     const si = steps.indexOf(it.key);
@@ -683,16 +733,23 @@ function docBlock(sectionKey){
     ${list.map(reqCard).join("")}</div>`;
 }
 
-/* ============ compliance calendar + document pages (v2.8 — principal only) ============ */
+/* ============ deliverable rows 5–8 (v2.9 — the dashboard carries its own deliverables) ============
+   Rendered ONLY when the principal state carries metrics.dlv — the deliverables
+   block /audit-analysis posts with the record. The crew slice never includes it,
+   so these rows cannot exist on the shared link. Copy lives in the record, not
+   here: the renderer is client-generic. */
 const CAL_LANES = [["statute","#0A2C44","STATUTORY"],["season","#A9430F","SEASON & SAFETY"],
                    ["training","#B4862B","TRAINING"],["engagement","#3E7D5B","ENGAGEMENT"]];
-function renderCalendar(){
+const BUCKETC = { HIGH:"#A9430F", MEDIUM:"#D8AC4E", LOW:"#D9DEE5" };
+const calD = s => { const [y,m,d]=String(s||"").split("-").map(Number); return (y&&m&&d)?new Date(y,m-1,d,12):null; };
+function sub4(tag,title,note){ return `<div class="sub4"><b>${esc(tag)}</b><h4>${esc(title)}</h4>${note?`<span>${esc(note)}</span>`:""}</div>`; }
+
+function calendarInnerHTML(){
   const entries = (calendar||[]).filter(e=>e.date&&e.label);
   const laneColor = {}; CAL_LANES.forEach(l=>laneColor[l[0]]=l[1]);
-  const D = s => { const [y,m,d]=String(s).split("-").map(Number); return (y&&m&&d)?new Date(y,m-1,d,12):null; };
   const now = new Date();
-  const soon = entries.map(e=>({...e, d:D(e.date)})).filter(e=>e.d&&e.d>=now).slice(0,3);
-  const dts = entries.map(e=>D(e.date)).filter(Boolean);
+  const soon = entries.map(e=>({...e, d:calD(e.date)})).filter(e=>e.d&&e.d>=now).slice(0,3);
+  const dts = entries.map(e=>calD(e.date)).filter(Boolean);
   const t0 = new Date(Math.min(now, ...dts)); t0.setDate(t0.getDate()-10);
   const t1 = new Date(Math.max(...dts, now)); t1.setDate(t1.getDate()+30);
   const span = t1-t0; const pct = d => Math.min(99, Math.max(0.5, (d-t0)/span*100));
@@ -704,11 +761,7 @@ function renderCalendar(){
     months += `<div class="grid" style="left:${pct(d)}%"></div>`;
     months += `<div class="month" style="left:${pct(mid)}%">${MON[mid.getMonth()]}${mid.getMonth()===0?" '"+String(mid.getFullYear()).slice(2):""}</div>`;
   }
-  stage.innerHTML = `<div class="card">
-    <h2>Compliance Calendar</h2>
-    <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · the year ahead, with today's line drawn now</p>
-    <p class="dash-lead">Every entry restates a route line in your report — the calendar invents nothing. Obligations approach, cross, and recede each time you visit.</p>
-    <div class="calsoon">${soon.map(e=>{
+  return `<div class="calsoon">${soon.map(e=>{
       const days=Math.ceil((e.d-now)/864e5);
       return `<div class="row${days<=14?" urgent":""}"><span class="caldot" style="background:${laneColor[e.lane]||"#42535A"}"></span><span class="days">${days<=0?"today":"in "+days+(days===1?" day":" days")}</span><span class="what">${esc(e.label)}</span></div>`;
     }).join("")||`<div class="row"><span class="what">No upcoming entries posted yet.</span></div>`}</div>
@@ -716,52 +769,172 @@ function renderCalendar(){
       ${CAL_LANES.map(l=>`<div class="lane-line" style="top:${laneY[l[0]]}px"></div><div class="lane-tag" style="top:${laneY[l[0]]}px">${l[2]}</div>`).join("")}
       ${months}
       <div class="axis"></div>
-      ${entries.map(e=>{const d=D(e.date); if(!d)return""; return `<div class="ev" style="left:${pct(d)}%;top:${laneY[e.lane]??100}px;background:${laneColor[e.lane]||"#42535A"}" title="${esc(e.date)} — ${esc(e.label)}${e.ref?" ("+esc(e.ref)+")":""}"></div>`;}).join("")}
+      ${entries.map(e=>{const d=calD(e.date); if(!d)return""; return `<div class="ev" style="left:${pct(d)}%;top:${laneY[e.lane]??100}px;background:${laneColor[e.lane]||"#42535A"}" title="${esc(e.date)} — ${esc(e.label)}${e.ref?" ("+esc(e.ref)+")":""}"></div>`;}).join("")}
       <div class="today" style="left:${pct(now)}%"></div>
     </div></div>
-    <div class="callegend">${CAL_LANES.map(l=>`<span><span class="caldot" style="background:${l[1]}"></span>${l[2].charAt(0)+l[2].slice(1).toLowerCase()}</span>`).join("")}</div>
-    <p class="note" style="margin-top:16px">Keyed to your documented headcount; a threshold crossing re-runs the applicability review. Entries retire as obligations close and the next year's are added on the statutory reset.</p>
-  </div>`;
+    <div class="callegend">${CAL_LANES.map(l=>`<span><span class="caldot" style="background:${l[1]}"></span>${l[2].charAt(0)+l[2].slice(1).toLowerCase()}</span>`).join("")}</div>`;
 }
 
-function renderDeliverableDoc(kind){
-  const meta = (metrics && metrics.deliverables) ? (metrics.deliverables[kind]||{}) : {};
-  if (kind === "report"){
-    const c = meta.counts || {};
-    stage.innerHTML = `<div class="card">
-      <h2>Compliance Audit Report</h2>
-      <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · document of record${meta.version?` · Version ${esc(String(meta.version))}`:""}${meta.date?` · ${esc(meta.date)}`:""}</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px">
-        ${c.high!=null?`<span class="tag" style="background:#F6E3D7;color:#A9430F;border:0">${c.high} HIGH</span>`:""}
-        ${c.medium!=null?`<span class="tag" style="background:#F5EBD2;color:#8A6D1F;border:0">${c.medium} MEDIUM</span>`:""}
-        ${c.low!=null?`<span class="tag" style="background:#EEF2F4;color:#42535A;border:0">${c.low} LOWER</span>`:""}
-      </div>
-      <p style="font-size:14.5px;max-width:66ch">${esc(meta.lead||"Every finding carries its statute, evidence, exposure, fix, and owner — with the 90-day roadmap that closes them.")}</p>
-      <div class="why" style="margin-top:16px"><b>The record</b>The portrait PDF delivered at your readout is the document of record. The Retainer Dashboard is its visual layer; the two always carry the same version stamp. New material evidence reopens the register and a new version is delivered the same way.</div>
-    </div>`;
-  } else {
-    const rec = meta.recent || [];
-    stage.innerHTML = `<div class="card">
-      <h2>Reasonable-Steps File</h2>
-      <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · standing record${meta.version?` · Version ${esc(String(meta.version))}`:""}${meta.opened?` · opened ${esc(meta.opened)}`:""}</p>
-      <p style="font-size:14.5px;max-width:66ch;margin-top:12px">The dated ledger of every reasonable step taken${meta.entries?` — ${esc(String(meta.entries))} entries and growing`:""}. Kept deliberately plain: this file is built to be credible outside this room.</p>
-      ${rec.length?`<div style="border-top:1px solid var(--line-lt);margin-top:14px">${rec.map(r=>`<div style="display:flex;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line-lt);font-size:13px;align-items:baseline;flex-wrap:wrap"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--slate-lt);min-width:52px">${esc(r[0]||"")}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;min-width:64px;color:var(--brass)">${esc(String(r[1]||"").toUpperCase())}</span><span>${esc(r[2]||"")}</span></div>`).join("")}</div>`:""}
-      <p class="note" style="margin-top:14px">The full ledger is in the PDF of record, delivered with your report and regenerated with every version.</p>
-    </div>`;
-  }
+// The year at a glance, derived from the posted calendar entries — the grid
+// invents nothing the timeline doesn't already carry.
+function calYearGridHTML(){
+  const entries = (calendar||[]).map(e=>({...e, d:calD(e.date)})).filter(e=>e.d&&e.label)
+    .sort((a,b)=>a.d-b.d);
+  if (!entries.length) return "";
+  const laneColor = {}; CAL_LANES.forEach(l=>laneColor[l[0]]=l[1]);
+  const MON=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const byMonth = new Map();
+  entries.forEach(e=>{
+    const key = `${MON[e.d.getMonth()]} ${e.d.getFullYear()}`;
+    if(!byMonth.has(key)) byMonth.set(key, []);
+    byMonth.get(key).push(e);
+  });
+  return sub4("GRID","The year at a glance","every obligation placed, month by month")
+    +`<div class="cy-grid">${[...byMonth.entries()].map(([mon,items])=>
+      `<div class="cy-card"><div class="cy-m">${esc(mon)}</div>${items.map(e=>
+        `<div class="cy-it"><i style="background:${laneColor[e.lane]||"#42535A"}"></i><span>${esc(e.label)}</span></div>`).join("")}</div>`).join("")}</div>
+    <p class="cap-line" style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em">A THRESHOLD CROSSING RE-RUNS THE APPLICABILITY REVIEW</p>`;
+}
+
+function calSpineHTML(dlv){
+  const cad = (dlv.cal&&dlv.cal.cadences)||[];
+  if (!cad.length) return "";
+  return sub4("SPINE","The recurring spine","what runs every payroll, month, quarter, and season")
+    +cad.map(c=>`<div class="sp-row"><span class="sp-freq">${esc(c[0])}</span><span class="sp-desc">${esc(c[1])}</span><span class="sp-ref">${esc(c[2])}</span></div>`).join("")
+    +((dlv.cal&&dlv.cal.spineWhy)?`<div class="why" style="margin:14px 0 0"><b>Where this comes from</b>${esc(dlv.cal.spineWhy)}</div>`:"");
+}
+
+function pcapSVG(){
+  const caps = (((metrics||{}).exposure||{}).paga||{}).caps||[];
+  if (!caps.length) return "";
+  const two = t => { const w=String(t).split(" "); if(w.length<3) return [t]; const m=Math.ceil(w.length/2); return [w.slice(0,m).join(" "), w.slice(m).join(" ")]; };
+  const W=560,H=158,slot=(W-16)/caps.length,base=H-40,maxh=86;
+  let s="";
+  caps.forEach((c,i)=>{
+    const cx=8+slot*i+slot/2, bh=maxh*c.factor;
+    s += bh>0 ? `<rect x="${cx-24}" y="${base-bh}" width="48" height="${bh}" fill="${c.factor===0.15?"#B4862B":"#0A2C44"}"/>`
+              : `<line x1="${cx-24}" x2="${cx+24}" y1="${base-1}" y2="${base-1}" stroke="#B4862B" stroke-width="2.5"/>`;
+    s += `<text x="${cx}" y="${base-bh-8}" text-anchor="middle" font-size="12" font-weight="600" fill="#0A2C44" font-family="Public Sans,sans-serif">${Math.round(c.factor*100)}</text>`;
+    two(c.label).forEach((ln,j)=>{ s += `<text x="${cx}" y="${base+15+j*11}" text-anchor="middle" font-size="8.5" fill="#42535A" font-family="Public Sans,sans-serif">${esc(ln)}</text>`; });
+  });
+  return `<div class="pcap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="PAGA penalty index under each level of documented steps">${s}</svg></div>
+    <p class="cap-line">Documented reasonable steps taken before a notice cap PAGA penalties at 15% — this file is that documentation. The dollar arithmetic is in row 4 above.</p>`;
+}
+
+function stepsRowHTML(dlv){
+  const st = dlv.steps||{};
+  const AC = {"CFHR":"#0A2C44","Client":"#B4862B","T. Avery":"#3E7D5B"};
+  const AL = {"CFHR":"CFHR","Client":"CLIENT","T. Avery":"T. AVERY"};
+  const rows = list => `<div class="sl">${list.map(e=>{
+    const c = AC[e.actor]||"#0A2C44";
+    return `<div class="sl-row"><span class="sl-date">${esc(String(e.date).toUpperCase())}</span><span class="sl-dot"><i style="background:${c}"></i></span><span class="sl-act"><span class="sl-chip" style="color:${c};border-color:${c}">${esc(AL[e.actor]||String(e.actor).toUpperCase())}</span>${esc(e.action)}</span><span class="sl-ref"><b>${esc(String(e.instrument||"").toUpperCase())}</b><span>${esc(String(e.evidence||"").toUpperCase())}</span></span></div>`;
+  }).join("")}</div>`;
+  const L = st.ledger||[], cut = st.split||Math.ceil(L.length/2);
+  return `${st.lead?`<p style="font-size:14px;max-width:66ch">${esc(st.lead)}</p>`:""}
+    ${(st.stats||[]).length?`<div class="stats">${st.stats.map(t=>`<div class="stat"><div class="v">${esc(t[0])}</div><div class="k" style="color:#8A6D1F;font-weight:600;letter-spacing:.08em;font-size:9.5px;margin-top:2px">${esc(String(t[1]).toUpperCase())}</div><div class="s">${esc(t[2])}</div></div>`).join("")}</div>`:""}
+    ${sub4("WHY","What documented steps are built to earn","the PAGA penalty index")}
+    ${pcapSVG()}
+    ${L.length?`${sub4(`1–${cut}`,"The ledger — opening to analysis","intake, documents, and the review passes")}
+    ${rows(L.slice(0,cut))}
+    ${sub4(`${cut+1}–${L.length}`,"The ledger — analysis to delivery","findings, versions, and the readback")}
+    ${rows(L.slice(cut))}`:""}
+    ${st.token?`<p style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--brass);margin-top:14px">FILE TOKEN ${esc(st.token)}${st.opened?` · OPENED ${esc(String(st.opened).toUpperCase())}`:""} · NEVER CLOSES</p>`:""}
+    ${st.why?`<div class="why" style="margin:14px 0 0"><b>The file of record</b>${esc(st.why)}</div>`:""}`;
+}
+
+function riskRowHTML(dlv){
+  const rk = dlv.risk||{};
+  const scores = rk.scores||{}, shorts = rk.shorts||{};
+  const fs = (findings||[]).map(f=>{
+    const s = scores[f.id]||{};
+    const found = calD(f.found), target = calD(f.target);
+    return {...f, short: shorts[f.id]||f.title, bucket: s.b||"MEDIUM", l:s.l||0, i:s.i||0,
+      score:(s.l||0)*(s.i||0), days:(found&&target)?Math.round((target-found)/864e5):null, targetD:target};
+  });
+  if (!fs.length || !Object.keys(scores).length) return "";
+  const ranked = fs.slice().sort((a,b)=>b.score-a.score||(b.exposure||0)-(a.exposure||0)||(a.id<b.id?-1:1));
+  const MONS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const fd = t => t?`${MONS[t.getMonth()]} ${t.getDate()}`:"—";
+  const counts = { HIGH: fs.filter(f=>f.bucket==="HIGH").length, MEDIUM: fs.filter(f=>f.bucket==="MEDIUM").length, LOW: fs.filter(f=>f.bucket==="LOW").length };
+  // the map: severity (L×I) against effort (days the plan allots), dot size = exposure share
+  const W=560,H=320,pl=46,pr=16,pt=20,pb=44,xmax=Math.max(70,...fs.map(f=>f.days||0)),ymax=27;
+  const X=d=>pl+Math.min(d,xmax)/xmax*(W-pl-pr), Y=v=>pt+(1-v/ymax)*(H-pt-pb);
+  let s="";
+  [5,10,15,20,25].forEach(v=>{ s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#D9DEE5" stroke-dasharray="2 3"/><text x="${pl-8}" y="${Y(v)+3}" text-anchor="end" font-size="9" fill="#5A6675" font-family="IBM Plex Mono,monospace">${v}</text>`; });
+  [7,15,30,45,60].forEach(d=>{ s+=`<line x1="${X(d)}" x2="${X(d)}" y1="${pt}" y2="${H-pb}" stroke="#D9DEE5" stroke-dasharray="2 3"/><text x="${X(d)}" y="${H-pb+14}" text-anchor="middle" font-size="9" fill="#5A6675" font-family="IBM Plex Mono,monospace">${d}</text>`; });
+  s += `<line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" stroke="#0A2C44"/>`;
+  s += `<text x="${(pl+W-pr)/2}" y="${H-8}" text-anchor="middle" font-size="8.5" letter-spacing=".1em" fill="#42535A" font-family="IBM Plex Mono,monospace">EFFORT — DAYS THE PLAN ALLOTS TO CLOSE IT</text>`;
+  s += `<text transform="rotate(-90)" x="${-(pt+(H-pt-pb)/2)}" y="12" text-anchor="middle" font-size="8.5" letter-spacing=".1em" fill="#42535A" font-family="IBM Plex Mono,monospace">SEVERITY — L × I</text>`;
+  const groups = new Map();
+  fs.forEach(f=>{ if(f.days==null) return; const k=`${f.days}|${f.score}`; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(f); });
+  groups.forEach(g=>{ g.forEach((f,j)=>{
+    const cx=X(f.days)+(j-(g.length-1)/2)*17, cy=Y(f.score), r=4+Math.sqrt(f.exposure||0)/62;
+    s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${BUCKETC[f.bucket]}" fill-opacity=".88"${f.bucket==="LOW"?' stroke="#0A2C44" stroke-opacity=".35"':""}><title>${esc(`${f.id} · ${f.title} — L${f.l}×I${f.i}${f.exposure?` · carries ${fmtK(f.exposure)}`:""}`)}</title></circle>`;
+    s += `<text x="${cx.toFixed(1)}" y="${(cy-r-3).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#0A2C44" font-family="IBM Plex Mono,monospace">${esc(f.id)}</text>`;
+  }); });
+  s += `<text x="${W-pr-2}" y="${Y(26.3)}" text-anchor="end" font-size="8.5" letter-spacing=".08em" fill="#A9430F" font-family="IBM Plex Mono,monospace">← FIX FIRST: HIGH SCORE, SHORT WINDOW</text>`;
+  return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px">
+      <span class="tag" style="background:#F6E3D7;color:#A9430F;border:0">${counts.HIGH} HIGH</span>
+      <span class="tag" style="background:#F5EBD2;color:#8A6D1F;border:0">${counts.MEDIUM} MEDIUM</span>
+      <span class="tag" style="background:#EEF2F4;color:#42535A;border:0">${counts.LOW} LOWER</span></div>
+    ${rk.lead?`<p style="font-size:14px;max-width:66ch">${esc(rk.lead)}</p>`:""}
+    <p class="ask" style="font-size:13px;color:var(--slate);max-width:72ch;margin:6px 0 4px">Severity is the report's likelihood-times-impact score. Effort is the days the 90-day plan allots to close the finding. Dot size is the finding's share of the illustrative range — the costly, quick items sit top-left, and that is the 30-day agenda.</p>
+    <div class="riskmap caltl-wrap"><svg viewBox="0 0 ${W} ${H}" style="min-width:560px" role="img" aria-label="All ${fs.length} findings mapped: severity score against the days allotted to close each">${s}</svg></div>
+    <div class="legend" style="margin-top:4px"><span><i style="background:#A9430F"></i>High ${counts.HIGH}</span><span><i style="background:#D8AC4E"></i>Medium ${counts.MEDIUM}</span><span><i style="background:#D9DEE5;border:1px solid rgba(10,44,68,.3)"></i>Lower ${counts.LOW}</span>${rk.range?`<span>dot size — the finding's share of the ${esc(rk.range)} illustrative range</span>`:""}</div>
+    <div class="rk-list">${ranked.map((f,i)=>
+      `<div class="rk-row"><span class="rk-rank">${String(i+1).padStart(2,"0")}</span><span class="rk-t" title="${esc(f.title)}"><span class="sevchip" style="background:${BUCKETC[f.bucket]}${f.bucket==="LOW"?";border:1px solid rgba(10,44,68,.3)":""}"></span><span class="qid">${esc(f.id)}</span> · ${esc(f.short)}</span><span class="rk-score">L${f.l}×I${f.i} · ${f.score}</span><span class="rk-eff">${f.days!=null?`${f.days}-day window · by ${fd(f.targetD)}`:"—"}</span><span class="rk-exp">${f.exposure?fmtK(f.exposure):"—"}</span></div>`).join("")}</div>
+    <p class="cap-line">Ranked by score, then by exposure. The exposure column is the high end of the finding's illustrative range; the arithmetic behind each number is in row 4 above.</p>
+    ${(rk.high||[]).length?`${sub4("TOP 7","The seven high-priority findings","these set the 30-day agenda")}
+    ${rk.high.map(h=>`<div class="hi-row"><span class="hi-n">${esc(h[0])}</span><div class="hi-main"><div class="hi-t">${esc(h[1])}</div><div class="hi-cite">${esc(String(h[2]).toUpperCase())}</div></div><div class="hi-right"><div class="hi-score">${esc(h[3])}</div><div class="hi-exp">${esc(h[4])}</div><div class="hi-own">${esc(h[5])}</div></div></div>`).join("")}`:""}
+    ${(rk.roadmap||[]).length?`${sub4("90 DAYS","The roadmap","three moves, every finding owned")}
+    <div class="rm-grid">${rk.roadmap.map((col,i)=>`<div class="rm-col"><div class="rm-head${i===2?" green":""}"><div class="rm-days">${esc(col[0])}</div><div class="rm-theme"><h4>${esc(col[1])}</h4><small>${esc(String(col[2]).toUpperCase())}</small></div></div><ul>${col[3].map(it=>`<li>${esc(it)}</li>`).join("")}</ul>${col[4]?`<div class="rm-more">${esc(String(col[4]).toUpperCase())}</div>`:""}</div>`).join("")}</div>`:""}
+    ${rk.ratio?`<div class="why" style="margin:16px 0 0"><b>The ratio</b>${esc(rk.ratio)}</div>`:""}
+    ${rk.record?`<div class="why" style="margin:14px 0 0"><b>The record</b>${esc(rk.record)}</div>`:""}`;
+}
+
+function deliverableRows(m){
+  const dlv = m.dlv||{};
+  const r = dlv.readout||{}, st = dlv.steps||{}, rk = dlv.risk||{}, cal = dlv.cal||{};
+  const calEntries = (calendar||[]).filter(e=>e.date&&e.label);
+  // live peek on the calendar row — the next obligation, in days
+  let calPeek = cal.peek||"met · live";
+  const now = new Date();
+  const next = calEntries.map(e=>calD(e.date)).filter(d=>d&&d>=now).sort((a,b)=>a-b)[0];
+  if (next){ const days = Math.ceil((next-now)/864e5); calPeek += ` · next ${days<=0?"today":`in ${days}${days===1?" day":" days"}`}`; }
+  return `
+    ${secOpen(5,"Findings Readout", r.sub||"the walkthrough, in person — readout edition on file", r.peek||"met")}
+    <div class="tile wide">
+      ${r.body?`<p style="font-size:14px;max-width:66ch">${esc(r.body)}</p>`:""}
+      ${r.where?`<div class="why" style="margin:14px 0 0"><b>Where it lives</b>${esc(r.where)}</div>`:""}
+    </div>
+    ${secClose()}
+    ${secOpen(6,"Reasonable-Steps Report", st.sub||"the written record for counsel — never closes", st.peek||"met")}
+    <div class="tile wide">${stepsRowHTML(dlv)}</div>
+    ${secClose()}
+    ${secOpen(7,"Ranked Risk Map", rk.sub||"every finding scored by severity and effort", rk.peek||"met")}
+    <div class="tile wide">${riskRowHTML(dlv)}</div>
+    ${secClose()}
+    ${secOpen(8,"12-Month Compliance Calendar", cal.sub||"the year ahead — today's line drawn live", calPeek)}
+    <div class="tile wide">
+      ${cal.meta?`<p class="sub" style="margin:2px 0 10px">${esc(cal.meta)}</p>`:""}
+      ${calendarInnerHTML()}
+      <p class="note">Every obligation restates a route line in your report — the calendar invents nothing. Obligations approach, cross, and recede each visit.</p>
+      ${calYearGridHTML()}
+      ${calSpineHTML(dlv)}
+    </div>
+    ${secClose()}`;
 }
 
 /* ============ render: steps ============ */
 function render(){
+  // A step index remembered from the retainer-era rail can point past the end of
+  // the shorter list — land those visitors on the dashboard, not a blank page.
+  if (step >= steps.length){ step = steps.indexOf("dashboard"); remember(); }
   renderRail();
   const key = steps[step];
   if (key === "start") return renderStart();
   if (key === "review") return renderReview();
   if (key === "dashboard") return renderDashboard();
-  if (key === "retainer") return retainerOn() ? renderRetainer() : renderDashboard();
-  if (key === "calendar") return principalOn() ? renderCalendar() : renderDashboard();
-  if (key === "repdoc") return principalOn() ? renderDeliverableDoc("report") : renderDashboard();
-  if (key === "stepsdoc") return principalOn() ? renderDeliverableDoc("steps") : renderDashboard();
   const sec = SECTIONS.find(s=>s.k===key);
   const [a,t] = sectionAnswered(key);
   stage.innerHTML = `<div class="card">
@@ -1133,88 +1306,13 @@ function renderDashboard(){
       ${secClose()}` : ``}
     </div>
     ${(delivered && principal && m.exposure) ? exposureSection({...m.exposure, findings:m.findings}) : ""}
+    ${(delivered && principal && m.dlv) ? deliverableRows(m) : ""}
     ${principal
       ? (delivered ? "" : `<div class="dashlock" style="margin-top:14px"><b>At your readout</b>What the analysis found, and what it could cost, are shared in person with your report — the fix beside every finding. Nothing from the analysis is posted here before then.</div>`)
       : `<div class="dashlock" style="margin-top:14px"><b>Delivered separately</b>What the analysis found, and what it could cost, are delivered with your report — in person at the readout, to the engagement principal. They are not posted on this page.</div>`}
     <p class="note" style="margin-top:16px">${(delivered && principal)
       ? `Measures are computed from your answers and from documents we have verified. Where evidence is still outstanding, a measure stays blank rather than estimated.`
       : `Everything on this page comes from your answers and from documents we have verified — nothing is estimated.`}</p>
-  </div>`;
-}
-
-/* ============ retainer dashboard (v2.7 — the findings ledger, delivered-gated) ============ */
-const SEVC = { critical:"#A9430F", serious:"#C9783F", moderate:"#D8AC4E", minor:"#D9DEE5" };
-function retainerOn(){ return !!(principal && metrics && metrics.delivered && Array.isArray(findings) && findings.length); }
-// v2.8: the principal door is open and the engagement is delivered — the state in
-// which the Compliance Calendar and the two document pages exist.
-function principalOn(){ return !!(principal && metrics && metrics.delivered); }
-function renderRetainer(){
-  const D = s => { if(!s) return null; const [y,m,d] = String(s).split("-").map(Number); return (y&&m&&d) ? new Date(y,m-1,d) : null; };
-  const MONS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const fd = t => t ? `${MONS[t.getMonth()]} ${t.getDate()}` : "—";
-  const today = new Date(); today.setHours(0,0,0,0);
-  const fs = findings;
-  const closedN = fs.filter(f=>f.closed).length;
-
-  // The shared axis: readout (earliest found) to the latest target/close, padded.
-  const dates = fs.flatMap(f=>[D(f.found), D(f.target), D(f.closed)]).filter(Boolean).concat([today]);
-  const from = new Date(Math.min(...dates)), to = new Date(Math.max(...dates));
-  from.setDate(from.getDate()-4); to.setDate(to.getDate()+10);
-  const X = t => 6 + (t-from)/(to-from)*534;
-  const readout = fs.map(f=>D(f.found)).filter(Boolean).sort((a,b)=>a-b)[0];
-  const ticks = []; { const t0=new Date(from.getFullYear(), from.getMonth()+1, 1);
-    for(let t=t0; t<=to; t=new Date(t.getFullYear(), t.getMonth()+1, 1)) ticks.push(t); }
-  const TXT = (x,y,s,c,a,w)=>`<text x="${x}" y="${y}" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="${c||"#6E837F"}" text-anchor="${a||"start"}" letter-spacing=".08em" font-weight="${w||400}">${esc(s)}</text>`;
-  const axis = (()=>{ let s=`<line x1="6" y1="22" x2="540" y2="22" stroke="#0A2C44" stroke-opacity=".3"/>`;
-    ticks.forEach(t=>{ s+=`<line x1="${X(t)}" y1="18" x2="${X(t)}" y2="26" stroke="#0A2C44" stroke-opacity=".5"/>`+TXT(X(t)+4,14,MONS[t.getMonth()].toUpperCase()); });
-    // The readout keeps its tick always, its label only with clear air from TODAY.
-    if(readout){ s+=`<line x1="${X(readout)}" y1="12" x2="${X(readout)}" y2="32" stroke="#B4862B" stroke-width="3"/>`;
-      if(!(today>=from&&today<=to) || Math.abs(X(today)-X(readout))>64) s+=TXT(X(readout),46,"READOUT","#B4862B","middle",600); }
-    if(today>=from&&today<=to){ s+=`<line x1="${X(today)}" y1="12" x2="${X(today)}" y2="32" stroke="#0A2C44" stroke-width="2"/>`+TXT(X(today)+5,46,"TODAY","#0A2C44","start",600); }
-    return `<svg viewBox="0 0 560 50" width="100%" style="display:block">${s}</svg>`; })();
-  const strip = f => { const a=D(f.found)||readout||today, b=D(f.closed)||D(f.target)||to;
-    let s=`<line x1="6" y1="15" x2="540" y2="15" stroke="#0A2C44" stroke-opacity=".12"/>`;
-    if(readout) s+=`<line x1="${X(readout)}" y1="0" x2="${X(readout)}" y2="30" stroke="#B4862B" stroke-opacity=".18" stroke-width="1.5"/>`;
-    if(today>=from&&today<=to) s+=`<line x1="${X(today)}" y1="0" x2="${X(today)}" y2="30" stroke="#0A2C44" stroke-opacity=".45" stroke-width="2"/>`;
-    const x0=X(a), x1=X(b), c=SEVC[f.severity]||"#B4862B";
-    s+=`<rect x="${Math.min(x0,x1)}" y="8" width="${Math.max(3,Math.abs(x1-x0))}" height="14" rx="3" fill="${c}"${f.severity==="minor"?' stroke="#0A2C44" stroke-opacity=".25"':""}/>`;
-    return `<svg viewBox="0 0 560 30" width="100%" style="display:block">${s}</svg>`; };
-
-  // Per-finding status: closed → ok; past its target unclosed → flag; else open.
-  const fstat = f => f.closed ? "ok" : (D(f.target) && D(f.target) < today ? "flag" : "unk");
-  const fword = f => f.closed ? `Closed ${fd(D(f.closed))}` : (fstat(f)==="flag" ? `Past its line — ${fd(D(f.target))}` : (f.target ? `Target ${fd(D(f.target))}` : "Scheduled"));
-
-  // The pace line: where the plan says the count should stand today.
-  const span = Math.max(1, to-from), pace = Math.min(1, Math.max(0,(today-from)/span)) * fs.length;
-  const behind = closedN < pace - 0.5, overdue = fs.filter(f=>fstat(f)==="flag");
-  const expTotal = fs.reduce((n,f)=>n+(f.exposure||0),0), expClosed = fs.filter(f=>f.closed).reduce((n,f)=>n+(f.exposure||0),0);
-  const nextUp = fs.filter(f=>!f.closed && D(f.target)).sort((a,b)=>D(a.target)-D(b.target))[0];
-
-  stage.innerHTML = `<div class="card">
-    <h2>Retainer Dashboard</h2>
-    <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · from your audit readout${readout?` of ${fd(readout)}`:""}</p>
-    <p class="dash-lead">${fs.length} findings from your audit, <b>${closedN} closed</b>${expTotal?`, ${fmtK(expClosed)} of the illustrative ${fmtK(expTotal)} range addressed`:""}. Everything below is your record moving.</p>
-    <div class="why"><b>How to read this</b><span class="tag verified">Closed</span> means the corrective record is on file in your documents — a documentation status, never just a promise, and never a legal determination. <span class="tag">The line</span> is the pace your plan set at the readout. This page reports the status of your records. It is not legal advice, and a closed finding is not a certification of compliance — legal questions belong to your employment counsel.</div>
-    <div class="tile wide">
-      <span class="k">Findings closing <span class="tag verified">Documented</span></span>
-      <h3>${closedN} of ${fs.length} findings closed${overdue.length?` · ${overdue.length} past its line`:""}</h3>
-      <p class="ask">Each finding is a window on the line — found to closed; the color is severity as your report grades it.</p>
-      ${lineBar({value:closedN, line:pace, max:fs.length, label:"Findings closed against the pace the plan set", display:`${closedN} of ${fs.length}`, lineLabel:"the pace your plan set"})}
-      <p class="sub" style="margin-top:2px">${behind?`Behind the line — the plan has ${Math.round(pace)} closed by today.`:`${overdue.length?`On count, but ${overdue.length} individual finding${overdue.length>1?"s are":" is"} past its own line.`:"On or ahead of the line."}`}</p>
-      <div class="ohead"><h5>On the line</h5><h5>Detail</h5></div>
-      <div class="orow axis"><div>${axis}</div><div></div></div>
-      ${fs.map(f=>`<div class="orow"><div>${strip(f)}</div><div class="chk">${stIcon(fstat(f))}<span class="lbl"><span class="sevchip" style="background:${SEVC[f.severity]||"#B4862B"}${f.severity==="minor"?";border:1px solid rgba(10,44,68,.3)":""}"></span><span class="sub" style="display:inline;margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em">${esc(f.id)}</span> · ${esc(f.title)}<small>${esc((f.severity||"").toUpperCase())}${f.note?` · ${esc(f.note)}`:""}</small></span><span class="val" style="white-space:normal">${esc(fword(f))}</span></div></div>`).join("")}
-      <p class="note" style="margin-top:10px">Today is the navy line; a finding closes only when its corrective record is on file — the same documentation standard your audit used.</p>
-    </div>
-    ${expTotal?`<div class="tile wide" style="margin-top:16px">
-      <span class="k">Exposure addressed as findings close <span class="tag analysis">In analysis</span></span>
-      <h3>${fmtK(expClosed)} of the illustrative ${fmtK(expTotal)} range now sits behind a closed finding; ${fmtK(expTotal-expClosed)} remains open</h3>
-      <p class="ask">The illustrative range from your report, allocated by finding. Amounts are estimates for prioritization — not measures of legal liability, which can survive a fix for past periods.</p>
-      ${lineBar({value:expClosed, line:expTotal, max:expTotal, label:"Exposure addressed", display:fmtK(expClosed), lineLabel:`${fmtK(expTotal)} at readout`})}
-      <p class="sub" style="margin-top:2px">${fmtK(expClosed)} addressed across ${closedN} closing${closedN===1?"":"s"}.</p>
-    </div>`:""}
-    ${nextUp?`<div class="navytile"><div class="k">Next to close</div><h4>${esc(nextUp.id)} — ${esc(nextUp.title)}</h4><p>${esc((nextUp.severity||"").charAt(0).toUpperCase()+(nextUp.severity||"").slice(1))} · target ${fd(D(nextUp.target))}${nextUp.exposure?` · carries ${fmtK(nextUp.exposure)} of the remaining illustrative range`:""}.</p><div class="dot">${closedN} OF ${fs.length} CLOSED · UPDATED WITH YOUR RECORD</div></div>`:""}
-    <p class="note" style="margin-top:16px">Measures are computed from the findings ledger your engagement maintains. Where a corrective record is not yet on file, a finding stays open rather than estimated.</p>
   </div>`;
 }
 
@@ -1434,6 +1532,53 @@ async function completeAll(){
       // ledger, calendar, and the two document pages, all unlocked.
       if (PREVIEW_PRINCIPAL){
         principal = true;
+        // v2.9: the deliverables block — rows 5–8 of the dashboard. Compact preview
+        // sample; production posts the real block with the record via /audit-analysis.
+        metrics.exposure.paga = { caps:[
+          {label:"No documented steps", factor:1},
+          {label:"Steps within 60 days of a notice", factor:0.3},
+          {label:"Steps taken before a notice", factor:0.15},
+          {label:"Steps taken + violation cured", factor:0}] };
+        metrics.dlv = {
+          readout:{ peek:"met Aug 20 · this page, live", sub:"the 60-minute walkthrough, in person — readout edition on file",
+            body:"Delivered in person at the Aug 20 readout — a 60-minute walkthrough of the record in plain English; legal conclusions framed for the company's counsel.",
+            where:"Rows 1–4 above are the readout, live — the same record, moving as it moves. The readout edition PDF is on file as delivered." },
+          steps:{ peek:"met · Version 3", sub:"the written record for counsel — 14 entries · never closes",
+            lead:"The dated ledger of every reasonable step taken — 14 entries since the engagement opened, every one dated, attributed, and evidenced.",
+            stats:[["14","ledger entries","every one dated, attributed, and evidenced"],["8","days, open to delivery","August 12 to the August 20 readback"],["3 of 4","documents verified","returns documented"],["3","report versions cut","each generated from this ledger"]],
+            token:"PREVIEW", opened:"Aug 12, 2026", split:7,
+            ledger:[
+              {date:"Aug 12", actor:"CFHR", action:"Engagement opened; workspace link issued; document requests seeded", instrument:"12 · Intake Kit", evidence:"Requests register"},
+              {date:"Aug 14", actor:"Client", action:"Workspace intake completed — attributed to the owner", instrument:"12 · Intake Kit", evidence:"AI-PREVIEW"},
+              {date:"Aug 15", actor:"Client", action:"Documents received against the open requests", instrument:"01 · Steps File", evidence:"Drive · 01 Uploads/"},
+              {date:"Aug 16", actor:"CFHR", action:"Documents reviewed — first pass: handbook verified; wage statements returned with the export named", instrument:"01 · Steps File", evidence:"Review memo (first pass)"},
+              {date:"Aug 18", actor:"CFHR", action:"Document tests run on the verified record; findings drafted and scored", instrument:"02 · Exposure Map", evidence:"Findings file (V1)"},
+              {date:"Aug 19", actor:"Client", action:"All requested documents fulfilled across review passes", instrument:"01 · Steps File", evidence:"Drive · 01 Uploads/"},
+              {date:"Aug 19", actor:"CFHR", action:"Report Version 2 and Steps File Version 2 generated together from this ledger", instrument:"01 · Steps File", evidence:"Report PDF V002"},
+              {date:"Aug 20", actor:"CFHR", action:"Audit Dashboard record written — measures against their statutory lines", instrument:"02 · Exposure Map", evidence:"Metrics record"},
+              {date:"Aug 20", actor:"T. Avery", action:"Report Version 3 and Steps File Version 3 delivered at the readback", instrument:"01 · Steps File", evidence:"Report PDF V003"},
+              {date:"Aug 20", actor:"CFHR", action:"Dashboard analysis layer released to the client workspace on delivery", instrument:"02 · Exposure Map", evidence:"Metrics record · delivered"}],
+            why:"The portrait Reasonable-Steps File is the record; this ledger restates it entry for entry." },
+          risk:{ peek:"met · Version 3 · 9 findings", sub:"every finding scored by severity and effort — fix the costly items first",
+            lead:"Nine findings on a complete evidentiary record — each with its statute, evidence, exposure, fix, and owner.",
+            range:"$41K–$96K",
+            scores:{ "F-01":{b:"HIGH",l:5,i:5},"F-02":{b:"HIGH",l:5,i:4},"F-03":{b:"MEDIUM",l:4,i:4},"F-04":{b:"HIGH",l:4,i:5},"F-05":{b:"MEDIUM",l:4,i:3},"F-06":{b:"MEDIUM",l:4,i:3},"F-07":{b:"MEDIUM",l:3,i:3},"F-08":{b:"LOW",l:3,i:2},"F-09":{b:"LOW",l:2,i:2} },
+            shorts:{ "F-01":"Meal periods not recorded — field crews","F-02":"Overtime underpaid on harvest days","F-03":"Two exempt salaries below the floor","F-04":"No written heat-illness plan","F-05":"Wage statements missing items","F-06":"Quarter-hour rounding","F-07":"Handbook missing leave language","F-08":"Glass-breakage deductions","F-09":"Outdated wage notice in packets" },
+            high:[["F-01","Meal periods not recorded for field crews","LC 512; 226.7","L5 × I5","$34K","Payroll lead — Days 1–30"],
+                  ["F-02","Overtime underpaid on harvest days","LC 510","L5 × I4","$24K","Payroll lead — Days 1–15"],
+                  ["F-04","No written heat-illness prevention plan","8 CCR 3395","L4 × I5","Cited per item","Field manager — Days 1–15"]],
+            roadmap:[["DAYS 1–30","Stop the meter","4 moves",["Heat plan adopted; crews trained","Overtime rule corrected in payroll","Meal-period recording live","Breakage deductions stopped and repaid"],null],
+                     ["DAYS 31–60","Rebuild the paper","3 moves",["Exempt classification decided with counsel","Handbook leave language added","Wage statements corrected"],null],
+                     ["DAYS 61–90","Prove it holds","2 moves",["Fresh payroll sample retested","Back-pay decision closed with counsel"],null]],
+            ratio:"Most of the first thirty days is a payroll configuration session and a scheduling rule — that ratio is the argument for doing this before a demand letter does it for you.",
+            record:"The portrait Compliance Audit Report delivered at the readout is the document of record. This map is its visual layer; the two carry the same version stamp." },
+          cal:{ peek:"met · live", sub:"the year ahead — today's line drawn live",
+            meta:"The rolling twelve months · keyed to your documented headcount",
+            cadences:[["EVERY PAYROLL","Meal- and rest-premium exception report reviewed and premiums paid from it","F-01"],
+                      ["EVERY QUARTER","Regular-rate and overtime self-test across pay types","F-02"],
+                      ["EVERY JAN + JUL","Statutory review on the reset cycle — wages, floors, notices, the handbook","F-07"],
+                      ["EVERY HIRE","Wage notice in the employee's primary language","F-09"]],
+            spineWhy:"Every entry restates a route line in the Compliance Audit Report — the calendar invents nothing." } };
         metrics.deliverables = {
           report:{ version:3, date:"Aug 20", counts:{high:2, medium:5, low:2},
                    lead:"Nine findings on a complete evidentiary record — each with its statute, evidence, exposure, fix, and owner — and the 90-day roadmap that closes them." },
