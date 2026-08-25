@@ -918,13 +918,10 @@ function deliverableRows(m){
       ${r.where?`<div class="why" style="margin:14px 0 0"><b>Where it lives</b>${esc(r.where)}</div>`:""}
     </div>
     ${secClose()}
-    ${secOpen(6,"Reasonable-Steps Report", st.sub||"the written record for counsel — never closes", st.peek||"met")}
-    <div class="tile wide">${stepsRowHTML(dlv)}</div>
-    ${secClose()}
-    ${secOpen(7,"Ranked Risk Map", rk.sub||"every finding scored by severity and effort", rk.peek||"met")}
+    ${secOpen(6,"Ranked Risk Map", rk.sub||"every finding scored by severity and effort", rk.peek||"met")}
     <div class="tile wide">${riskRowHTML(dlv)}</div>
     ${secClose()}
-    ${secOpen(8,"12-Month Compliance Calendar", cal.sub||"the year ahead — today's line drawn live", calPeek)}
+    ${secOpen(7,"12-Month Compliance Calendar", cal.sub||"the year ahead — today's line drawn live", calPeek)}
     <div class="tile wide">
       ${cal.meta?`<p class="sub" style="margin:2px 0 10px">${esc(cal.meta)}</p>`:""}
       ${calendarInnerHTML()}
@@ -932,6 +929,9 @@ function deliverableRows(m){
       ${calYearGridHTML()}
       ${calSpineHTML(dlv)}
     </div>
+    ${secClose()}
+    ${secOpen(8,"Reasonable-Steps Report", st.sub||"the written record for counsel — never closes", st.peek||"met")}
+    <div class="tile wide">${stepsRowHTML(dlv)}</div>
     ${secClose()}`;
 }
 
