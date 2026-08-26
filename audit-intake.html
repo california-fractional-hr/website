@@ -937,6 +937,12 @@ function deliverableRows(m){
 
 /* ============ render: steps ============ */
 function render(){
+  // The principal (CEO) door is a readout, not a workspace — its head says so.
+  // The shared intake door keeps the workspace heading.
+  if (principal){
+    document.querySelector(".page-head h1").textContent = "Your Audit Dashboard";
+    document.title = "Audit Dashboard — California Fractional HR";
+  }
   // A step index remembered from the retainer-era rail can point past the end of
   // the shorter list — land those visitors on the dashboard, not a blank page.
   if (step >= steps.length){ step = steps.indexOf("dashboard"); remember(); }
@@ -966,8 +972,10 @@ function renderStart(){
   const pct = Math.round(100*done/total);
   stage.innerHTML = `<div class="card">
     ${submitted?`<div class="banner"><b>Intake complete</b>Submitted ${esc(submitted.at)}. This workspace stays open for the life of the audit — document requests live in the Documents view, and any answer below can still be corrected. Changes are filed as dated amendments; your original submission stays intact.</div>`:""}
-    <h2>${esc(company||"Welcome")} — your audit workspace</h2>
-    <p style="color:var(--slate);font-size:14.5px;margin-top:6px">Ten short sections. Everything saves as you type, from any device — and this link can be shared: forward it to whoever runs payroll, HR, or operations day-to-day, and each of you can fill in the sections you know best.</p>
+    <h2>${esc(company||"Welcome")} — your audit ${principal?"dashboard":"workspace"}</h2>
+    ${principal
+      ? `<p style="color:var(--slate);font-size:14.5px;margin-top:6px">Ten short sections. Everything saves as you type, from any device. This link is personal to you — it carries the full engagement record.</p>`
+      : `<p style="color:var(--slate);font-size:14.5px;margin-top:6px">Ten short sections. Everything saves as you type, from any device — and this link can be shared: forward it to whoever runs payroll, HR, or operations day-to-day, and each of you can fill in the sections you know best.</p>`}
     <div class="progressbar"><i style="width:${pct}%"></i></div>
     <p class="note"><b>${done}</b> of ${total} questions answered · every answer is stamped with who gave it</p>
     <div class="why" style="margin-top:18px"><b>Confidential</b>Your answers are confidential client records used solely to perform the audit. This form gathers facts; it does not render legal advice.</div>
