@@ -394,6 +394,28 @@ const PREVIEW_DONE = location.hash === "#preview-done" || location.hash === "#pr
 const PREVIEW_PRINCIPAL = location.hash === "#preview-principal"; // v2.8: preview the principal door (deliverables unlocked)
 const token = new URLSearchParams(location.search).get("t") || "";
 const MAX = 25*1024*1024;
+
+/* ============ the page head is door-specific and must not change between the
+   loading phase and the loaded workspace. Principal tokens carry a P segment
+   (CBV-P-XXXXXX) by minting convention, so the door is read off the token the
+   moment the page opens; the record's authoritative principal flag re-applies
+   the same head after load (a no-op unless a token was minted off-convention).
+   The principal (CEO) head never mentions sharing; the shared intake head is
+   designed to invite it. No token at all → the neutral no-share head. ============ */
+function setHead(isPrincipal){
+  const h1 = document.querySelector(".page-head h1"), p = document.querySelector(".page-head p");
+  if (isPrincipal){
+    h1.textContent = "Your Audit Dashboard";
+    document.title = "Audit Dashboard — California Fractional HR";
+    p.textContent = `Answer with what actually happens, not what policy says should happen — "don't know" is a useful answer. Everything saves the moment you type it, from any device.`;
+  } else {
+    h1.textContent = "Your Audit Workspace";
+    document.title = "Audit Workspace — California Fractional HR";
+    p.textContent = `Answer with what actually happens, not what policy says should happen — "don't know" is a useful answer. Everything saves the moment you type it, from any device. Share this link with whoever knows each section best; documents attach right where the questions live.`;
+  }
+}
+const P_HINT = /-P-/i.test(token) || PREVIEW_PRINCIPAL;
+if (token || PREVIEW) setHead(P_HINT);
 const SCALE = ["Yes","No","Sometimes / varies","Don't know","Not applicable"];
 
 /* ============ the question set — v2.0 (dropdown enumeration approved 2026-08-18) ============ */
@@ -937,16 +959,7 @@ function deliverableRows(m){
 
 /* ============ render: steps ============ */
 function render(){
-  // The principal (CEO) door is a readout, not a workspace — its head says so
-  // and never invites sharing. The shared intake door is designed to be
-  // forwarded, so once the door is known its head says that too. The static
-  // default (before state loads, and on the gate) is the neutral no-share copy.
-  if (principal){
-    document.querySelector(".page-head h1").textContent = "Your Audit Dashboard";
-    document.title = "Audit Dashboard — California Fractional HR";
-  } else {
-    document.querySelector(".page-head p").textContent = `Answer with what actually happens, not what policy says should happen — "don't know" is a useful answer. Everything saves the moment you type it, from any device. Share this link with whoever knows each section best; documents attach right where the questions live.`;
-  }
+  setHead(principal); // authoritative; matches the token-derived head set at boot
   // A step index remembered from the retainer-era rail can point past the end of
   // the shorter list — land those visitors on the dashboard, not a blank page.
   if (step >= steps.length){ step = steps.indexOf("dashboard"); remember(); }
