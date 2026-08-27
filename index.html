@@ -407,9 +407,10 @@
     .nav-links{
       position:fixed;inset:88px 0 auto 0;background:var(--paper);flex-direction:column;
       align-items:flex-start;gap:0;padding:8px 28px 24px;border-bottom:1px solid var(--line-lt);
-      transform:translateY(-120%);transition:transform .3s ease;box-shadow:0 20px 30px -20px rgba(0,0,0,.3)
+      transform:translateY(-120%);visibility:hidden;
+      transition:transform .3s ease,visibility 0s linear .3s;box-shadow:0 20px 30px -20px rgba(0,0,0,.3)
     }
-    .nav-links.open{transform:none}
+    .nav-links.open{transform:none;visibility:visible;transition:transform .3s ease,visibility 0s}
     .nav-links a{padding:14px 0;width:100%;border-bottom:1px solid var(--line-lt);font-size:16px;white-space:normal}
     .nav-links .nav-cta{margin-top:14px;width:100%;justify-content:center;border-bottom:none}
     .menu-btn{display:flex}
