@@ -902,6 +902,11 @@
 </div>
 
 <script>
+  // land at the top on a fresh open — don't let the browser restore a stale
+  // scroll position; honor a real #anchor when the URL carries one
+  if('scrollRestoration' in history)history.scrollRestoration='manual';
+  if(!location.hash)window.scrollTo(0,0);
+
   // mobile menu
   const menuBtn=document.getElementById('menuBtn');
   const navLinks=document.getElementById('navLinks');
