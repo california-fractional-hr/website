@@ -286,6 +286,16 @@
   .audit-box-intro .detail{margin-top:22px}
   .contact-line{margin-top:40px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.03em;color:var(--slate)}
   .contact-line .brass{color:var(--brass)}
+  .contact-line a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(180,134,43,.4)}
+  /* four-option chooser */
+  .begin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:44px}
+  .begin-opt{display:flex;flex-direction:column;gap:9px;background:var(--paper);border:1px solid var(--line-lt);border-radius:3px;padding:22px 22px;text-decoration:none;transition:border-color .2s, transform .2s, box-shadow .2s}
+  .begin-opt:hover{border-color:var(--brass);transform:translateY(-3px);box-shadow:0 10px 30px -18px rgba(10,44,68,.45)}
+  .begin-opt .k{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+  .begin-opt .t{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600;font-size:1.12rem;color:var(--ink)}
+  .begin-opt .t .arr{color:var(--brass);transition:transform .18s ease}
+  .begin-opt:hover .t .arr{transform:translateX(4px)}
+  .begin-opt .d{font-size:13.5px;color:var(--slate);line-height:1.5}
 
   /* ---------- footer ---------- */
   footer{background:var(--deep);color:var(--slate-lt);padding:56px 0 34px}
@@ -663,7 +673,30 @@
     <div class="sec-head reveal" style="max-width:720px;margin-bottom:44px;">
       <span class="eyebrow">Start here</span>
       <h2>Choose how to begin.</h2>
-      <p class="intro">Request the fixed-fee Compliance Audit, book a quick call, or send a question. Every route reaches the practice directly.</p>
+      <p class="intro">Call us, schedule a quick call, send a message, or request the fixed-fee Compliance Audit. Every route reaches the practice directly.</p>
+    </div>
+
+    <div class="begin-grid reveal">
+      <a class="begin-opt" href="tel:+18052503252">
+        <span class="k">Direct line</span>
+        <span class="t">Call <span class="arr">→</span></span>
+        <span class="d">(805) 250-3252</span>
+      </a>
+      <a class="begin-opt" href="/book.html">
+        <span class="k">15 min · free</span>
+        <span class="t">Schedule a Call <span class="arr">→</span></span>
+        <span class="d">Pick a time — no prep, no pitch.</span>
+      </a>
+      <a class="begin-opt" href="#contact-message">
+        <span class="k">Got a question?</span>
+        <span class="t">Send Us a Message <span class="arr">→</span></span>
+        <span class="d">A personal reply within one business day.</span>
+      </a>
+      <a class="begin-opt" href="#audit-request">
+        <span class="k">Fixed fee · from $4,500</span>
+        <span class="t">Request an Audit <span class="arr">→</span></span>
+        <span class="d">The California Compliance Audit.</span>
+      </a>
     </div>
 
     <div class="start-card audit-box feature reveal" id="audit-request" style="scroll-margin-top:96px;margin-bottom:22px;">
@@ -746,7 +779,7 @@
         <p>A free 15-minute video call — no prep, no pitch. Bring one question and we'll figure out the right next step together.</p>
         <a href="/book.html" class="btn btn-primary">Book a 15-min call <span class="arr">→</span></a>
       </div>
-      <div class="start-card">
+      <div class="start-card" id="contact-message" style="scroll-margin-top:96px">
         <div class="sc-n">GOT A QUESTION?</div>
         <h3>Contact us</h3>
         <p>Send a message and I'll get back to you personally — usually within one business day.</p>
@@ -762,7 +795,7 @@
       </div>
     </div>
 
-    <p class="contact-line reveal"><span class="brass">EMAIL</span>&nbsp;&nbsp;connect@calfractionalhr.com&nbsp;&nbsp;·&nbsp;&nbsp;<span class="brass">AREA</span>&nbsp;&nbsp;Ventura · Santa Barbara · Statewide CA&nbsp;&nbsp;·&nbsp;&nbsp;<span class="brass">RESP</span>&nbsp;&nbsp;Within one business day</p>
+    <p class="contact-line reveal"><span class="brass">CALL</span>&nbsp;&nbsp;<a href="tel:+18052503252">(805) 250-3252</a>&nbsp;&nbsp;·&nbsp;&nbsp;<span class="brass">EMAIL</span>&nbsp;&nbsp;connect@calfractionalhr.com&nbsp;&nbsp;·&nbsp;&nbsp;<span class="brass">AREA</span>&nbsp;&nbsp;Ventura · Santa Barbara · Statewide CA&nbsp;&nbsp;·&nbsp;&nbsp;<span class="brass">RESP</span>&nbsp;&nbsp;Within one business day</p>
   </div>
 </section>
 
@@ -796,8 +829,10 @@
       </div>
       <div class="foot-col">
         <h5>Contact</h5>
+        <a href="tel:+18052503252">Call · (805) 250-3252</a>
+        <a href="/book.html">Schedule a call</a>
+        <a href="#contact-message">Send us a message</a>
         <a href="#audit-request">Request an audit</a>
-        <a href="/book.html">Book a call</a>
         <a href="mailto:connect@calfractionalhr.com">connect@calfractionalhr.com</a>
         <a href="/privacy.html">Privacy policy</a>
       </div>
