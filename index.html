@@ -237,6 +237,10 @@
   .portrait .cap{position:absolute;bottom:16px;left:18px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--slate-lt);letter-spacing:.1em;z-index:2}
   .portrait .seal{position:relative;z-index:3;width:66%;max-width:290px;height:auto;filter:drop-shadow(0 6px 20px rgba(0,0,0,.4))}
   .portrait .seal .brg{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;fill:var(--brass-2);opacity:.75}
+  .portrait .compass{position:relative;z-index:2;width:78%;max-width:300px;height:auto;filter:drop-shadow(0 8px 26px rgba(0,0,0,.45))}
+  .compass-spin{transform-box:fill-box;transform-origin:center;animation:compassSpin 28s linear infinite}
+  @keyframes compassSpin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.compass-spin{animation:none}}
   .about-txt .eyebrow{margin-bottom:18px}
   .about-txt h2{font-size:clamp(1.8rem,3.5vw,2.6rem);margin-bottom:8px}
   .about-txt .role{font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.1em;color:var(--brass);text-transform:uppercase;margin-bottom:24px}
@@ -644,8 +648,39 @@
   <div class="wrap">
     <div class="about-grid reveal">
       <div class="portrait">
-        <img class="ph" src="troy-avery.jpg" alt="Troy Avery, Principal — California Fractional HR">
-        <div class="cap">TROY AVERY · PRINCIPAL · VENTURA COUNTY, CA</div>
+        <!-- Photo removed 2026-08-28; brand compass stands in. To restore the portrait, swap this <svg> for:
+             <img class="ph" src="troy-avery.jpg" alt="Troy Avery, Principal — California Fractional HR"> -->
+        <svg class="compass" viewBox="0 0 200 200" role="img" aria-label="California Fractional HR compass">
+          <defs>
+            <radialGradient id="compassGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#D8AC4E" stop-opacity=".20"/>
+              <stop offset="55%" stop-color="#D8AC4E" stop-opacity=".05"/>
+              <stop offset="100%" stop-color="#D8AC4E" stop-opacity="0"/>
+            </radialGradient>
+            <path id="compassMinor" d="M100 50 L104 100 L100 150 L96 100 Z"/>
+          </defs>
+          <circle cx="100" cy="100" r="96" fill="url(#compassGlow)"/>
+          <!-- static graduated bezel -->
+          <circle cx="100" cy="100" r="94" fill="none" stroke="#B4862B" stroke-width="1.25"/>
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#D8AC4E" stroke-width="1" stroke-opacity=".5" stroke-dasharray="1 6.68"/>
+          <circle cx="100" cy="100" r="70" fill="none" stroke="#B4862B" stroke-width=".75" stroke-opacity=".35"/>
+          <g fill="#D8AC4E" font-family="'IBM Plex Mono',monospace" font-size="13" font-weight="500" text-anchor="middle">
+            <text x="100" y="22">N</text>
+            <text x="100" y="187">S</text>
+            <text x="185" y="105">E</text>
+            <text x="15" y="105">W</text>
+          </g>
+          <!-- rotating rose -->
+          <g class="compass-spin">
+            <use href="#compassMinor" fill="#D8AC4E" fill-opacity=".55" transform="rotate(45 100 100)"/>
+            <use href="#compassMinor" fill="#D8AC4E" fill-opacity=".55" transform="rotate(-45 100 100)"/>
+            <path d="M38 100 L100 93 L162 100 L100 107 Z" fill="#0A2C44" stroke="#B4862B" stroke-width="1"/>
+            <path d="M100 38 L107 100 L100 162 L93 100 Z" fill="#B4862B"/>
+            <circle cx="100" cy="100" r="6" fill="#B4862B"/>
+            <circle cx="100" cy="100" r="2.6" fill="#0A2C44"/>
+          </g>
+        </svg>
+        <div class="cap">VENTURA COUNTY, CA · 34°16′N 119°14′W</div>
       </div>
       <div class="about-txt">
         <span class="eyebrow">The Practice</span>
