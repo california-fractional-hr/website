@@ -115,6 +115,12 @@
   .req.is-replace .rev-note{background:#FFFFFF}
   .rev-note{border-left:3px solid #B4552B;background:#FBF1EC;border-radius:2px;padding:11px 15px;margin-top:10px;font-size:13.5px;color:#7A2E1D;line-height:1.55}
   .rev-note b{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:#B4552B}
+  .chip.absent{color:var(--ink);background:#fff;border:1px solid var(--ink);font-weight:500}       /* v2.11: closed by written statement */
+  .req.is-absent{background:#F5F6F8;border-color:rgba(10,44,68,.28);border-left:3px solid var(--ink)} /* navy: closed — on the record, not verified */
+  .stmt{border-left:3px solid var(--ink);background:#F5F6F8;border-radius:2px;padding:11px 15px;margin-top:10px;font-size:13.5px;color:#22323D;line-height:1.55}
+  .req.is-absent .stmt{background:#FFFFFF}
+  .req.is-absent .drop{border-color:rgba(10,44,68,.22);background:transparent;color:var(--slate)}   /* quiet: nothing is asked of the client */
+  .stmt b{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--ink)}
   .obstacles{list-style:none;margin:10px 0 6px}
   .obstacles button{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line-lt);padding:9px 8px;font-family:'Public Sans',sans-serif;font-size:14px;color:#31424A;line-height:1.5;cursor:pointer;border-radius:2px;transition:background .15s}
   .obstacles button:hover{background:#FBF6EA}
@@ -225,7 +231,7 @@
      look so the framed badge means one thing — the stage of the evidence. */
   .tag.plain{font-family:'Public Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:0;text-transform:none;border:1px solid var(--line-lt);background:#FFFFFF;color:var(--slate)}
   .si{display:inline-flex;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px;flex:none}
-  .si.ok{background:#EFF5F0;color:var(--ok)} .si.flag{background:rgba(169,67,15,.09);color:var(--warn)} .si.unk{background:#EEF0F3;color:#6B7684}
+  .si.ok{background:#EFF5F0;color:var(--ok)} .si.flag{background:rgba(169,67,15,.09);color:var(--warn)} .si.unk{background:#EEF0F3;color:#6B7684} .si.closed{background:#EEF1F5;color:var(--ink)}
   .chk{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line-lt);font-size:13.5px}
   .chk:last-child{border-bottom:0} .chk .lbl{flex:1;min-width:0} .chk .val{color:var(--slate);font-size:12.5px;text-align:right;max-width:56%;white-space:nowrap}
   @media (max-width:640px){
@@ -732,25 +738,57 @@ function qHtml(q){
 }
 
 /* ============ render: section documents ============ */
+/* v2.11 (10.05.2026): an item can also close by the client's written statement that it
+   does not exist (SOW-A §3) — status "absent". It is not verified and not waived; it
+   counts toward a complete record. `r.statement` carries the basis in the firm's words,
+   and may also sit on a verified card whose request was delivered only in part.
+   Client-facing copy for the state lives here, in one place. */
+const STMT = {
+  // Wording: Catherine Hollis (CHRO), on Priya's floor, 10.05.2026. The card makes the
+  // document the subject, names the basis and its date, and never says "complete".
+  chip: "CLOSED BY STATEMENT",                 // SOW-A §3's own words
+  siteChip: "CLOSED BY SITE VISIT",            // closed on our dated on-site observation
+  head: "On record",
+  meta: "CLOSED",                              // not "recorded" — Exhibit A uses that for findings
+  drop: "If one turns up, drop it here, or <b>browse</b> — we'll review it",
+  siteDrop: "If we missed one, drop a photo here, or <b>browse</b>",
+  legend: "Closed",
+  word: d => `Closed by written statement${d?" · "+d:""}`,
+  siteWord: d => `Closed by site visit${d?" · "+d:""}`,
+  partialWord: d => `Verified${d?" · "+d:""} — the rest closed by statement`,
+  leadComplete: (v,s,t,reviewer) => `<b>All ${t}</b> requested items are accounted for: ${v} document${v===1?"":"s"} verified by ${reviewer}, and ${s} closed — each card shows how. Analysis proceeds on this record.`,
+  leadAllIn: (v,s,r,t) => `<b>All ${t}</b> requested items are in or closed — ${v} verified, ${s} closed, ${r} under review. Nothing more is needed from you right now.`,
+  leadOpen: (inC,t,v,s,o) => `<b>${inC} of ${t}</b> requested items are in or closed · ${v} verified · ${s} closed. <b>${o}</b> item${o===1?" stands":"s stand"} between you and a complete record:`,
+  tileTitle: (v,s,t) => `${v} of ${t} verified · ${s} closed`,
+  sectionTitle: (allDone,t,v,s,inN) => allDone ? (v ? `${v} verified · ${s} closed` : `All closed`) : `${inN} of ${t} in or closed · ${v} verified`,
+};
+const isClosedByStatement = r => r.status==="absent" || r.status==="observed";
+function stmtDate(r){ const m = String(r.statement||"").match(/\b\d{2}\.\d{2}\.\d{4}\b/); return m ? m[0] : ""; }
+function closedN(list){ return list.filter(r=>r.status==="reviewed"||isClosedByStatement(r)).length; }
 function reqCard(r){
   // Three client-visible states (v2.3): received means it is being checked;
-  // the checkmark belongs to the review, not the upload.
+  // the checkmark belongs to the review, not the upload. v2.11 adds the fourth:
+  // closed by the client's written statement (absent).
   const verified = r.status==="reviewed";
   const inReview = r.status==="received";
   const repl = r.status==="replace";
-  const cls = r.status==="waived" ? "" : repl ? "is-replace" : verified ? "is-done" : inReview ? "is-inreview" : "is-open";
-  const chip = r.status==="waived" ? "" : repl ? `<span class="chip replace">NEEDS ATTENTION</span>` : verified ? `<span class="chip done">VERIFIED ✓</span>` : inReview ? `<span class="chip inreview">IN REVIEW</span>` : `<span class="chip open">OUTSTANDING</span>`;
+  const absent = r.status==="absent", observed = r.status==="observed", closed = absent||observed;
+  const cls = r.status==="waived" ? "" : repl ? "is-replace" : verified ? "is-done" : closed ? "is-absent" : inReview ? "is-inreview" : "is-open";
+  const chip = r.status==="waived" ? "" : repl ? `<span class="chip replace">NEEDS ATTENTION</span>` : verified ? `<span class="chip done">VERIFIED ✓</span>${r.statement?` <span class="chip absent">${STMT.chip}</span>`:""}` : closed ? `<span class="chip absent">${observed?STMT.siteChip:STMT.chip}</span>` : inReview ? `<span class="chip inreview">IN REVIEW</span>` : `<span class="chip open">OUTSTANDING</span>`;
   const meta = [r.requested?"REQUESTED "+String(r.requested).toUpperCase():"",
     (inReview||verified)&&r.received?"RECEIVED "+String(r.received).toUpperCase():"",
-    verified&&r.reviewed?"VERIFIED "+String(r.reviewed).toUpperCase()+(r.reviewed_by?" — "+esc(String(r.reviewed_by).toUpperCase()):""):""].filter(Boolean).join(" · ");
+    verified&&r.reviewed?"VERIFIED "+String(r.reviewed).toUpperCase()+(r.reviewed_by?" — "+esc(String(r.reviewed_by).toUpperCase()):""):"",
+    closed&&r.reviewed?STMT.meta+" "+String(r.reviewed).toUpperCase()+(r.reviewed_by?" — "+esc(String(r.reviewed_by).toUpperCase()):""):""].filter(Boolean).join(" · ");
   const revNote = repl&&r.review_note?`<p class="rev-note"><b>From our review</b>${esc(r.review_note)}</p>`:"";
+  const stmt = r.statement && r.status!=="waived" ? `<p class="stmt"><b>${STMT.head}</b>${esc(r.statement)}</p>` : "";
   const onRecord = (r.files_list||[]).map(f=>`<li>📄 ${esc(f.name)}<span class="sz">FILED ${esc(String(f.date||"")).toUpperCase()}</span></li>`).join("");
   const drop = r.status==="waived" ? "" :
-    `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${repl?`Drop the <b>corrected file</b> here, or <b>browse</b>`:(inReview||verified)?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
+    `<div class="drop" data-req="${esc(r.id)}" data-title="${esc(r.title)}">${repl?`Drop the <b>corrected file</b> here, or <b>browse</b>`:observed?STMT.siteDrop:absent?STMT.drop:(inReview||verified)?"Add another file — drop here, or <b>browse</b>":`Drop <b>${esc(r.title)}</b> here, or <b>browse</b>`}</div>`;
   return `<div class="req ${cls}" id="req-${esc(r.id)}">
     <div class="req-top"><h3>${esc(r.title)}</h3>${chip}</div>
     ${r.note?`<p class="req-note">${esc(r.note)}</p>`:""}
     ${revNote}
+    ${stmt}
     ${meta?`<p class="req-meta">${meta}</p>`:""}
     ${onRecord?`<ul class="filelist">${onRecord}</ul>`:""}
     ${drop}<ul class="filelist" data-list="${esc(r.id)}"></ul></div>`;
@@ -759,8 +797,10 @@ function docBlock(sectionKey){
   const list = requests.filter(r=>r.section===sectionKey && r.status!=="waived");
   if (!list.length) return "";
   const vN = list.filter(r=>r.status==="reviewed").length;
+  const sN = list.filter(isClosedByStatement).length;
   const inN = list.filter(r=>r.status!=="open").length;
-  const title = vN===list.length ? `All documents verified` : inN===list.length ? `All ${list.length} in · ${vN} verified` : `${inN} of ${list.length} in · ${vN} verified`;
+  const title = sN ? STMT.sectionTitle(closedN(list)===list.length, list.length, vN, sN, inN)
+    : vN===list.length ? (list.some(r=>r.status==="reviewed"&&r.statement) ? `All filed documents verified · the rest closed by statement` : `All documents verified`) : inN===list.length ? `All ${list.length} in · ${vN} verified` : `${inN} of ${list.length} in · ${vN} verified`;
   return `<div class="docblock"><div class="dhead"><small>Documents for this section</small>${title}</div>
     ${list.map(reqCard).join("")}</div>`;
 }
@@ -1049,9 +1089,10 @@ function renderReview(){
 }
 
 function docsVerified(){
-  // [verified, active] — the one count the rail, the summary, and the banner share.
+  // [closed, active] — the one count the rail, the summary, and the banner share.
+  // v2.11: an item closed by the client's written statement counts as closed (SOW-A §3).
   const active = requests.filter(r=>r.status!=="waived");
-  return [active.filter(r=>r.status==="reviewed").length, active.length];
+  return [closedN(active), active.length];
 }
 function docsComplete(){ const [v,t] = docsVerified(); return t>0 && v===t; }
 function docSummary(){
@@ -1059,21 +1100,26 @@ function docSummary(){
   // Uploading everything gets you to "all in — under review", never to "complete".
   const active = requests.filter(r=>r.status!=="waived");
   const verified = active.filter(r=>r.status==="reviewed");
+  const byStmt = active.filter(isClosedByStatement);   // v2.11: closed by written statement or site visit
   const inReview = active.filter(r=>r.status==="received");
   const obstacles = active.filter(r=>r.status==="open"||r.status==="replace");
-  const inCount = verified.length + inReview.length;
+  const inCount = verified.length + byStmt.length + inReview.length;
   const pctV = active.length ? Math.round(100*verified.length/active.length) : 0;
+  const pctS = active.length ? Math.round(100*byStmt.length/active.length) : 0;
   const pctR = active.length ? Math.round(100*inReview.length/active.length) : 0;
   const allVerified = active.length>0 && !obstacles.length && !inReview.length;
   const allIn = !obstacles.length && inReview.length>0;
   const reviewer = (verified.find(r=>r.reviewed_by)||{}).reviewed_by || "California Fractional HR";
   let lead;
-  if (allVerified) lead = `<b>${verified.length} of ${active.length}</b> documents verified. Collection is complete — every document has been opened, checked against your intake record, and confirmed by ${esc(reviewer)}. Analysis proceeds on a verified record.`;
+  if (allVerified && byStmt.length) lead = STMT.leadComplete(verified.length, byStmt.length, active.length, esc(reviewer));
+  else if (allIn && byStmt.length) lead = STMT.leadAllIn(verified.length, byStmt.length, inReview.length, active.length);
+  else if (byStmt.length) lead = STMT.leadOpen(inCount, active.length, verified.length, byStmt.length, obstacles.length);
+  else if (allVerified) lead = `<b>${verified.length} of ${active.length}</b> documents verified. Collection is complete — every document has been opened, checked against your intake record, and confirmed by ${esc(reviewer)}. Analysis proceeds on a verified record.`;
   else if (allIn) lead = `<b>All ${active.length}</b> requested documents are in — ${verified.length} verified, ${inReview.length} under review. We open and check every document against your intake record before analysis begins; anything that needs a second look comes back here with a note. Nothing more is needed from you right now — you'll see each item flip to VERIFIED as we confirm it.`;
   else lead = `<b>${inCount} of ${active.length}</b> requested documents are in · ${verified.length} verified. <b>${obstacles.length}</b> item${obstacles.length===1?" stands":"s stand"} between you and a complete record:`;
   return `<h2 class="docstand">Where your document collection stands</h2>
     <p class="note" style="margin-top:4px">${lead}</p>
-    <div class="progressbar" style="display:flex"><i style="width:${pctV}%;background:var(--ok)"></i><i style="width:${pctR}%;background:#9DB2AD"></i></div>
+    <div class="progressbar" style="display:flex"><i style="width:${pctV}%;background:var(--ok)"></i><i style="width:${pctS}%;background:#5B6F86"></i><i style="width:${pctR}%;background:#9DB2AD"></i></div>
     ${obstacles.length?`<ul class="obstacles">${obstacles.map(r=>`<li><button onclick="jumpReq('${esc(r.id)}')"><span class="chip ${r.status==="replace"?"replace":"open"}">${r.status==="replace"?"REPLACE":"SEND"}</span><span><b>${esc(r.title)}</b>${r.status==="replace"&&(r.review_note||r.note)?` — ${esc(r.review_note||r.note)}`:""}</span><span class="arrow">↓</span></button></li>`).join("")}</ul>
     <p class="note">Click any item to jump to its upload below. Findings that depend on them stay marked “evidence pending” until they arrive.</p>`:""}`;
 }
@@ -1116,7 +1162,7 @@ const LADDER = [
   {n:100, tag:"annual pay-data report to the state"}];
 function ansChoice(id){ return ((state.answers[id]||{}).choice||"").trim(); }
 function ansNum(id,i){ const p=(state.answers[id]||{}).parts||{}; const v=parseFloat(String(p[i]??"").replace(/[^0-9.]/g,"")); return isFinite(v)?v:null; }
-function stIcon(s){ return s==="ok"?'<span class="si ok" aria-hidden="true">✓</span>':s==="flag"?'<span class="si flag" aria-hidden="true">▲</span>':'<span class="si unk" aria-hidden="true">?</span>'; }
+function stIcon(s){ return s==="stmt"?'<span class="si closed" aria-hidden="true">–</span>':s==="ok"?'<span class="si ok" aria-hidden="true">✓</span>':s==="flag"?'<span class="si flag" aria-hidden="true">▲</span>':'<span class="si unk" aria-hidden="true">?</span>'; }
 function stWord(s){ return s==="ok"?"In place":s==="flag"?"Review":"Unknown"; }
 function ladderSVG(n){
   const W=520,H=72,L=14,R=14, x=v=>L+Math.sqrt(Math.min(v,120)/120)*(W-L-R);
@@ -1271,7 +1317,8 @@ function renderDashboard(){
   const mix = ((state.answers.B0||{}).multi)||[];
   const act = requests.filter(r=>r.status!=="waived");
   const ev = { verified: act.filter(r=>r.status==="reviewed").length, review: act.filter(r=>r.status==="received").length,
-               attention: act.filter(r=>r.status==="replace").length, open: act.filter(r=>r.status==="open").length };
+               attention: act.filter(r=>r.status==="replace").length, open: act.filter(r=>r.status==="open").length,
+               absent: act.filter(isClosedByStatement).length };   // v2.11
   const checks = statedChecks();
   const m = metrics||{};
   const delivered = !!m.delivered && Array.isArray(m.ratios);
@@ -1315,13 +1362,13 @@ function renderDashboard(){
       ${secOpen(2,"What we verified","each document opened and checked against your answers", [act.length?`${ev.verified} of ${act.length} verified`:"nothing requested yet", delivered&&m.contradictions!=null?`${m.contradictions} contradictions`:""].filter(Boolean).join(" · "))}
       <div class="tile wide">
         <span class="k">Evidence <span class="tag verified">Verified</span></span>
-        <h3>${act.length?`${ev.verified} of ${act.length} documents verified`:"No documents requested yet"}</h3>
+        <h3>${act.length?(ev.absent?STMT.tileTitle(ev.verified,ev.absent,act.length):`${ev.verified} of ${act.length} documents verified`):"No documents requested yet"}</h3>
         <p class="ask">A document counts only once it has been opened and checked against your answers.</p>
-        ${splitBar([{value:ev.verified,color:"#3E7D5B"},{value:ev.review,color:"#9DB2AD"},{value:ev.attention,color:"#A9430F"},{value:ev.open,color:"#D9DEE5"}])}
-        <div class="legend"><span><i style="background:#3E7D5B"></i>Verified ${ev.verified}</span><span><i style="background:#9DB2AD"></i>In review ${ev.review}</span><span><i style="background:#A9430F"></i>Needs attention ${ev.attention}</span><span><i style="background:#D9DEE5"></i>Outstanding ${ev.open}</span></div>
+        ${splitBar([{value:ev.verified,color:"#3E7D5B"},{value:ev.absent,color:"#5B6F86"},{value:ev.review,color:"#9DB2AD"},{value:ev.attention,color:"#A9430F"},{value:ev.open,color:"#D9DEE5"}])}
+        <div class="legend"><span><i style="background:#3E7D5B"></i>Verified ${ev.verified}</span>${ev.absent?`<span><i style="background:#5B6F86"></i>${STMT.legend} ${ev.absent}</span>`:""}<span><i style="background:#9DB2AD"></i>In review ${ev.review}</span><span><i style="background:#A9430F"></i>Needs attention ${ev.attention}</span><span><i style="background:#D9DEE5"></i>Outstanding ${ev.open}</span></div>
         ${act.length?`<div style="margin-top:14px">${act.map(r=>{
-          const st = r.status==="reviewed"?"ok":r.status==="received"?"unk":"flag";
-          const word = r.status==="reviewed"?`Verified${r.reviewed?" · "+esc(r.reviewed):""}`:r.status==="received"?`Under review${r.received?" · received "+esc(r.received):""}`:r.status==="replace"?"Needs replacement — see the note in Documents":"Outstanding — awaiting your upload";
+          const st = r.status==="reviewed"?"ok":isClosedByStatement(r)?"stmt":r.status==="received"?"unk":"flag";
+          const word = r.status==="reviewed"?(r.statement?STMT.partialWord(esc(r.reviewed||"")):`Verified${r.reviewed?" · "+esc(r.reviewed):""}`):r.status==="absent"?STMT.word(stmtDate(r)):r.status==="observed"?STMT.siteWord(stmtDate(r)):r.status==="received"?`Under review${r.received?" · received "+esc(r.received):""}`:r.status==="replace"?"Needs replacement — see the note in Documents":"Outstanding — awaiting your upload";
           return `<div class="chk">${stIcon(st)}<span class="lbl"><span class="sub" style="display:inline;margin:0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em">${esc(r.id)}</span> · ${esc((r.title||"").split(" — ")[0])}</span><span class="val" style="white-space:normal">${word}</span></div>`;
         }).join("")}</div>`:""}
         ${delivered&&(m.documented_headcount||m.contradictions!=null)?`
@@ -1434,7 +1481,7 @@ async function handleFiles(dropEl, fileList){
   }
   if(sent.length){
     const r = requests.find(x=>x.id===reqId);
-    if(r){ if(r.status==="open") r.status="received"; (r.files_list=r.files_list||[]).push(...sent.map(n=>({name:n,date:"today"}))); }
+    if(r){ if(r.status==="open"||isClosedByStatement(r)) r.status="received"; (r.files_list=r.files_list||[]).push(...sent.map(n=>({name:n,date:"today"}))); }
     queueNotify(title, sent);
   }
   chipMsg("AUTOSAVE ON", true);
@@ -1639,6 +1686,9 @@ async function completeAll(){
       {id:"R-02", title:"Wage statements (3–5 employees)", note:"We test the nine §226 line items against real stubs.", status:"replace", requested:"Aug 12", received:"Aug 14", section:"C", review_note:"The file titled 'wage statements' is a benefits deduction summary — re-export actual pay stubs, one per pay group.", files_list:[{name:"stubs-batch.pdf", date:"Aug 14"}]},
       {id:"R-03", title:"Current employee handbook", note:"Whatever version employees actually received.", status:"reviewed", requested:"Aug 12", received:"Aug 13", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"F", files_list:[{name:"handbook-2025.pdf", date:"Aug 13"}]},
       {id:"R-04", title:"Org chart or roster with titles and pay rates", note:"Headcount here reconciles against your Section A answers.", status:"open", requested:"Aug 12", section:"A"},
+      {id:"R-05", title:"Harassment-prevention training roster or completion certificates", note:"", status:"absent", requested:"Aug 12", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"H", statement:"Sample Client Co. told us in writing on 08.14.2026 that no such document exists."},
+      {id:"R-06", title:"Offer letter template and a recent signed example; wage notice sample", note:"", status:"reviewed", requested:"Aug 12", received:"Aug 13", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"E", statement:"The filed document is verified. Sample Client Co. told us in writing that no signed example exists and that no wage notice exists (08.14.2026).", files_list:[{name:"offer-letter.docx", date:"Aug 13"}]},
+      {id:"R-07", title:"Photos of posting boards at each location", note:"", status:"observed", requested:"Aug 12", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"I", statement:"On our visit to 120 Sample Way on 08.15.2026, we did not see a posting board."},
     ];
     document.getElementById("gate").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
