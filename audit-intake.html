@@ -211,6 +211,7 @@
   .xp.kv td:first-child{width:22%;font-weight:600;color:var(--ink);white-space:nowrap}
   .xp-ul.tight li{padding:3px 0 3px 18px;font-size:13px}
   .pg-note{font-size:13px;line-height:1.5;color:#2F3A47;margin:10px 0 0}
+  .cond-head{font-size:15px;line-height:1.5;color:var(--ink);margin:6px 0 0;max-width:72ch} .cond-head b{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:22px;color:var(--brass);letter-spacing:-.01em} .cond-head span{display:block;font-size:13px;color:var(--slate)}
   .cap-line{font-size:11.5px;line-height:1.5;color:#6B7684;margin:6px 0 0}
   .tot-line{display:flex;justify-content:flex-end;align-items:baseline;gap:10px;margin:2px 0 0;font-size:13px;color:var(--slate)} .tot-line b{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:24px;color:var(--brass);letter-spacing:-.01em}
   .chart{margin:10px 0 0} .chart svg{display:block;width:100%;height:auto}
@@ -1197,7 +1198,7 @@ const QUESTIONS = {
   time_fidelity:"Are people paid for the hours on the original time records?",
   deductions:"Are there deductions from pay that California doesn't allow?",
   heat_training:"Has everyone who works in heat been trained?"};
-function fmtK(v){ if(v==null||!isFinite(v)) return "—"; return v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1000?`$${Math.round(v/1000)}K`:`$${v}`; }
+function fmtK(v){ if(v==null||!isFinite(v)) return "—"; return v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1000?`$${Math.round(v/1000)}K`:`$${Math.round(v)}`; }   // v2.14: whole dollars under $1K (an "if" row can carry cents)
 // Sections collapse: every one starts closed (a closed page is still a picture —
 // each header carries a one-line read of what is inside); the reader decides what
 // stays open. Native <details>, so it works without script and with a keyboard.
@@ -1241,13 +1242,20 @@ function exposureSection(x){
   const capBar=(c)=>{ const v=pgTotal*c.factor, w=Math.max(4,Math.round(v/Math.max(pgTotal,1)*(W-4))); return `<svg viewBox="0 0 ${W} 18" height="18" aria-hidden="true"><rect x="2" y="4" width="${W-4}" height="10" rx="3" fill="#EEF0F3"/><rect x="2" y="2" width="${w}" height="14" rx="3" fill="${c.factor<1?"#D8AC4E":"#B4862B"}"/></svg>`; };
   const capLo = caps.some(c=>c.factor>0)?Math.min(...caps.filter(c=>c.factor>0).map(c=>c.factor)):1; // the cure path can reach $0; the low end quoted is the 15% cap
   const headline = x.display||`${fmtK(lo)} – ${fmtK(hi)}`;
-  const peek = pg&&pgTotal?`${headline} + PAGA ${fmtK(Math.round(pgTotal*capLo))}–${fmtK(pgTotal)}`:headline;
+  // v2.14 (10.05.2026): conditional exposure — "If …" rows beside the scored range, never folded into it.
+  // The record supplies every string (the condition, the inputs, the arithmetic, the lookback); the page sums and charts.
+  const cd = x.conditional||null, cdItems=(cd&&cd.items)||[], cdLo=cdItems.reduce((s,i)=>s+(+i.low||0),0), cdHi=cdItems.reduce((s,i)=>s+(+i.high||0),0);
+  const cdPg=(cd&&cd.paga_items)||[], cdPgLo=cdPg.reduce((s,i)=>s+(+i.low||0),0), cdPgHi=cdPg.reduce((s,i)=>s+(+i.high||0),0);
+  const wf=(cd&&cd.willful)||null, cdRange=cd?(cd.display||`${fmtK(cdLo)} – ${fmtK(cdHi)}`):"";
+  const peekBase = pg&&pgTotal?`${headline} + PAGA ${fmtK(Math.round(pgTotal*capLo))}–${fmtK(pgTotal)}`:headline;
+  const peek = cd?`${peekBase} · if ${cdRange}`:peekBase;
   return `
       ${secOpen(4,"What it could cost","the findings, then PAGA on top — and what the company can do about each", peek)}
       <div class="tile wide">
         <span class="k">Illustrative exposure <span class="tag analysis">From analysis</span></span>
         <h3>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}${pg&&pgTotal?` <span style="font-size:15px;font-weight:400;color:var(--slate)">+ PAGA ${fmtK(Math.round(pgTotal*capLo))} – ${fmtK(pgTotal)}</span>`:""}</h3>
         <p class="ask">${esc(x.note||"")}</p>
+        ${cd?`<p class="cond-head">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b>${cdPg.length?`<span>+ PAGA ${fmtK(cdPgLo)} – ${fmtK(cdPgHi)} before any cap</span>`:""}${wf?`<span>${esc(wf.label||"Only if found willful")}: ${fmtK(wf.low)} – ${fmtK(wf.high)} — shown beside the total, never inside it</span>`:""}</p>`:""}
 
         ${items.length?`<div class="sub4"><b>4A</b><h4>The findings</h4><span>cost per violation, and the total</span></div>
         ${colChart(items.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Illustrative exposure by finding"})}
@@ -1276,6 +1284,24 @@ function exposureSection(x){
           ${caps.map(c=>`<tr><td class="f"><b>${esc(c.label)}</b></td><td>${esc(c.words||"")}</td><td class="nr">${fmtK(Math.round(pgTotal*c.factor))}</td></tr>`).join("")}</tbody></table></div>`:""}
           ${pg.split?`<p class="pg-note"><b>${esc(pg.split)}</b></p>`:""}
           ${pg.notes&&pg.notes.length?`<ul class="xp-ul tight" style="margin-top:8px">${pg.notes.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+        </div></details>`:""}
+
+        ${cd?`<div class="sub4" style="margin-top:22px"><b>4D</b><h4>${esc(cd.lead||"If the open questions go against the company")}</h4><span>${esc(cd.sub||"what turns on the open questions — every input, rate and statute shown")}</span></div>
+        ${colChart(cdItems.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Conditional exposure by finding — if the open questions went against the company"})}
+        <div class="tot-line">Together, if every open question went against the company <b>${esc(cdRange)}</b></div>
+        ${wf?`<div class="tot-line" style="font-size:12.5px"><span>${esc(wf.label||"Only if found willful")}${wf.cite?` · ${esc(wf.cite)}`:""} — beside the total, never inside it</span><b style="font-size:18px">${fmtK(wf.low)} – ${fmtK(wf.high)}</b></div>`:""}
+        ${cd.caption?`<p class="cap-line">${esc(cd.caption)}</p>`:""}
+        <details class="drill"><summary>Show the arithmetic behind each "if"</summary><div>
+          <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>If …</th><th>Inputs</th><th>Arithmetic</th><th>Over the lookback</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
+          ${cdItems.map(i=>`<tr><td class="f" style="width:16%"><b>${esc(i.id)} · ${esc(i.short||i.title||"")}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.condition||"")}</td><td>${esc(i.inputs||"")}</td><td>${esc(i.arithmetic||"")}</td><td>${esc(i.lookback||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
+          <tr class="tot"><td colspan="5">Together, if every open question went against the company — before PAGA and before any fix</td><td class="nr">${fmtK(cdLo)} – ${fmtK(cdHi)}</td></tr>
+          ${wf?`<tr><td class="f"><b>${esc(wf.id||"")} · ${esc(wf.short||"Willful misclassification")}</b>${wf.cite?`<small>${esc(wf.cite)}</small>`:""}</td><td>${esc(wf.condition||"")}</td><td>${esc(wf.inputs||"")}</td><td>${esc(wf.arithmetic||"")}</td><td>${esc(wf.lookback||"")}</td><td class="nr">${fmtK(wf.low)} – ${fmtK(wf.high)}</td></tr>`:""}
+          </tbody></table></div>
+          ${cdPg.length?`<h4 class="xp-h4">Then PAGA, if the same questions went against the company</h4><div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>If …</th><th>Employees × pay periods × rate × violations</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
+          ${cdPg.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||"")}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.condition||"")}</td><td>${esc(i.basis||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
+          <tr class="tot"><td colspan="3">Before any cap — the caps in 4C apply to these the same way</td><td class="nr">${fmtK(cdPgLo)} – ${fmtK(cdPgHi)}</td></tr></tbody></table></div>`:""}
+          ${cd.named&&cd.named.length?`<h4 class="xp-h4">Named with the formula, not totaled</h4><ul class="xp-ul tight">${cd.named.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+          ${cd.method&&cd.method.length?`<h4 class="xp-h4">How the "if" rows are built</h4><div class="xpwrap"><table class="xp tight kv"><tbody>${cd.method.map(t=>{const k=t.indexOf(". ");return `<tr><td>${esc(k>0&&k<40?t.slice(0,k):"—")}</td><td>${esc(k>0&&k<40?t.slice(k+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
         </div></details>`:""}
 
         <details class="drill"><summary>How the ranges are built, what they leave out, and what is carried without a number</summary><div>
