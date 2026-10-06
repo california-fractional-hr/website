@@ -891,7 +891,7 @@ function pcapSVG(){
     two(c.label).forEach((ln,j)=>{ s += `<text x="${cx}" y="${base+15+j*11}" text-anchor="middle" font-size="8.5" fill="#42535A" font-family="Public Sans,sans-serif">${esc(ln)}</text>`; });
   });
   return `<div class="pcap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="PAGA penalty index under each level of documented steps">${s}</svg></div>
-    <p class="cap-line">Documented reasonable steps taken before a notice cap PAGA penalties at 15% — this file is that documentation. The dollar arithmetic is in row 4 above.</p>`;
+    <p class="cap-line">Where a court finds all reasonable steps were taken before a PAGA notice, penalties can be capped at 15%; within 60 days after, at 30%. The dollar arithmetic is in row 4 above.</p>`;
 }
 
 function stepsRowHTML(dlv){
@@ -993,7 +993,7 @@ function deliverableRows(m){
       ${calSpineHTML(dlv)}
     </div>
     ${secClose()}
-    ${secOpen(8,"Reasonable-Steps Report", st.sub||"the written record for counsel — never closes", st.peek||"met")}
+    ${secOpen(8,"Reasonable-Steps Report", st.sub||"the dated record of what was done — never closes", st.peek||"met")}
     <div class="tile wide">${stepsRowHTML(dlv)}</div>
     ${secClose()}`;
 }
@@ -1651,9 +1651,9 @@ async function completeAll(){
           {label:"Steps taken + violation cured", factor:0}] };
         metrics.dlv = {
           readout:{ peek:"met Aug 20 · this page, live", sub:"the 60-minute walkthrough, in person — readout edition on file",
-            body:"Delivered in person at the Aug 20 readout — a 60-minute walkthrough of the record in plain English; legal conclusions framed for the company's counsel.",
+            body:"Delivered in person at the Aug 20 readout — a 60-minute walkthrough of the record in plain English; legal questions named and left open.",
             where:"Rows 1–4 above are the readout, live — the same record, moving as it moves. The readout edition PDF is on file as delivered." },
-          steps:{ peek:"met · Version 3", sub:"the written record for counsel — 14 entries · never closes",
+          steps:{ peek:"met · Version 3", sub:"the dated record of what was done — 14 entries · never closes",
             lead:"The dated ledger of every reasonable step taken — 14 entries since the engagement opened, every one dated, attributed, and evidenced.",
             stats:[["14","ledger entries","every one dated, attributed, and evidenced"],["8","days, open to delivery","August 12 to the August 20 readback"],["3 of 4","documents verified","returns documented"],["3","report versions cut","each generated from this ledger"]],
             token:"PREVIEW", opened:"Aug 12, 2026", split:7,
@@ -1678,8 +1678,8 @@ async function completeAll(){
                   ["F-02","Overtime underpaid on harvest days","LC 510","L5 × I4","$24K","Payroll lead — Days 1–15"],
                   ["F-04","No written heat-illness prevention plan","8 CCR 3395","L4 × I5","Cited per item","Field manager — Days 1–15"]],
             roadmap:[["DAYS 1–30","Stop the meter","4 moves",["Heat plan adopted; crews trained","Overtime rule corrected in payroll","Meal-period recording live","Breakage deductions stopped and repaid"],null],
-                     ["DAYS 31–60","Rebuild the paper","3 moves",["Exempt classification decided with counsel","Handbook leave language added","Wage statements corrected"],null],
-                     ["DAYS 61–90","Prove it holds","2 moves",["Fresh payroll sample retested","Back-pay decision closed with counsel"],null]],
+                     ["DAYS 31–60","Rebuild the paper","3 moves",["Exempt classification decided by the company","Handbook leave language added","Wage statements corrected"],null],
+                     ["DAYS 61–90","Prove it holds","2 moves",["Fresh payroll sample retested","Back-pay decision made by the company"],null]],
             ratio:"Most of the first thirty days is a payroll configuration session and a scheduling rule — that ratio is the argument for doing this before a demand letter does it for you.",
             record:"The portrait Compliance Audit Report delivered at the readout is the document of record. This map is its visual layer; the two carry the same version stamp." },
           cal:{ peek:"met · live", sub:"the year ahead — today's line drawn live",
