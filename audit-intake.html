@@ -862,7 +862,7 @@ function calYearGridHTML(){
     if(!byMonth.has(key)) byMonth.set(key, []);
     byMonth.get(key).push(e);
   });
-  return sub4("GRID","The year at a glance","every obligation placed, month by month")
+  return sub4("GRID","The year at a glance","month by month, every dated entry placed")
     +`<div class="cy-grid">${[...byMonth.entries()].map(([mon,items])=>
       `<div class="cy-card"><div class="cy-m">${esc(mon)}</div>${items.map(e=>
         `<div class="cy-it"><i style="background:${laneColor[e.lane]||"#42535A"}"></i><span>${esc(e.label)}</span></div>`).join("")}</div>`).join("")}</div>
@@ -988,7 +988,7 @@ function deliverableRows(m){
     <div class="tile wide">
       ${cal.meta?`<p class="sub" style="margin:2px 0 10px">${esc(cal.meta)}</p>`:""}
       ${calendarInnerHTML()}
-      <p class="note">Every obligation restates a route line in your report — the calendar invents nothing. Obligations approach, cross, and recede each visit.</p>
+      <p class="note">Every entry restates a Fix or Route line in your Compliance Audit Report, or a dated document it cites; the calendar invents nothing.</p>
       ${calYearGridHTML()}
       ${calSpineHTML(dlv)}
     </div>
@@ -1401,7 +1401,7 @@ function renderDashboard(){
           <h4 class="xp-h4" style="margin-top:20px">Your answers against your documents</h4>
           <p class="cap-line" style="margin:0 0 4px">${stIcon("flag")}marks an answer the documents contradict. Where the two differ, the documents govern and the report says so — nothing here is held against you; it is where the intake and the record part ways.</p>
           ${m.documented_headcount?(()=>{const ok=ca!=null&&ca===m.documented_headcount; return `<div class="chk">${stIcon(ok?"ok":"flag")}<span class="lbl">Headcount — you said <b>${ca??"—"}</b>; the roster and payroll show <b>${m.documented_headcount}</b></span><span class="val">${ok?"matches":"differs"}</span></div>`;})():""}
-          ${m.contradictions!=null?`<div class="chk">${stIcon(m.contradictions?"flag":"ok")}<span class="lbl">Answers the documents disagree with</span><span class="val"><b>${m.contradictions}</b>${m.contradictions?" of 65":""}</span></div>`:""}
+          ${m.contradictions!=null?`<div class="chk">${stIcon(m.contradictions?"flag":"ok")}<span class="lbl">Answers the documents disagree with</span><span class="val"><b>${m.contradictions}</b>${m.contradictions?` of ${SECTIONS.reduce((n,s)=>n+s.qs.length,0)}`:""}</span></div>`:""}
           ${Array.isArray(m.contradiction_items)&&m.contradiction_items.length?`<details class="drill"><summary>Show the ${m.contradiction_items.length} answers</summary><div><div class="xpwrap"><table class="xp tight"><thead><tr><th>Question</th><th>You said</th><th>The documents show</th></tr></thead><tbody>${m.contradiction_items.map(c=>`<tr><td class="f" style="width:22%"><b>${esc(c.topic||c.q)}</b>${c.q?`<small>${esc(c.q)}</small>`:""}</td><td>${esc(c.said||"")}</td><td>${esc(c.shows||"")}</td></tr>`).join("")}</tbody></table></div></div></details>`:""}`:""}
       </div>
       ${secClose()}
