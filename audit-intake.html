@@ -866,7 +866,7 @@ function calYearGridHTML(){
     +`<div class="cy-grid">${[...byMonth.entries()].map(([mon,items])=>
       `<div class="cy-card"><div class="cy-m">${esc(mon)}</div>${items.map(e=>
         `<div class="cy-it"><i style="background:${laneColor[e.lane]||"#42535A"}"></i><span>${esc(e.label)}</span></div>`).join("")}</div>`).join("")}</div>
-    <p class="cap-line" style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em">A THRESHOLD CROSSING RE-RUNS THE APPLICABILITY REVIEW</p>`;
+    <p class="cap-line" style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em">IF HEADCOUNT CROSSES A LEGAL THRESHOLD, WHICH RULES APPLY CAN CHANGE</p>`;
 }
 
 function calSpineHTML(dlv){
@@ -1654,7 +1654,7 @@ async function completeAll(){
             body:"Delivered in person at the Aug 20 readout — a 60-minute walkthrough of the record in plain English; legal questions named and left open.",
             where:"Rows 1–4 above are the readout, live — the same record, moving as it moves. The readout edition PDF is on file as delivered." },
           steps:{ peek:"met · Version 3", sub:"the dated record of what was done — 14 entries · never closes",
-            lead:"The dated ledger of every reasonable step taken — 14 entries since the engagement opened, every one dated, attributed, and evidenced.",
+            lead:"The dated ledger of what was done — 14 entries since the engagement opened, every one dated, attributed, and evidenced.",
             stats:[["14","ledger entries","every one dated, attributed, and evidenced"],["8","days, open to delivery","August 12 to the August 20 readback"],["3 of 4","documents verified","returns documented"],["3","report versions cut","each generated from this ledger"]],
             token:"PREVIEW", opened:"Aug 12, 2026", split:7,
             ledger:[
