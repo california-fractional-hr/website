@@ -1296,8 +1296,8 @@ function exposureParts(x){
   // scored range stays in the section (the header line, the 4A total). No "if" record: the old head.
   // Under the figure, box 1 is four collapsible blocks in one style (Troy, 10.06.2026) — each a labeled
   // heading with its total at the right, over a table on shared columns (finding · low–high · only if
-  // found willful): 1 the rows behind the "if" figure, open by default so the §226.8 figure sits beside
-  // the total on first view · 2 then PAGA on the same questions, its own total · 3 what documented steps
+  // found willful): 1 the rows behind the "if" figure (every block closed on arrival, Troy 10.06.2026 — the
+  // §226.8 figure sits beside the total one click in) · 2 then PAGA on the same questions, its own total · 3 what documented steps
   // can do to that PAGA, the court's-decision line kept with the caps · 4 the scored findings. The §226.8
   // figure is never inside a total; an empty cell is "—", never "$0".
   // A range breaks only after its dash on a narrow screen ("$13K –" / "$112K"), never around it.
@@ -1321,13 +1321,13 @@ function exposureParts(x){
   const scRows = items.slice().sort(byHigh).map(i=>row(i.id, i.short||i.title, esc(i.cite||""), `<td class="nr">${amt(i.low,i.high)}</td>${dash}`)).join("")
     + `<tr class="tot"><td>Together, before PAGA and before any fix</td><td class="nr">${rng(headline)}</td>${dash}</tr>`;   // 06 and 12 are penalties themselves
   const ifTable = cdItems.length ? [
-    blk(A_LABEL, rng(cdRange), ifRows, true),
+    blk(A_LABEL, rng(cdRange), ifRows, false),
     cdPg.length ? blk("Then PAGA, if the same questions went against the company", amt(cdPgLo,cdPgHi), pgRows, false) : "",
     cdPg.length && caps.length ? blk("What documented reasonable steps do to that number", "", capRows, false, "What the company does") : "",
     items.length ? blk(D_LABEL, rng(headline), scRows, false) : ""].join("\n        ") : "";
   // v2.15 (10.06.2026, Troy): the CEO page draws the exposure without bar charts, and carries the "if"
   // arithmetic and the method drill at the foot of box 1 (lead); the old row 4 keeps both (body).
-  const ifDrill = cd ? `
+  const ifDrillFor = capsLine => cd ? `
         <details class="drill"><summary>Show the arithmetic behind each "if"</summary><div>
           <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>If …</th><th>Inputs</th><th>Arithmetic</th><th>Over the lookback</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
           ${cdItems.map(i=>`<tr><td class="f" style="width:16%"><b>${esc(i.id)} · ${esc(i.short||i.title||"")}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.condition||"")}</td><td>${esc(i.inputs||"")}</td><td>${esc(i.arithmetic||"")}</td><td>${esc(i.lookback||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
@@ -1336,10 +1336,11 @@ function exposureParts(x){
           </tbody></table></div>
           ${cdPg.length?`<h4 class="xp-h4">Then PAGA, if the same questions went against the company</h4><div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>If …</th><th>Employees × pay periods × rate × violations</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
           ${cdPg.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||"")}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.condition||"")}</td><td>${esc(i.basis||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
-          <tr class="tot"><td colspan="3">Before any cap — the caps in 4C apply to these the same way</td><td class="nr">${fmtK(cdPgLo)} – ${fmtK(cdPgHi)}</td></tr></tbody></table></div>`:""}
+          <tr class="tot"><td colspan="3">${capsLine}</td><td class="nr">${fmtK(cdPgLo)} – ${fmtK(cdPgHi)}</td></tr></tbody></table></div>`:""}
           ${cd.named&&cd.named.length?`<h4 class="xp-h4">Named with the formula, not totaled</h4><ul class="xp-ul tight">${cd.named.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
           ${cd.method&&cd.method.length?`<h4 class="xp-h4">How the "if" rows are built</h4><div class="xpwrap"><table class="xp tight kv"><tbody>${cd.method.map(t=>{const k=t.indexOf(". ");return `<tr><td>${esc(k>0&&k<40?t.slice(0,k):"—")}</td><td>${esc(k>0&&k<40?t.slice(k+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
         </div></details>` : "";
+  const ifDrill = ifDrillFor("Before any cap — the caps in 4C apply to these the same way");   // the old row 4
   const rangesDrill = `
         <details class="drill"><summary>How the ranges are built, what they leave out, and what is carried without a number</summary><div>
           ${x.method&&x.method.length?`<h4 class="xp-h4" style="margin-top:6px">How the range is built</h4><div class="xpwrap"><table class="xp tight kv"><tbody>${x.method.map(t=>{const i=t.indexOf(". ");return `<tr><td>${esc(i>0&&i<40?t.slice(0,i):"—")}</td><td>${esc(i>0&&i<40?t.slice(i+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
