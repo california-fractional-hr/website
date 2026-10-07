@@ -189,6 +189,28 @@
   .secctl{display:flex;justify-content:flex-end;gap:14px;margin:14px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
   .secctl button{background:none;border:0;padding:0;color:var(--brass);cursor:pointer;font:inherit} .secctl button:hover{text-decoration:underline}
   @media (max-width:640px){.sec .peek{display:none}}
+  /* v2.15 (10.06.2026): CEO page headers — number, title, figures and chevron share the first line; the
+     subtitle runs the full width beneath, so the figures never squeeze it into a narrow column */
+  .dash.ceo .sec{display:grid;grid-template-columns:32px minmax(0,1fr) auto 22px;column-gap:14px}
+  .dash.ceo .sec > div{display:contents}
+  .dash.ceo .sec .num{grid-column:1;grid-row:1/span 2} .dash.ceo .sec h3{grid-column:2;grid-row:1}
+  .dash.ceo .sec .peek{grid-column:3;grid-row:1} .dash.ceo .sec .chev{grid-column:4;grid-row:1}
+  .dash.ceo .sec p{grid-column:2/-1;grid-row:2}
+  /* Section 1's figure shows on a phone too (Troy, 10.06.2026), wrapping at its dash so the title keeps its room */
+  @media (max-width:640px){ .dash.ceo .figure .sec .peek{display:block;white-space:normal;text-align:right;max-width:6.5ch} }
+  /* the CEO page's "if" table: three columns, no sideways scroll */
+  .xp.fit{min-width:0;margin-top:14px} .xp.fit td.f{width:auto} .xp.fit .amt{white-space:nowrap}
+  .xp.fit{table-layout:fixed} .xp.fit col.c-amt{width:25%} @media (max-width:640px){ .xp.fit col.c-amt{width:28%} }
+  /* box 1's blocks: a mono-caps heading on a heavy rule, its total at the right, a brass chevron */
+  .xblk{margin-top:22px} .xblk:first-of-type{margin-top:18px} .xblk .xpwrap{margin:0} .xblk .xp.fit{margin-top:0}
+  .xblk > summary{display:flex;align-items:baseline;gap:12px;padding:8px;border-bottom:2px solid var(--ink);cursor:pointer;list-style:none;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--ink)}
+  .xblk > summary::-webkit-details-marker{display:none}
+  .xblk > summary .t{flex:1;min-width:0} .xblk > summary .v{font-size:12px;letter-spacing:.02em;text-align:right}
+  .xblk > summary .chev{flex:none;width:16px;height:16px;align-self:center;color:var(--brass);transition:transform .18s}
+  .xblk[open] > summary .chev{transform:rotate(180deg)} .xblk > summary:hover .t{color:var(--brass-2,#8F6A1F)}
+  .xblk .xp th{border-bottom:1px solid var(--line-lt);color:var(--slate);padding-top:10px;white-space:normal;vertical-align:bottom}
+  .xp.fit tr.note td{border-bottom:0;padding-top:10px;font-size:12px;color:var(--slate)}
+  @media (max-width:640px){ .xp.fit td,.xp.fit th{padding:8px 5px} .xp.fit td.nr,.xp.fit th{white-space:normal} }
   .sec .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--brass);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:3px}
   .sec h3{font-size:24px;line-height:1.15;margin:0;color:var(--ink)}
   .sec p{margin:4px 0 0;font-size:14px;color:var(--slate)}
@@ -212,6 +234,9 @@
   .xp-ul.tight li{padding:3px 0 3px 18px;font-size:13px}
   .pg-note{font-size:13px;line-height:1.5;color:#2F3A47;margin:10px 0 0}
   .cond-head{font-size:15px;line-height:1.5;color:var(--ink);margin:6px 0 0;max-width:72ch} .cond-head b{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:22px;color:var(--brass);letter-spacing:-.01em} .cond-head span{display:block;font-size:13px;color:var(--slate)}
+  /* v2.15 (10.06.2026): the CEO page's exposure lead — the "if" figure large, its condition in headline type before it; full width */
+  .xp-lead{font-family:'Spectral',Georgia,serif;font-weight:400;font-size:clamp(19px,2.6vw,24px);line-height:1.3;color:var(--ink);margin:12px 0 0;max-width:none}
+  .xp-lead b{font-weight:500;font-size:clamp(32px,4.4vw,42px);line-height:1.15;color:var(--brass);letter-spacing:-.015em;white-space:nowrap}
   .cap-line{font-size:11.5px;line-height:1.5;color:#6B7684;margin:6px 0 0}
   .tot-line{display:flex;justify-content:flex-end;align-items:baseline;gap:10px;margin:2px 0 0;font-size:13px;color:var(--slate)} .tot-line b{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:24px;color:var(--brass);letter-spacing:-.01em}
   .chart{margin:10px 0 0} .chart svg{display:block;width:100%;height:auto}
@@ -959,32 +984,40 @@ function riskRowHTML(dlv){
     <p class="cap-line">Ranked by score, then by exposure. The exposure column is the high end of the finding's illustrative range; the arithmetic behind each number is in row 4 above.</p>
     ${(rk.high||[]).length?`${sub4("TOP 7","The seven high-priority findings","these set the 30-day agenda")}
     ${rk.high.map(h=>`<div class="hi-row"><span class="hi-n">${esc(h[0])}</span><div class="hi-main"><div class="hi-t">${esc(h[1])}</div><div class="hi-cite">${esc(String(h[2]).toUpperCase())}</div></div><div class="hi-right"><div class="hi-score">${esc(h[3])}</div><div class="hi-exp">${esc(h[4])}</div><div class="hi-own">${esc(h[5])}</div></div></div>`).join("")}`:""}
-    ${(rk.roadmap||[]).length?`${sub4("90 DAYS","The roadmap","three moves, every finding owned")}
-    <div class="rm-grid">${rk.roadmap.map((col,i)=>`<div class="rm-col"><div class="rm-head${i===2?" green":""}"><div class="rm-days">${esc(col[0])}</div><div class="rm-theme"><h4>${esc(col[1])}</h4><small>${esc(String(col[2]).toUpperCase())}</small></div></div><ul>${col[3].map(it=>`<li>${esc(it)}</li>`).join("")}</ul>${col[4]?`<div class="rm-more">${esc(String(col[4]).toUpperCase())}</div>`:""}</div>`).join("")}</div>`:""}
     ${rk.ratio?`<div class="why" style="margin:16px 0 0"><b>The ratio</b>${esc(rk.ratio)}</div>`:""}
     ${rk.record?`<div class="why" style="margin:14px 0 0"><b>The record</b>${esc(rk.record)}</div>`:""}`;
 }
+// v2.15 (10.06.2026): the 90-Day Roadmap is its own section (SOW-A lists it apart from the map).
+function roadmapHTML(rk){
+  return `<div class="rm-grid">${(rk.roadmap||[]).map((col,i)=>`<div class="rm-col"><div class="rm-head${i===2?" green":""}"><div class="rm-days">${esc(col[0])}</div><div class="rm-theme"><h4>${esc(col[1])}</h4><small>${esc(String(col[2]).toUpperCase())}</small></div></div><ul>${col[3].map(it=>`<li>${esc(it)}</li>`).join("")}</ul>${col[4]?`<div class="rm-more">${esc(String(col[4]).toUpperCase())}</div>`:""}</div>`).join("")}</div>`;
+}
 
+// v2.15 (10.06.2026, Troy): the CEO page is four sections, in this order — 1 Ranked Risk Map (the
+// illustrative exposure totals live here, with every "if" and its arithmetic one click away),
+// 2 90-Day Roadmap, 3 Compliance Calendar, 4 Reasonable-Steps File. The Report is the PDF; the
+// readout is the meeting; the intake and documents stay in the workspace itself.
 function deliverableRows(m){
   const dlv = m.dlv||{};
-  const r = dlv.readout||{}, st = dlv.steps||{}, rk = dlv.risk||{}, cal = dlv.cal||{};
+  const st = dlv.steps||{}, rk = dlv.risk||{}, cal = dlv.cal||{};
+  const xp = m.exposure ? exposureParts({...m.exposure, findings:m.findings}) : null;
   const calEntries = (calendar||[]).filter(e=>e.date&&e.label);
   // live peek on the calendar row — the next obligation, in days
   let calPeek = cal.peek||"met · live";
   const now = new Date();
   const next = calEntries.map(e=>calD(e.date)).filter(d=>d&&d>=now).sort((a,b)=>a-b)[0];
   if (next){ const days = Math.ceil((next-now)/864e5); calPeek += ` · next ${days<=0?"today":`in ${days}${days===1?" day":" days"}`}`; }
+  const sub1 = rk.sub||"every finding scored by severity and effort";
+  let n = 0;
   return `
-    ${secOpen(5,"Findings Readout", r.sub||"the walkthrough, in person — readout edition on file", r.peek||"met")}
-    <div class="tile wide">
-      ${r.body?`<p style="font-size:14px;max-width:66ch">${esc(r.body)}</p>`:""}
-      ${r.where?`<div class="why" style="margin:14px 0 0"><b>Where it lives</b>${esc(r.where)}</div>`:""}
-    </div>
-    ${secClose()}
-    ${secOpen(6,"Ranked Risk Map", rk.sub||"every finding scored by severity and effort", rk.peek||"met")}
+    ${secOpen(++n,"Ranked Risk Map", sub1, xp?xp.ceoPeek:(rk.peek||"met"), "figure")}
+    ${xp?`<div class="tile wide">${xp.lead}</div>`:""}
     <div class="tile wide">${riskRowHTML(dlv)}</div>
+    ${xp?`<div class="tile wide">${xp.body}</div>`:""}
     ${secClose()}
-    ${secOpen(7,"12-Month Compliance Calendar", cal.sub||"the year ahead — today's line drawn live", calPeek)}
+    ${(rk.roadmap||[]).length?`${secOpen(++n,"90-Day Roadmap","three moves, every finding owned","")}
+    <div class="tile wide">${roadmapHTML(rk)}</div>
+    ${secClose()}`:""}
+    ${secOpen(++n,"12-Month Compliance Calendar", cal.sub||"the year ahead — today's line drawn live", calPeek)}
     <div class="tile wide">
       ${cal.meta?`<p class="sub" style="margin:2px 0 10px">${esc(cal.meta)}</p>`:""}
       ${calendarInnerHTML()}
@@ -993,7 +1026,7 @@ function deliverableRows(m){
       ${calSpineHTML(dlv)}
     </div>
     ${secClose()}
-    ${secOpen(8,"Reasonable-Steps Report", st.sub||"the dated record of what was done — never closes", st.peek||"met")}
+    ${secOpen(++n,"Reasonable-Steps File", st.sub||"the dated record of what was done — never closes", st.peek||"met")}
     <div class="tile wide">${stepsRowHTML(dlv)}</div>
     ${secClose()}`;
 }
@@ -1202,7 +1235,7 @@ function fmtK(v){ if(v==null||!isFinite(v)) return "—"; return v>=1e6?`$${(v/1
 // Sections collapse: every one starts closed (a closed page is still a picture —
 // each header carries a one-line read of what is inside); the reader decides what
 // stays open. Native <details>, so it works without script and with a keyboard.
-function secOpen(n,title,subtitle,peek){ return `<details class="secwrap"><summary class="sec"><span class="num">${n}</span><div><h3>${esc(title)}</h3>${subtitle?`<p>${esc(subtitle)}</p>`:""}</div>${peek?`<span class="peek">${esc(peek)}</span>`:""}<svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>`; }
+function secOpen(n,title,subtitle,peek,cls){ return `<details class="secwrap${cls?` ${cls}`:""}"><summary class="sec"><span class="num">${n}</span><div><h3>${esc(title)}</h3>${subtitle?`<p>${esc(subtitle)}</p>`:""}</div>${peek?`<span class="peek">${esc(peek)}</span>`:""}<svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>`; }
 function secClose(){ return `</details>`; }
 function setAllSections(open){ document.querySelectorAll(".secwrap").forEach(d=>{ d.open = open; }); }
 function niceMax(v){ v=Math.max(v,1); const e=Math.pow(10,Math.floor(Math.log10(v))); const c=[1,1.5,2,2.5,3,4,5,6,8,10].find(c=>c*e>=v); return c*e; }
@@ -1227,7 +1260,9 @@ function colChart(bars, opts={}){
   }).join("");
   return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria||"")}"><line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}" stroke="#0A2C44" stroke-width="1"/>${grid}${cols}</svg></div>`;
 }
-function exposureSection(x){
+// v2.15 (10.06.2026): the exposure in parts — the totals (head) and the charts with their drills (body) —
+// so the CEO page can carry them inside the Ranked Risk Map; exposureSection still draws the old row 4.
+function exposureParts(x){
   const items=x.items||[], lo=items.reduce((s,i)=>s+(+i.low||0),0), hi=items.reduce((s,i)=>s+(+i.high||0),0);
   const axisMax = Math.max(...items.map(i=>+i.high||0), 1), W=520;
   const px = v=>Math.round(Math.min(Math.max(v,0),axisMax)/axisMax*(W-4))+2;
@@ -1249,14 +1284,50 @@ function exposureSection(x){
   const wf=(cd&&cd.willful)||null, cdRange=cd?(cd.display||`${fmtK(cdLo)} – ${fmtK(cdHi)}`):"";
   const peekBase = pg&&pgTotal?`${headline} + PAGA ${fmtK(Math.round(pgTotal*capLo))}–${fmtK(pgTotal)}`:headline;
   const peek = cd?`${peekBase} · if ${cdRange}`:peekBase;
-  return `
-      ${secOpen(4,"What it could cost","the findings, then PAGA on top — and what the company can do about each", peek)}
-      <div class="tile wide">
+  const head = `
         <span class="k">Illustrative exposure <span class="tag analysis">From analysis</span></span>
         <h3>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}${pg&&pgTotal?` <span style="font-size:15px;font-weight:400;color:var(--slate)">+ PAGA ${fmtK(Math.round(pgTotal*capLo))} – ${fmtK(pgTotal)}</span>`:""}</h3>
         <p class="ask">${esc(x.note||"")}</p>
-        ${cd?`<p class="cond-head">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b>${cdPg.length?`<span>+ PAGA ${fmtK(cdPgLo)} – ${fmtK(cdPgHi)} before any cap</span>`:""}${wf?`<span>${esc(wf.label||"Only if found willful")}: ${fmtK(wf.low)} – ${fmtK(wf.high)} — shown beside the total, never inside it</span>`:""}</p>`:""}
-
+        ${cd?`<p class="cond-head">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b>${cdPg.length?`<span>+ PAGA ${fmtK(cdPgLo)} – ${fmtK(cdPgHi)} before any cap</span>`:""}${wf?`<span>${esc(wf.label||"Only if found willful")}: ${fmtK(wf.low)} – ${fmtK(wf.high)} — shown beside the total, never inside it</span>`:""}</p>`:""}`;
+  // v2.15 (10.06.2026, Troy): the CEO page's first box leads with the "if" figure, its condition in
+  // headline type beside it — never apart from it; every line runs the full width of the box. The
+  // scored range stays in the section (the header line, the 4A total). No "if" record: the old head.
+  // Under the figure, box 1 is four collapsible blocks in one style (Troy, 10.06.2026) — each a labeled
+  // heading with its total at the right, over a table on shared columns (finding · low–high · only if
+  // found willful): 1 the rows behind the "if" figure, open by default so the §226.8 figure sits beside
+  // the total on first view · 2 then PAGA on the same questions, its own total · 3 what documented steps
+  // can do to that PAGA, the court's-decision line kept with the caps · 4 the scored findings. The §226.8
+  // figure is never inside a total; an empty cell is "—", never "$0".
+  // A range breaks only after its dash on a narrow screen ("$13K –" / "$112K"), never around it.
+  const pair = (a,b) => `<span class="amt">${a} –</span> <span class="amt">${b}</span>`;
+  const amt = (l,h) => fmtK(+l)===fmtK(+h) ? fmtK(+h) : pair(fmtK(+l), fmtK(+h));
+  const rng = t => t.includes(" – ") ? pair(...t.split(" – ").map(esc)) : esc(t);
+  const dash = wf ? `<td class="nr">—</td>` : "";
+  const A_LABEL = cd.lead||"If the open questions go against the company";
+  const D_LABEL = ((x.captions&&x.captions.findings)||"Scored findings only").split(". ")[0].replace(/\.$/,"");
+  const blk = (label, fig, rows, open, head = "Finding") => `<details class="xblk"${open?" open":""}><summary><span class="t">${esc(label)}</span>${fig?`<span class="v">${fig}</span>`:""}<svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>
+          <div class="xpwrap"><table class="xp tight fit"><colgroup><col><col class="c-amt">${wf?`<col class="c-amt">`:""}</colgroup><thead><tr><th>${esc(head)}</th><th style="text-align:right">Low – high</th>${wf?`<th style="text-align:right">${esc(wf.label||"Only if found willful")}</th>`:""}</tr></thead><tbody>${rows}</tbody></table></div></details>`;
+  const row = (id, name, small, cells) => `<tr><td class="f"><b>${id?`${esc(id)} · `:""}${esc(name||"")}</b>${small?`<small>${small}</small>`:""}</td>${cells}</tr>`;
+  const byHigh = (a,b) => (+b.high||0)-(+a.high||0);
+  const ifRows = cdItems.slice().sort(byHigh).map(i=>row(i.id, i.short||i.title, esc(i.cite||""), `<td class="nr">${amt(i.low,i.high)}</td>${dash}`)).join("")
+    + (wf ? row(wf.id, wf.short||"Willful misclassification", esc(wf.cite||""), `<td class="nr">—</td><td class="nr">${amt(wf.low,wf.high)}</td>`) : "")
+    + `<tr class="tot"><td>Together, if every open question went against the company</td><td class="nr">${rng(cdRange)}</td>${wf?`<td class="nr">${amt(wf.low,wf.high)}</td>`:""}</tr>`;
+  const pgRows = cdPg.map(i=>row(i.id, i.short, esc(i.cite||""), `<td class="nr">${amt(i.low,i.high)}</td>${dash}`)).join("")
+    + `<tr class="tot"><td>Together, before any cap</td><td class="nr">${amt(cdPgLo,cdPgHi)}</td>${dash}</tr>`;
+  const capRows = caps.map(c=>row("", c.label, `${esc(c.words||"")}${c.flag?` · <span class="amt">▲ ${esc(String(c.flag).toUpperCase())}</span>`:""}`, `<td class="nr">${amt(Math.round(cdPgLo*c.factor),Math.round(cdPgHi*c.factor))}</td>${dash}`)).join("")
+    + (x.captions&&x.captions.caps ? `<tr class="note"><td colspan="${wf?3:2}">${esc(x.captions.caps)}</td></tr>` : "");
+  const scRows = items.slice().sort(byHigh).map(i=>row(i.id, i.short||i.title, esc(i.cite||""), `<td class="nr">${amt(i.low,i.high)}</td>${dash}`)).join("")
+    + `<tr class="tot"><td>Together, before penalties and before any fix</td><td class="nr">${rng(headline)}</td>${dash}</tr>`;
+  const ifTable = cdItems.length ? [
+    blk(A_LABEL, rng(cdRange), ifRows, true),
+    cdPg.length ? blk("Then PAGA, if the same questions went against the company", amt(cdPgLo,cdPgHi), pgRows, false) : "",
+    cdPg.length && caps.length ? blk("What documented reasonable steps do to that number", "", capRows, false, "What the company does") : "",
+    items.length ? blk(D_LABEL, rng(headline), scRows, false) : ""].join("\n        ") : "";
+  const lead = cd ? `
+        <span class="k">Illustrative exposure <span class="tag analysis">From analysis</span></span>
+        <p class="xp-lead">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b></p>
+        ${ifTable}` : head;
+  const body = `
         ${items.length?`<div class="sub4"><b>4A</b><h4>The findings</h4><span>cost per violation, and the total</span></div>
         ${colChart(items.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Illustrative exposure by finding"})}
         <div class="tot-line">Together, before penalties <b>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}</b></div>
@@ -1310,7 +1381,18 @@ function exposureSection(x){
           ${x.unscored&&x.unscored.length?`<h4 class="xp-h4">Carried without a number</h4><ul class="xp-ul tight">${x.unscored.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
           ${x.findings?`<h4 class="xp-h4">Findings by severity</h4><div class="legend"><span><i style="background:#A9430F"></i>Critical ${x.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${x.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${x.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${x.findings.minor||0}</span></div>`:""}
         </div></details>
-        ${x.guardrail?`<div class="why" style="margin:22px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}
+        ${x.guardrail?`<div class="why" style="margin:22px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}`;
+  // The CEO page's collapsed header carries the large figure only; its "if" opens the subtitle beneath
+  // (deliverableRows) — Troy, 10.06.2026.
+  const ceoPeek = cd ? cdRange : peek;
+  return { peek, ceoPeek, head, lead, body };
+}
+function exposureSection(x){
+  const p = exposureParts(x);
+  return `
+      ${secOpen(4,"What it could cost","the findings, then PAGA on top — and what the company can do about each", p.peek)}
+      <div class="tile wide">${p.head}
+${p.body}
       </div>
       ${secClose()}`;
 }
@@ -1349,6 +1431,19 @@ function renderDashboard(){
   const m = metrics||{};
   const delivered = !!m.delivered && Array.isArray(m.ratios);
   const updated = m.updated ? `Analysis updated ${esc(m.updated)}` : (submitted ? `Intake submitted ${esc(submitted.at)}` : "Intake in progress");
+  // v2.15 (10.06.2026, Troy): the delivered CEO page is the SOW-A deliverables only — four sections
+  // (deliverableRows). Same gate as before: delivered, principal door, deliverables record on file.
+  // Every other state (the workspace door, the CEO page before release) draws as it always has.
+  if (delivered && principal && m.dlv) {
+    stage.innerHTML = `<div class="card">
+    <h2>Audit Dashboard</h2>
+    <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · ${updated}</p>
+    <p class="note" style="margin-top:8px">This page informs; it does not render legal advice.</p>
+    <div class="secctl"><button type="button" onclick="setAllSections(true)">Expand all</button><button type="button" onclick="setAllSections(false)">Collapse all</button></div>
+    <div class="dash ceo">${deliverableRows(m)}</div>
+  </div>`;
+    return;
+  }
   stage.innerHTML = `<div class="card">
     <h2>Audit Dashboard</h2>
     <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · ${updated}</p>
@@ -1416,7 +1511,6 @@ function renderDashboard(){
       ${secClose()}` : ``}
     </div>
     ${(delivered && principal && m.exposure) ? exposureSection({...m.exposure, findings:m.findings}) : ""}
-    ${(delivered && principal && m.dlv) ? deliverableRows(m) : ""}
     ${principal
       ? (delivered ? "" : `<div class="dashlock" style="margin-top:14px"><b>At your readout</b>What the analysis found, and what it could cost, are shared in person with your report — the fix beside every finding. Nothing from the analysis is posted here before then.</div>`)
       : `<div class="dashlock" style="margin-top:14px"><b>Delivered separately</b>What the analysis found, and what it could cost, are delivered with your report — in person at the readout, to the engagement principal. They are not posted on this page.</div>`}
