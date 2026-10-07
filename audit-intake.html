@@ -917,7 +917,7 @@ function pcapSVG(){
     two(c.label).forEach((ln,j)=>{ s += `<text x="${cx}" y="${base+15+j*11}" text-anchor="middle" font-size="8.5" fill="#42535A" font-family="Public Sans,sans-serif">${esc(ln)}</text>`; });
   });
   return `<div class="pcap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="PAGA penalty index under each level of documented steps">${s}</svg></div>
-    <p class="cap-line">Where a court finds all reasonable steps were taken before a PAGA notice, penalties can be capped at 15%; within 60 days after, at 30%. The dollar arithmetic is in row 4 above.</p>`;
+    <p class="cap-line">Where a court finds all reasonable steps were taken before a PAGA notice, penalties can be capped at 15%; within 60 days after, at 30%. The dollar arithmetic is in Section 1 above, under “Illustrative exposure.”</p>`;
 }
 
 function stepsRowHTML(dlv){
@@ -982,7 +982,7 @@ function riskRowHTML(dlv){
     <div class="legend" style="margin-top:4px"><span><i style="background:#A9430F"></i>High ${counts.HIGH}</span><span><i style="background:#D8AC4E"></i>Medium ${counts.MEDIUM}</span><span><i style="background:#D9DEE5;border:1px solid rgba(10,44,68,.3)"></i>Lower ${counts.LOW}</span>${rk.range?`<span>dot size — the finding's share of the ${esc(rk.range)} illustrative range</span>`:""}</div>
     <div class="rk-list">${ranked.map((f,i)=>
       `<div class="rk-row"><span class="rk-rank">${String(i+1).padStart(2,"0")}</span><span class="rk-t" title="${esc(f.title)}"><span class="sevchip" style="background:${BUCKETC[f.bucket]}${f.bucket==="LOW"?";border:1px solid rgba(10,44,68,.3)":""}"></span><span class="qid">${esc(f.id)}</span> · ${esc(f.short)}</span><span class="rk-score">L${f.l}×I${f.i} · ${f.score}</span><span class="rk-eff">${f.days!=null?`${f.days}-day window · by ${fd(f.targetD)}`:"—"}</span><span class="rk-exp">${f.exposure?fmtK(f.exposure):"—"}</span></div>`).join("")}</div>
-    <p class="cap-line">Ranked by score, then by exposure. The exposure column is the high end of the finding's illustrative range; the arithmetic behind each number is in row 4 above.</p>
+    <p class="cap-line">Ranked by score, then by exposure. The exposure column is the high end of the finding's illustrative range; the arithmetic is below, under “The math behind each number.”</p>
     ${(rk.high||[]).length?`${sub4("TOP 7","The seven high-priority findings","these set the 30-day agenda")}
     ${rk.high.map(h=>`<div class="hi-row"><span class="hi-n">${esc(h[0])}</span><div class="hi-main"><div class="hi-t">${esc(h[1])}</div><div class="hi-cite">${esc(String(h[2]).toUpperCase())}</div></div><div class="hi-right"><div class="hi-score">${esc(h[3])}</div><div class="hi-exp">${esc(h[4])}</div><div class="hi-own">${esc(h[5])}</div></div></div>`).join("")}`:""}
     ${rk.ratio?`<div class="why" style="margin:16px 0 0"><b>The ratio</b>${esc(rk.ratio)}</div>`:""}
@@ -1399,7 +1399,7 @@ function exposureParts(x){
         <p class="xp-lead">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b></p>
         ${ifTable}
         <details class="xblk xmath"><summary><span class="t">The math behind each number</span><svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>
-          <div class="xmath-in">${ifDrill}${scDrill(SC_DRILL)}${pgDrill(PG_DRILL)}${rangesDrill}</div></details>` : head;   // the four drills, one section (Troy, 10.06.2026; Catherine's name for it)
+          <div class="xmath-in">${ifDrillFor("Before any cap — the caps above, under “What documented reasonable steps do to that number,” apply to these the same way")}${scDrill(SC_DRILL)}${pgDrill(PG_DRILL)}${rangesDrill}</div></details>` : head;   // the four drills, one section (Troy, 10.06.2026; Catherine's name for it)
   // The CEO page's collapsed header carries the large figure only; its "if" opens the subtitle beneath
   // (deliverableRows) — Troy, 10.06.2026.
   const ceoPeek = cd ? cdRange : peek;
