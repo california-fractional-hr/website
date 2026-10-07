@@ -209,6 +209,7 @@
   .xblk > summary .chev{flex:none;width:16px;height:16px;align-self:center;color:var(--brass);transition:transform .18s}
   .xblk[open] > summary .chev{transform:rotate(180deg)} .xblk > summary:hover .t{color:var(--brass-2,#8F6A1F)}
   .xblk .xp th{border-bottom:1px solid var(--line-lt);color:var(--slate);padding-top:10px;white-space:normal;vertical-align:bottom}
+  .xmath-in{padding:2px 0 0 8px}
   .xp.fit tr.note td{border-bottom:0;padding-top:10px;font-size:12px;color:var(--slate)}
   @media (max-width:640px){ .xp.fit td,.xp.fit th{padding:8px 5px} .xp.fit td.nr,.xp.fit th{white-space:normal} }
   .sec .num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--brass);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:3px}
@@ -1012,9 +1013,8 @@ function deliverableRows(m){
   let n = 0;
   return `
     ${secOpen(++n,"Ranked Risk Map", sub1, xp?xp.ceoPeek:(rk.peek||"met"), "figure")}
-    ${xp?`<div class="tile wide">${xp.lead}</div>`:""}
     <div class="tile wide">${riskRowHTML(dlv)}</div>
-    ${xp?`<div class="tile wide">${xp.body}</div>`:""}
+    ${xp?`<div class="tile wide">${xp.lead}</div>`:""}
     ${secClose()}
     ${(rk.roadmap||[]).length?`${secOpen(++n,"90-Day Roadmap","three moves, every finding owned","")}
     <div class="tile wide">${roadmapHTML(rk)}</div>
@@ -1325,45 +1325,9 @@ function exposureParts(x){
     cdPg.length ? blk("Then PAGA, if the same questions went against the company", amt(cdPgLo,cdPgHi), pgRows, false) : "",
     cdPg.length && caps.length ? blk("What documented reasonable steps do to that number", "", capRows, false, "What the company does") : "",
     items.length ? blk(D_LABEL, rng(headline), scRows, false) : ""].join("\n        ") : "";
-  const lead = cd ? `
-        <span class="k">Illustrative exposure <span class="tag analysis">From analysis</span></span>
-        <p class="xp-lead">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b></p>
-        ${ifTable}` : head;
-  const body = `
-        ${items.length?`<div class="sub4"><b>4A</b><h4>The findings</h4><span>cost per violation, and the total</span></div>
-        ${colChart(items.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Illustrative exposure by finding"})}
-        <div class="tot-line">Together, before penalties <b>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}</b></div>
-        ${x.captions&&x.captions.findings?`<p class="cap-line">${esc(x.captions.findings)}</p>`:""}
-        <details class="drill"><summary>Show the arithmetic behind each bar</summary><div>
-          <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>In the sample</th><th>Scaled</th><th>Over the lookback</th><th>Assumes</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
-          ${items.map(i=>`<tr><td class="f" style="width:18%"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.sample||i.shows||"")}</td><td>${esc(i.scale||"")}</td><td>${esc(i.lookback||"")}</td><td>${esc(i.assumption||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
-          <tr class="tot"><td colspan="5">Together, before penalties and before any fix</td><td class="nr">${fmtK(lo)} – ${fmtK(hi)}</td></tr></tbody></table></div>
-        </div></details>`:""}
-
-        ${pg&&pgItems.length?`<div class="sub4"><b>4B</b><h4>Then PAGA</h4><span>civil penalties per violation, and the total</span></div>
-        ${colChart(pgItems.map(i=>({label:`${i.id}\n${i.tag||""}`, value:i.pg.total, display:fmtK(i.pg.total)})), {aria:"PAGA civil penalties by finding, unmitigated"})}
-        <div class="tot-line">Together, before any cap <b>${fmtK(pgTotal)}</b></div>
-        ${x.captions&&x.captions.paga?`<p class="cap-line">${esc(x.captions.paga)}</p>`:""}
-        ${caps.length?`<div class="sub4" style="margin-top:22px"><b>4C</b><h4>What documented reasonable steps do to that number</h4></div>
-        ${colChart(caps.map(c=>({label:c.label.replace(" of a notice","\nof a notice").replace(" + violation cured","\n+ violation cured").replace("before a notice","\nbefore a notice"), value:Math.round(pgTotal*c.factor), display:c.factor>0?fmtK(Math.round(pgTotal*c.factor)):"$0", color:c.flag?"#B4862B":"#0A2C44", flag:c.flag,
-          sub: c.factor>=1 ? "the full amount" : c.factor>0 ? `capped at ${Math.round(c.factor*100)}%` : "can reach $0"})), {aria:"PAGA penalties under each cap", h:252, padB:58})}
-        ${x.captions&&x.captions.caps?`<p class="cap-line">${esc(x.captions.caps)}</p>`:""}`:""}
-        <details class="drill"><summary>Show the PAGA math</summary><div>
-          <p class="pg-note" style="margin-top:0">${esc(pg.display_note||"")}</p>
-          <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>Employees</th><th>Pay periods</th><th>Rate</th><th>Violations</th><th style="text-align:right">Penalty</th></tr></thead><tbody>
-          ${pgItems.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.pg.basis?`<small style="color:var(--slate);font-family:'Public Sans',sans-serif;letter-spacing:0;font-size:11.5px">${esc(i.pg.basis)}</small>`:""}</td><td class="n">${i.pg.employees}</td><td class="n">${i.pg.periods}</td><td class="n">$${i.pg.rate}</td><td class="n">${i.pg.types||1}</td><td class="nr">${fmtK(i.pg.total)}</td></tr>`).join("")}
-          <tr class="tot"><td colspan="5">Before any cap</td><td class="nr">${fmtK(pgTotal)}</td></tr></tbody></table></div>
-          ${caps.length?`<div class="xpwrap" style="margin-top:12px"><table class="xp tight"><thead><tr><th>What the company does</th><th></th><th style="text-align:right">Penalty</th></tr></thead><tbody>
-          ${caps.map(c=>`<tr><td class="f"><b>${esc(c.label)}</b></td><td>${esc(c.words||"")}</td><td class="nr">${fmtK(Math.round(pgTotal*c.factor))}</td></tr>`).join("")}</tbody></table></div>`:""}
-          ${pg.split?`<p class="pg-note"><b>${esc(pg.split)}</b></p>`:""}
-          ${pg.notes&&pg.notes.length?`<ul class="xp-ul tight" style="margin-top:8px">${pg.notes.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
-        </div></details>`:""}
-
-        ${cd?`<div class="sub4" style="margin-top:22px"><b>4D</b><h4>${esc(cd.lead||"If the open questions go against the company")}</h4><span>${esc(cd.sub||"what turns on the open questions — every input, rate and statute shown")}</span></div>
-        ${colChart(cdItems.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Conditional exposure by finding — if the open questions went against the company"})}
-        <div class="tot-line">Together, if every open question went against the company <b>${esc(cdRange)}</b></div>
-        ${wf?`<div class="tot-line" style="font-size:12.5px"><span>${esc(wf.label||"Only if found willful")}${wf.cite?` · ${esc(wf.cite)}`:""} — beside the total, never inside it</span><b style="font-size:18px">${fmtK(wf.low)} – ${fmtK(wf.high)}</b></div>`:""}
-        ${cd.caption?`<p class="cap-line">${esc(cd.caption)}</p>`:""}
+  // v2.15 (10.06.2026, Troy): the CEO page draws the exposure without bar charts, and carries the "if"
+  // arithmetic and the method drill at the foot of box 1 (lead); the old row 4 keeps both (body).
+  const ifDrill = cd ? `
         <details class="drill"><summary>Show the arithmetic behind each "if"</summary><div>
           <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>If …</th><th>Inputs</th><th>Arithmetic</th><th>Over the lookback</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
           ${cdItems.map(i=>`<tr><td class="f" style="width:16%"><b>${esc(i.id)} · ${esc(i.short||i.title||"")}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.condition||"")}</td><td>${esc(i.inputs||"")}</td><td>${esc(i.arithmetic||"")}</td><td>${esc(i.lookback||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
@@ -1375,15 +1339,65 @@ function exposureParts(x){
           <tr class="tot"><td colspan="3">Before any cap — the caps in 4C apply to these the same way</td><td class="nr">${fmtK(cdPgLo)} – ${fmtK(cdPgHi)}</td></tr></tbody></table></div>`:""}
           ${cd.named&&cd.named.length?`<h4 class="xp-h4">Named with the formula, not totaled</h4><ul class="xp-ul tight">${cd.named.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
           ${cd.method&&cd.method.length?`<h4 class="xp-h4">How the "if" rows are built</h4><div class="xpwrap"><table class="xp tight kv"><tbody>${cd.method.map(t=>{const k=t.indexOf(". ");return `<tr><td>${esc(k>0&&k<40?t.slice(0,k):"—")}</td><td>${esc(k>0&&k<40?t.slice(k+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
-        </div></details>`:""}
-
+        </div></details>` : "";
+  const rangesDrill = `
         <details class="drill"><summary>How the ranges are built, what they leave out, and what is carried without a number</summary><div>
           ${x.method&&x.method.length?`<h4 class="xp-h4" style="margin-top:6px">How the range is built</h4><div class="xpwrap"><table class="xp tight kv"><tbody>${x.method.map(t=>{const i=t.indexOf(". ");return `<tr><td>${esc(i>0&&i<40?t.slice(0,i):"—")}</td><td>${esc(i>0&&i<40?t.slice(i+2):t)}</td></tr>`;}).join("")}</tbody></table></div>`:""}
           ${x.excluded&&x.excluded.length?`<h4 class="xp-h4">Left out of every number above</h4><ul class="xp-ul tight">${x.excluded.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
           ${x.unscored&&x.unscored.length?`<h4 class="xp-h4">Carried without a number</h4><ul class="xp-ul tight">${x.unscored.map(u=>`<li>${esc(u)}</li>`).join("")}</ul>`:""}
           ${x.findings?`<h4 class="xp-h4">Findings by severity</h4><div class="legend"><span><i style="background:#A9430F"></i>Critical ${x.findings.critical||0}</span><span><i style="background:#C9783F"></i>Serious ${x.findings.serious||0}</span><span><i style="background:#D8AC4E"></i>Moderate ${x.findings.moderate||0}</span><span><i style="background:#D9DEE5"></i>Minor ${x.findings.minor||0}</span></div>`:""}
-        </div></details>
+        </div></details>`;
+  // The scored findings' arithmetic and their PAGA math (v2.15): drawn in the old row 4 under its bar charts,
+  // and at the foot of box 1 on the CEO page, where the charts box is gone (Troy, 10.06.2026) — the math stays.
+  const scDrill = sum => items.length ? `<details class="drill"><summary>${sum}</summary><div>
+          <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>In the sample</th><th>Scaled</th><th>Over the lookback</th><th>Assumes</th><th style="text-align:right">Low – high</th></tr></thead><tbody>
+          ${items.map(i=>`<tr><td class="f" style="width:18%"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.cite?`<small>${esc(i.cite)}</small>`:""}</td><td>${esc(i.sample||i.shows||"")}</td><td>${esc(i.scale||"")}</td><td>${esc(i.lookback||"")}</td><td>${esc(i.assumption||"")}</td><td class="nr">${fmtK(i.low)} – ${fmtK(i.high)}</td></tr>`).join("")}
+          <tr class="tot"><td colspan="5">Together, before penalties and before any fix</td><td class="nr">${fmtK(lo)} – ${fmtK(hi)}</td></tr></tbody></table></div>
+        </div></details>` : "";
+  const pgDrill = sum => pg&&pgItems.length ? `<details class="drill"><summary>${sum}</summary><div>
+          <p class="pg-note" style="margin-top:0">${esc(pg.display_note||"")}</p>
+          <div class="xpwrap"><table class="xp tight"><thead><tr><th>Finding</th><th>Employees</th><th>Pay periods</th><th>Rate</th><th>Violations</th><th style="text-align:right">Penalty</th></tr></thead><tbody>
+          ${pgItems.map(i=>`<tr><td class="f"><b>${esc(i.id)} · ${esc(i.short||i.title)}</b>${i.pg.basis?`<small style="color:var(--slate);font-family:'Public Sans',sans-serif;letter-spacing:0;font-size:11.5px">${esc(i.pg.basis)}</small>`:""}</td><td class="n">${i.pg.employees}</td><td class="n">${i.pg.periods}</td><td class="n">$${i.pg.rate}</td><td class="n">${i.pg.types||1}</td><td class="nr">${fmtK(i.pg.total)}</td></tr>`).join("")}
+          <tr class="tot"><td colspan="5">Before any cap</td><td class="nr">${fmtK(pgTotal)}</td></tr></tbody></table></div>
+          ${caps.length?`<div class="xpwrap" style="margin-top:12px"><table class="xp tight"><thead><tr><th>What the company does</th><th></th><th style="text-align:right">Penalty</th></tr></thead><tbody>
+          ${caps.map(c=>`<tr><td class="f"><b>${esc(c.label)}</b></td><td>${esc(c.words||"")}</td><td class="nr">${fmtK(Math.round(pgTotal*c.factor))}</td></tr>`).join("")}</tbody></table></div>`:""}
+          ${pg.split?`<p class="pg-note"><b>${esc(pg.split)}</b></p>`:""}
+          ${pg.notes&&pg.notes.length?`<ul class="xp-ul tight" style="margin-top:8px">${pg.notes.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+        </div></details>` : "";
+  const mkBody = (charts, drills) => `
+        ${items.length?`<div class="sub4"><b>4A</b><h4>The findings</h4><span>cost per violation, and the total</span></div>
+        ${!charts?"":colChart(items.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Illustrative exposure by finding"})}
+        <div class="tot-line">Together, before penalties <b>${esc(x.display||`${fmtK(lo)} – ${fmtK(hi)}`)}</b></div>
+        ${x.captions&&x.captions.findings?`<p class="cap-line">${esc(x.captions.findings)}</p>`:""}
+        ${scDrill("Show the arithmetic behind each bar")}`:""}
+
+        ${pg&&pgItems.length?`<div class="sub4"><b>4B</b><h4>Then PAGA</h4><span>civil penalties per violation, and the total</span></div>
+        ${!charts?"":colChart(pgItems.map(i=>({label:`${i.id}\n${i.tag||""}`, value:i.pg.total, display:fmtK(i.pg.total)})), {aria:"PAGA civil penalties by finding, unmitigated"})}
+        <div class="tot-line">Together, before any cap <b>${fmtK(pgTotal)}</b></div>
+        ${x.captions&&x.captions.paga?`<p class="cap-line">${esc(x.captions.paga)}</p>`:""}
+        ${caps.length?`<div class="sub4" style="margin-top:22px"><b>4C</b><h4>What documented reasonable steps do to that number</h4></div>
+        ${!charts?"":colChart(caps.map(c=>({label:c.label.replace(" of a notice","\nof a notice").replace(" + violation cured","\n+ violation cured").replace("before a notice","\nbefore a notice"), value:Math.round(pgTotal*c.factor), display:c.factor>0?fmtK(Math.round(pgTotal*c.factor)):"$0", color:c.flag?"#B4862B":"#0A2C44", flag:c.flag,
+          sub: c.factor>=1 ? "the full amount" : c.factor>0 ? `capped at ${Math.round(c.factor*100)}%` : "can reach $0"})), {aria:"PAGA penalties under each cap", h:252, padB:58})}
+        ${x.captions&&x.captions.caps?`<p class="cap-line">${esc(x.captions.caps)}</p>`:""}`:""}
+        ${pgDrill("Show the PAGA math")}`:""}
+
+        ${cd?`<div class="sub4" style="margin-top:22px"><b>4D</b><h4>${esc(cd.lead||"If the open questions go against the company")}</h4><span>${esc(cd.sub||"what turns on the open questions — every input, rate and statute shown")}</span></div>
+        ${!charts?"":colChart(cdItems.map(i=>({label:`${i.id}\n${i.tag||""}`, value:+i.high||0, low:+i.low||0, display:fmtRange(i.low,i.high)})), {aria:"Conditional exposure by finding — if the open questions went against the company"})}
+        <div class="tot-line">Together, if every open question went against the company <b>${esc(cdRange)}</b></div>
+        ${wf?`<div class="tot-line" style="font-size:12.5px"><span>${esc(wf.label||"Only if found willful")}${wf.cite?` · ${esc(wf.cite)}`:""} — beside the total, never inside it</span><b style="font-size:18px">${fmtK(wf.low)} – ${fmtK(wf.high)}</b></div>`:""}
+        ${cd.caption?`<p class="cap-line">${esc(cd.caption)}</p>`:""}
+        ${drills?ifDrill:""}`:""}
+
+        ${drills?rangesDrill:""}
         ${x.guardrail?`<div class="why" style="margin:22px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}`;
+  const body = mkBody(true, true);
+  const SC_DRILL = "Show the arithmetic behind each bar", PG_DRILL = "Show the PAGA math";
+  const lead = cd ? `
+        <span class="k">Illustrative exposure <span class="tag analysis">From analysis</span></span>
+        <p class="xp-lead">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b></p>
+        ${ifTable}
+        <details class="xblk xmath"><summary><span class="t">The Math Behind it All</span><svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>
+          <div class="xmath-in">${ifDrill}${scDrill(SC_DRILL)}${pgDrill(PG_DRILL)}${rangesDrill}</div></details>` : head;   // the four drills, one section (Troy, 10.06.2026)
   // The CEO page's collapsed header carries the large figure only; its "if" opens the subtitle beneath
   // (deliverableRows) — Troy, 10.06.2026.
   const ceoPeek = cd ? cdRange : peek;
