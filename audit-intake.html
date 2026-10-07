@@ -1006,7 +1006,9 @@ function deliverableRows(m){
   const now = new Date();
   const next = calEntries.map(e=>calD(e.date)).filter(d=>d&&d>=now).sort((a,b)=>a-b)[0];
   if (next){ const days = Math.ceil((next-now)/864e5); calPeek += ` · next ${days<=0?"today":`in ${days}${days===1?" day":" days"}`}`; }
-  const sub1 = rk.sub||"every finding scored by severity and effort";
+  // Section 1's subtitle opens with the condition on the figure at its right (Catherine's line, Troy 10.06.2026).
+  const cdLead = m.exposure && m.exposure.conditional && m.exposure.conditional.lead, nF = (findings||[]).length;
+  const sub1 = cdLead ? `${cdLead}: the range at right${nF?` · all ${nF} findings`:""}` : (rk.sub||"every finding scored by severity and effort");
   let n = 0;
   return `
     ${secOpen(++n,"Ranked Risk Map", sub1, xp?xp.ceoPeek:(rk.peek||"met"), "figure")}
@@ -1303,8 +1305,8 @@ function exposureParts(x){
   const amt = (l,h) => fmtK(+l)===fmtK(+h) ? fmtK(+h) : pair(fmtK(+l), fmtK(+h));
   const rng = t => t.includes(" – ") ? pair(...t.split(" – ").map(esc)) : esc(t);
   const dash = wf ? `<td class="nr">—</td>` : "";
-  const A_LABEL = cd.lead||"If the open questions go against the company";
-  const D_LABEL = ((x.captions&&x.captions.findings)||"Scored findings only").split(". ")[0].replace(/\.$/,"");
+  // Block labels — Catherine's wording on Priya's floor (10.06.2026); D is the approved caption, shortened.
+  const A_LABEL = "The findings behind that range", D_LABEL = "Scored findings · what the record shows directly";
   const blk = (label, fig, rows, open, head = "Finding") => `<details class="xblk"${open?" open":""}><summary><span class="t">${esc(label)}</span>${fig?`<span class="v">${fig}</span>`:""}<svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>
           <div class="xpwrap"><table class="xp tight fit"><colgroup><col><col class="c-amt">${wf?`<col class="c-amt">`:""}</colgroup><thead><tr><th>${esc(head)}</th><th style="text-align:right">Low – high</th>${wf?`<th style="text-align:right">${esc(wf.label||"Only if found willful")}</th>`:""}</tr></thead><tbody>${rows}</tbody></table></div></details>`;
   const row = (id, name, small, cells) => `<tr><td class="f"><b>${id?`${esc(id)} · `:""}${esc(name||"")}</b>${small?`<small>${small}</small>`:""}</td>${cells}</tr>`;
@@ -1317,7 +1319,7 @@ function exposureParts(x){
   const capRows = caps.map(c=>row("", c.label, `${esc(c.words||"")}${c.flag?` · <span class="amt">▲ ${esc(String(c.flag).toUpperCase())}</span>`:""}`, `<td class="nr">${amt(Math.round(cdPgLo*c.factor),Math.round(cdPgHi*c.factor))}</td>${dash}`)).join("")
     + (x.captions&&x.captions.caps ? `<tr class="note"><td colspan="${wf?3:2}">${esc(x.captions.caps)}</td></tr>` : "");
   const scRows = items.slice().sort(byHigh).map(i=>row(i.id, i.short||i.title, esc(i.cite||""), `<td class="nr">${amt(i.low,i.high)}</td>${dash}`)).join("")
-    + `<tr class="tot"><td>Together, before penalties and before any fix</td><td class="nr">${rng(headline)}</td>${dash}</tr>`;
+    + `<tr class="tot"><td>Together, before PAGA and before any fix</td><td class="nr">${rng(headline)}</td>${dash}</tr>`;   // 06 and 12 are penalties themselves
   const ifTable = cdItems.length ? [
     blk(A_LABEL, rng(cdRange), ifRows, true),
     cdPg.length ? blk("Then PAGA, if the same questions went against the company", amt(cdPgLo,cdPgHi), pgRows, false) : "",
