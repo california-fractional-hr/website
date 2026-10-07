@@ -300,14 +300,16 @@
   /* — the deliverable rows (5–8): the dashboard display language, rendered live — */
   .riskmap svg{display:block;width:100%;height:auto}
   .rk-list{border-top:2px solid var(--ink);margin-top:12px}
-  .rk-row{display:grid;grid-template-columns:30px minmax(0,1fr) 96px 150px 92px;gap:10px;align-items:baseline;padding:8px 2px;border-bottom:1px solid var(--line-lt);font-size:12.5px}
-  .rk-rank{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--slate-lt)}
-  .rk-t{color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* v2.15 (10.06.2026): the list's order is the rank (one number per row, the finding's); names wrap, never cut */
+  .rk-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 178px 56px;column-gap:12px;align-items:baseline;padding:8px 2px;border-bottom:1px solid var(--line-lt);font-size:12.5px}
+  .rk-t{color:var(--ink);min-width:0;line-height:1.4}
   .rk-t .qid{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--brass);letter-spacing:.06em}
   .rk-score{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--warn);white-space:nowrap}
   .rk-eff{font-size:11.5px;color:var(--slate);white-space:nowrap}
   .rk-exp{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink);text-align:right;white-space:nowrap}
-  @media (max-width:700px){ .rk-row{grid-template-columns:24px minmax(0,1fr) 78px} .rk-eff,.rk-exp{display:none} .rk-t{white-space:normal} }
+  /* narrow: two lines a finding — the name, then score · window · dollars (nothing hidden) */
+  @media (max-width:700px){ .rk-row{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"t t t" "s e x";row-gap:3px}
+    .rk-t{grid-area:t} .rk-score{grid-area:s} .rk-eff{grid-area:e;white-space:normal} .rk-eff .nw{white-space:nowrap} .rk-exp{grid-area:x} }
   .hi-row{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line-lt);border-radius:4px;background:#fff;padding:13px 16px;margin-top:8px}
   .hi-n{width:25px;height:25px;border-radius:50%;background:var(--brass);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:10.5px;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
   .hi-main{flex:1;min-width:0}
@@ -952,36 +954,49 @@ function riskRowHTML(dlv){
   });
   if (!fs.length || !Object.keys(scores).length) return "";
   const ranked = fs.slice().sort((a,b)=>b.score-a.score||(b.exposure||0)-(a.exposure||0)||(a.id<b.id?-1:1));
-  const MONS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const fd = t => t?`${MONS[t.getMonth()]} ${t.getDate()}`:"—";
+  const p2 = n => String(n).padStart(2,"0");
+  const fd = t => t?`${p2(t.getMonth()+1)}.${p2(t.getDate())}.${t.getFullYear()}`:"—";   // MM.DD.YYYY (v2.15)
   const counts = { HIGH: fs.filter(f=>f.bucket==="HIGH").length, MEDIUM: fs.filter(f=>f.bucket==="MEDIUM").length, LOW: fs.filter(f=>f.bucket==="LOW").length };
   // the map: severity (L×I) against effort (days the plan allots), dot size = exposure share
-  const W=560,H=320,pl=46,pr=16,pt=20,pb=44,xmax=Math.max(70,...fs.map(f=>f.days||0)),ymax=27;
+  // v2.15 (10.06.2026): on a narrow page the map draws to fit (its own viewBox, larger type), never scrolling sideways.
+  const narrow = ((typeof stage!=="undefined"&&stage&&stage.clientWidth)||800) < 600, fz = narrow?1.4:1, fa = narrow?1.15:1;
+  const W=narrow?360:560,H=narrow?330:320,pl=narrow?40:46,pr=16,pt=20,pb=44,xmax=Math.max(70,...fs.map(f=>f.days||0)),ymax=27;
   const X=d=>pl+Math.min(d,xmax)/xmax*(W-pl-pr), Y=v=>pt+(1-v/ymax)*(H-pt-pb);
   let s="";
-  [5,10,15,20,25].forEach(v=>{ s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#D9DEE5" stroke-dasharray="2 3"/><text x="${pl-8}" y="${Y(v)+3}" text-anchor="end" font-size="9" fill="#5A6675" font-family="IBM Plex Mono,monospace">${v}</text>`; });
-  [7,15,30,45,60].forEach(d=>{ s+=`<line x1="${X(d)}" x2="${X(d)}" y1="${pt}" y2="${H-pb}" stroke="#D9DEE5" stroke-dasharray="2 3"/><text x="${X(d)}" y="${H-pb+14}" text-anchor="middle" font-size="9" fill="#5A6675" font-family="IBM Plex Mono,monospace">${d}</text>`; });
+  [5,10,15,20,25].forEach(v=>{ s+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#D9DEE5" stroke-dasharray="2 3"/><text x="${pl-8}" y="${Y(v)+3}" text-anchor="end" font-size="${9*fz}" fill="#5A6675" font-family="IBM Plex Mono,monospace">${v}</text>`; });
+  [7,15,30,45,60].forEach(d=>{ s+=`<line x1="${X(d)}" x2="${X(d)}" y1="${pt}" y2="${H-pb}" stroke="#D9DEE5" stroke-dasharray="2 3"/><text x="${X(d)}" y="${H-pb+14}" text-anchor="middle" font-size="${9*fz}" fill="#5A6675" font-family="IBM Plex Mono,monospace">${d}</text>`; });
   s += `<line x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}" stroke="#0A2C44"/>`;
-  s += `<text x="${(pl+W-pr)/2}" y="${H-8}" text-anchor="middle" font-size="8.5" letter-spacing=".1em" fill="#42535A" font-family="IBM Plex Mono,monospace">EFFORT — DAYS THE PLAN ALLOTS TO CLOSE IT</text>`;
-  s += `<text transform="rotate(-90)" x="${-(pt+(H-pt-pb)/2)}" y="12" text-anchor="middle" font-size="8.5" letter-spacing=".1em" fill="#42535A" font-family="IBM Plex Mono,monospace">SEVERITY — L × I</text>`;
-  const groups = new Map();
-  fs.forEach(f=>{ if(f.days==null) return; const k=`${f.days}|${f.score}`; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(f); });
-  groups.forEach(g=>{ g.forEach((f,j)=>{
-    const cx=X(f.days)+(j-(g.length-1)/2)*17, cy=Y(f.score), r=4+Math.sqrt(f.exposure||0)/62;
-    s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${BUCKETC[f.bucket]}" fill-opacity=".88"${f.bucket==="LOW"?' stroke="#0A2C44" stroke-opacity=".35"':""}><title>${esc(`${f.id} · ${f.title} — L${f.l}×I${f.i}${f.exposure?` · carries ${fmtK(f.exposure)}`:""}`)}</title></circle>`;
-    s += `<text x="${cx.toFixed(1)}" y="${(cy-r-3).toFixed(1)}" text-anchor="middle" font-size="7.5" fill="#0A2C44" font-family="IBM Plex Mono,monospace">${esc(f.id)}</text>`;
-  }); });
-  s += `<text x="${W-pr-2}" y="${Y(26.3)}" text-anchor="end" font-size="8.5" letter-spacing=".08em" fill="#A9430F" font-family="IBM Plex Mono,monospace">← FIX FIRST: HIGH SCORE, SHORT WINDOW</text>`;
+  s += `<text x="${(pl+W-pr)/2}" y="${H-8}" text-anchor="middle" font-size="${(8.5*fa).toFixed(1)}" letter-spacing=".1em" fill="#42535A" font-family="IBM Plex Mono,monospace">EFFORT — DAYS THE PLAN ALLOTS TO CLOSE IT</text>`;
+  s += `<text transform="rotate(-90)" x="${-(pt+(H-pt-pb)/2)}" y="12" text-anchor="middle" font-size="${(8.5*fa).toFixed(1)}" letter-spacing=".1em" fill="#42535A" font-family="IBM Plex Mono,monospace">SEVERITY — L × I</text>`;
+  // v2.15: dots never sit on each other. In each day column, findings that share a score sit side by side in
+  // number order; a group that would touch a dot already placed (or its label) steps aside, right then left.
+  const cols = new Map(), lw = 7.5*fz*1.3;   // lw: a two-digit label's width
+  fs.forEach(f=>{ if(f.days==null) return; if(!cols.has(f.days)) cols.set(f.days,[]); cols.get(f.days).push(f); });
+  cols.forEach(list=>{
+    const placed=[], byScore=new Map();
+    list.forEach(f=>{ if(!byScore.has(f.score)) byScore.set(f.score,[]); byScore.get(f.score).push(f); });
+    [...byScore.keys()].sort((a,b)=>b-a).forEach(sc=>{
+      const g=byScore.get(sc).sort((a,b)=>a.id<b.id?-1:1), cy=Y(sc), rs=g.map(f=>4+Math.sqrt(f.exposure||0)/62);
+      const step=Math.max(2*Math.max(...rs)+7, lw+6), xs=sh=>g.map((f,j)=>X(f.days)+(j-(g.length-1)/2)*step+sh);
+      const clash=xx=>xx.some((x,j)=>placed.some(p=>Math.abs(p.cx-x)<Math.max(p.r+rs[j]+5, lw+4) && Math.abs(p.cy-cy)<p.r+rs[j]+9*fz));
+      let sh=0; for (let k=1; clash(xs(sh)) && k<12; k++) sh=(k%2?1:-1)*Math.ceil(k/2)*step;
+      xs(sh).forEach((cx,j)=>{ const f=g[j], r=rs[j]; placed.push({cx, cy, r});
+      s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="${BUCKETC[f.bucket]}" fill-opacity=".88"${f.bucket==="LOW"?' stroke="#0A2C44" stroke-opacity=".35"':""}><title>${esc(`${f.id} · ${f.title} — L${f.l}×I${f.i}${f.exposure?` · carries ${fmtK(f.exposure)}`:""}`)}</title></circle>`;
+      s += `<text x="${cx.toFixed(1)}" y="${(cy-r-3).toFixed(1)}" text-anchor="middle" font-size="${(7.5*fz).toFixed(1)}" fill="#0A2C44" font-family="IBM Plex Mono,monospace">${esc(f.id)}</text>`;
+      });
+    });
+  });
+  s += `<text x="${W-pr-2}" y="${Y(26.3)}" text-anchor="end" font-size="${(8.5*fa).toFixed(1)}" letter-spacing=".08em" fill="#A9430F" font-family="IBM Plex Mono,monospace">← FIX FIRST: HIGH SCORE, SHORT WINDOW</text>`;
   return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:2px 0 12px">
       <span class="tag" style="background:#F6E3D7;color:#A9430F;border:0">${counts.HIGH} HIGH</span>
       <span class="tag" style="background:#F5EBD2;color:#8A6D1F;border:0">${counts.MEDIUM} MEDIUM</span>
       <span class="tag" style="background:#EEF2F4;color:#42535A;border:0">${counts.LOW} LOWER</span></div>
     ${rk.lead?`<p style="font-size:14px;max-width:66ch">${esc(rk.lead)}</p>`:""}
     <p class="ask" style="font-size:13px;color:var(--slate);max-width:72ch;margin:6px 0 4px">Severity is the report's likelihood-times-impact score. Effort is the days the 90-day plan allots to close the finding. Dot size is the finding's share of the illustrative range — the costly, quick items sit top-left, and that is the 30-day agenda.</p>
-    <div class="riskmap caltl-wrap"><svg viewBox="0 0 ${W} ${H}" style="min-width:560px" role="img" aria-label="All ${fs.length} findings mapped: severity score against the days allotted to close each">${s}</svg></div>
+    <div class="riskmap caltl-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="All ${fs.length} findings mapped: severity score against the days allotted to close each">${s}</svg></div>
     <div class="legend" style="margin-top:4px"><span><i style="background:#A9430F"></i>High ${counts.HIGH}</span><span><i style="background:#D8AC4E"></i>Medium ${counts.MEDIUM}</span><span><i style="background:#D9DEE5;border:1px solid rgba(10,44,68,.3)"></i>Lower ${counts.LOW}</span>${rk.range?`<span>dot size — the finding's share of the ${esc(rk.range)} illustrative range</span>`:""}</div>
-    <div class="rk-list">${ranked.map((f,i)=>
-      `<div class="rk-row"><span class="rk-rank">${String(i+1).padStart(2,"0")}</span><span class="rk-t" title="${esc(f.title)}"><span class="sevchip" style="background:${BUCKETC[f.bucket]}${f.bucket==="LOW"?";border:1px solid rgba(10,44,68,.3)":""}"></span><span class="qid">${esc(f.id)}</span> · ${esc(f.short)}</span><span class="rk-score">L${f.l}×I${f.i} · ${f.score}</span><span class="rk-eff">${f.days!=null?`${f.days}-day window · by ${fd(f.targetD)}`:"—"}</span><span class="rk-exp">${f.exposure?fmtK(f.exposure):"—"}</span></div>`).join("")}</div>
+    <div class="rk-list">${ranked.map(f=>
+      `<div class="rk-row"><span class="rk-t" title="${esc(f.title)}"><span class="sevchip" style="background:${BUCKETC[f.bucket]}${f.bucket==="LOW"?";border:1px solid rgba(10,44,68,.3)":""}"></span><span class="qid">${esc(f.id)}</span> · ${esc(f.short)}</span><span class="rk-score">L${f.l}×I${f.i} · ${f.score}</span><span class="rk-eff">${f.days!=null?`${f.days}-day window · <span class="nw">by ${fd(f.targetD)}</span>`:"—"}</span><span class="rk-exp">${f.exposure?fmtK(f.exposure):"—"}</span></div>`).join("")}</div>
     <p class="cap-line">Ranked by score, then by exposure. The exposure column is the high end of the finding's illustrative range; the arithmetic is below, under “The math behind each number.”</p>
     ${(rk.high||[]).length?`${sub4("TOP 7","The seven high-priority findings","these set the 30-day agenda")}
     ${rk.high.map(h=>`<div class="hi-row"><span class="hi-n">${esc(h[0])}</span><div class="hi-main"><div class="hi-t">${esc(h[1])}</div><div class="hi-cite">${esc(String(h[2]).toUpperCase())}</div></div><div class="hi-right"><div class="hi-score">${esc(h[3])}</div><div class="hi-exp">${esc(h[4])}</div><div class="hi-own">${esc(h[5])}</div></div></div>`).join("")}`:""}
