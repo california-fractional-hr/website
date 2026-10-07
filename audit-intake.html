@@ -1391,13 +1391,14 @@ function exposureParts(x){
         ${drills?rangesDrill:""}
         ${x.guardrail?`<div class="why" style="margin:22px 0 0"><b>Read this first</b>${esc(x.guardrail)}</div>`:""}`;
   const body = mkBody(true, true);
-  const SC_DRILL = "Show the arithmetic behind each bar", PG_DRILL = "Show the PAGA math";
+  // The two moved drills' labels — Catherine's wording on Priya's floor (10.06.2026).
+  const SC_DRILL = "Show the arithmetic behind each scored finding", PG_DRILL = "Show the PAGA arithmetic for the scored findings";
   const lead = cd ? `
         <span class="k">Illustrative exposure <span class="tag analysis">From analysis</span></span>
         <p class="xp-lead">${esc(cd.lead||"If the open questions go against the company")}: <b>${esc(cdRange)}</b></p>
         ${ifTable}
-        <details class="xblk xmath"><summary><span class="t">The Math Behind it All</span><svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>
-          <div class="xmath-in">${ifDrill}${scDrill(SC_DRILL)}${pgDrill(PG_DRILL)}${rangesDrill}</div></details>` : head;   // the four drills, one section (Troy, 10.06.2026)
+        <details class="xblk xmath"><summary><span class="t">The math behind each number</span><svg class="chev" viewBox="0 0 22 22" fill="none" aria-hidden="true"><path d="M5 8.5 L11 14 L17 8.5" stroke="currentColor" stroke-width="2"/></svg></summary>
+          <div class="xmath-in">${ifDrill}${scDrill(SC_DRILL)}${pgDrill(PG_DRILL)}${rangesDrill}</div></details>` : head;   // the four drills, one section (Troy, 10.06.2026; Catherine's name for it)
   // The CEO page's collapsed header carries the large figure only; its "if" opens the subtitle beneath
   // (deliverableRows) — Troy, 10.06.2026.
   const ceoPeek = cd ? cdRange : peek;
