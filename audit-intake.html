@@ -320,8 +320,8 @@
   .hi-exp{font-family:'Spectral',Georgia,serif;font-weight:600;font-size:17px;color:#8A6D1F;white-space:nowrap;margin-top:2px}
   .hi-own{font-size:11px;color:var(--slate);white-space:nowrap;margin-top:3px}
   @media (max-width:640px){ .hi-row{flex-wrap:wrap} .hi-right{text-align:left;width:100%;padding-left:39px} }
-  .rm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
-  @media (max-width:820px){.rm-grid{grid-template-columns:1fr}}
+  /* One column at every width (Troy, 10.08.2026): each period's heading is a full-width row, its moves beneath. */
+  .rm-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:8px}
   .rm-col{border:1px solid var(--line-lt);border-radius:4px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
   .rm-head{background:var(--ink);padding:10px 14px 11px}
   .rm-head.green{background:var(--ok)}
