@@ -334,9 +334,10 @@
   .rm-more{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--slate-lt);padding:0 14px 12px;margin-top:auto}
   /* One month per row at every width (Troy, 10.08.2026): the month heads the row, its entries beneath. */
   .cy-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
-  .cy-card{border:1px solid var(--line-lt);border-radius:4px;background:#fff;padding:10px 12px}
-  .cy-m{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--brass);padding-bottom:6px;border-bottom:1px solid var(--line-lt);margin-bottom:7px}
-  .cy-it{display:flex;gap:8px;font-size:12px;line-height:1.4;color:#2F3A47;padding:3px 0}
+  .cy-card{border:1px solid var(--line-lt);border-radius:4px;overflow:hidden;background:#fff;padding:0 0 9px}
+  /* The month heading is a navy row, as the roadmap's periods are (Troy, 10.08.2026). */
+  .cy-m{background:var(--ink);padding:11px 14px 12px;margin-bottom:8px;font-family:'Spectral',Georgia,serif;font-weight:600;font-size:17px;letter-spacing:.04em;color:#fff}
+  .cy-it{display:flex;gap:8px;font-size:12px;line-height:1.4;color:#2F3A47;padding:3px 14px}
   .cy-it i{width:7px;height:7px;border-radius:50%;flex:none;margin-top:4px}
   .sp-row{display:flex;gap:14px;align-items:baseline;border:1px solid var(--line-lt);border-radius:4px;background:#fff;padding:10px 14px;margin-top:8px}
   .sp-freq{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--ink);background:#EEF2F4;border:1px solid var(--line-lt);border-radius:3px;padding:4px 9px;white-space:nowrap;flex:none;min-width:122px;text-align:center}
