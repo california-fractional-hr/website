@@ -332,9 +332,8 @@
   .rm-col li{position:relative;padding:5px 0 5px 16px;font-size:12.5px;line-height:1.45;color:#2F3A47}
   .rm-col li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--brass)}
   .rm-more{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--slate-lt);padding:0 14px 12px;margin-top:auto}
-  .cy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
-  @media (max-width:900px){.cy-grid{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:480px){.cy-grid{grid-template-columns:1fr}}
+  /* One month per row at every width (Troy, 10.08.2026): the month heads the row, its entries beneath. */
+  .cy-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
   .cy-card{border:1px solid var(--line-lt);border-radius:4px;background:#fff;padding:10px 12px}
   .cy-m{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--brass);padding-bottom:6px;border-bottom:1px solid var(--line-lt);margin-bottom:7px}
   .cy-it{display:flex;gap:8px;font-size:12px;line-height:1.4;color:#2F3A47;padding:3px 0}
