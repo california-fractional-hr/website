@@ -899,7 +899,7 @@ function calYearGridHTML(){
 function calSpineHTML(dlv){
   const cad = (dlv.cal&&dlv.cal.cadences)||[];
   if (!cad.length) return "";
-  return sub4("SPINE","The recurring spine","what runs every payroll, month, quarter, and season")
+  return sub4("ROUTINE","The standing routine","what runs every payroll, hire, month, and season")
     +cad.map(c=>`<div class="sp-row"><span class="sp-freq">${esc(c[0])}</span><span class="sp-desc">${esc(c[1])}</span><span class="sp-ref">${esc(c[2])}</span></div>`).join("")
     +((dlv.cal&&dlv.cal.spineWhy)?`<div class="why" style="margin:14px 0 0"><b>Where this comes from</b>${esc(dlv.cal.spineWhy)}</div>`:"");
 }
