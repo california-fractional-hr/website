@@ -1030,7 +1030,7 @@ function deliverableRows(m){
     <div class="tile wide">${riskRowHTML(dlv)}</div>
     ${xp?`<div class="tile wide">${xp.lead}</div>`:""}
     ${secClose()}
-    ${(rk.roadmap||[]).length?`${secOpen(++n,"90-Day Roadmap","What fixing the findings and proving the hold look like","")}
+    ${(rk.roadmap||[]).length?`${secOpen(++n,"90-Day Roadmap","What fixing the findings and showing the fixes hold looks like","")}
     <div class="tile wide">${roadmapHTML(rk)}</div>
     ${secClose()}`:""}
     ${secOpen(++n,"12-Month Compliance Calendar", cal.sub||"the year ahead — today's line drawn live", calPeek)}
