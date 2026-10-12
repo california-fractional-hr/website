@@ -1859,6 +1859,11 @@ async function completeAll(){
     document.getElementById("gate").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
     if(submitted && steps[step]==="start") step=0;
+    // v2.16 (10.12.2026, Troy: "when the link is clicked, it should take you to the CEO audit dashboard"):
+    // the principal (CEO) link lands on the Audit Dashboard once the record is delivered. Only the door's
+    // first visit is moved — a step the reader chose on an earlier visit (remembered above) is kept, and the
+    // workspace (crew) link is untouched.
+    if(principal && metrics && metrics.delivered && step===0) step = steps.indexOf("dashboard");
     render();
     // refresh on focus so simultaneous editors converge — and re-render when the
     // record actually moved (a verdict posted, a request added), so returning to
