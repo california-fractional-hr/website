@@ -393,6 +393,11 @@
   .tr-hd .h-t,.tr-row .tr-t{grid-area:t} .tr-hd .h-sp,.tr-row .tr-sp{grid-area:sp} .tr-hd .h-d,.tr-row .tr-d{grid-area:d} .tr-hd .h-s,.tr-row .tr-st{grid-area:s} .tr-row .tr-box{grid-area:b}
   .tr-box{width:20px;height:20px;border:1.5px solid var(--ink);border-radius:2px;background:#fff;display:flex;align-items:center;justify-content:center}
   .tr-row.done .tr-box{background:var(--ink)} .tr-box svg{width:13px;height:13px}
+  /* v2.18: a box the client can tick is a button — it takes the brass on hover and focus */
+  button.tr-box{padding:0;cursor:pointer;font:inherit;transition:border-color .15s,box-shadow .15s}
+  button.tr-box:hover,button.tr-box:focus-visible{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(180,134,43,.18)}
+  button.tr-box:disabled{cursor:progress;opacity:.6}
+  .tr-by{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.04em;color:var(--ok);margin-top:3px}
   .tr-t{font-size:14.5px;line-height:1.45;color:var(--ink);min-width:0}
   .tr-row.done .tr-t{color:#6E7C7D}
   .tr-sp{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;color:var(--brass)}
@@ -1164,6 +1169,7 @@ function startGo(){
   flushSaves();          // anything held for a name goes now, attributed
   const back = returnStep; returnStep = null;
   go(back || 1);         // "you'll go straight back" — kept literally
+  if (trPending){ const n = trPending; trPending = null; trToggle(n); }   // v2.18: the tick that waited for a name
 }
 
 function renderReview(){
@@ -1639,6 +1645,44 @@ function trTask(i, dl){
   const m = /^([^:]{2,24}):\s+(.)/.exec(i.task||"");
   return (m && first && m[1].toLowerCase()===first.toLowerCase()) ? i.task.replace(m[0], m[2].toUpperCase()) : (i.task||"");
 }
+function trTodayText(){ const k = String(trTodayKey()); return `${k.slice(4,6)}.${k.slice(6,8)}.${k.slice(0,4)}`; }
+// v2.18 (Troy, 10.22.2026: "click it done and it be done"): the CEO link ticks an item done, or
+// un-ticks one it ticked. The firm's own done items are locked. The tick shows at once and is
+// saved behind it; a refused save puts the box back. Only a released page on the CEO link ticks.
+let trPending = null;        // an item clicked before a name was given — ticked once it is
+function trCanTick(i){ return !!(transition && transition.released===true && principal && (i.status!=="done" || i.markedBy)); }
+function trRerender(){
+  const open = [...document.querySelectorAll("details.secwrap[open]")].map(d=>d.id).filter(Boolean);
+  const y = window.scrollY;
+  render();
+  open.forEach(id=>{ const d=document.getElementById(id); if (d) d.open = true; });
+  window.scrollTo({top:y});
+}
+async function trToggle(n){
+  const i = transition && (transition.items||[]).find(x=>x.n===n);
+  if (!i || !trCanTick(i)) return;
+  if (!me){ trPending = n; requireIdentity(); return; }
+  const before = {...i};
+  const done = i.status!=="done";
+  if (done && !i.due) i.due = i.date;   // the due date comes back on an undo (the receiver also sends it)
+  const by = `${me.name} — ${me.role}`;
+  Object.assign(i, done ? {status:"done", date:trTodayText(), markedBy:by, markedAt:"just now"}
+                        : {status:"todo", date:i.due||i.date, markedBy:"", markedAt:""});
+  trRerender();
+  chipMsg("SAVING…", false);
+  try{
+    if (!PREVIEW){
+      const r = await api({action:"markTransition", token, n, done, by});
+      if (!r.ok) throw new Error(r.error||"not saved");
+      Object.assign(i, r.item);
+    }
+    chipMsg("SAVED ✓", false); setTimeout(()=>chipMsg("AUTOSAVE ON", true), 1600);
+  }catch(e){
+    Object.assign(i, before);
+    chipMsg("NOT SAVED — TRY AGAIN", false, true);
+  }
+  trRerender();
+}
 function trOpen(n){
   const d = document.getElementById("tr-d-"+n);
   if (d){ d.open = true; d.scrollIntoView({behavior:"smooth", block:"start"}); }
@@ -1659,9 +1703,12 @@ function renderTransition(){
     const isDone = i.status==="done";
     const due = !isDone && mdyKey(i.sort||i.date) < today;
     const st = isDone ? "DONE" : due ? "DUE NOW" : "TO DO";
+    const box = trCanTick(i)
+      ? `<button type="button" class="tr-box" onclick="trToggle(${i.n})" aria-pressed="${isDone}" aria-label="${isDone?"Done — select to undo":"Mark done"}">${isDone?tick:""}</button>`
+      : `<span class="tr-box" role="img" aria-label="${isDone?"Done":"To do"}">${isDone?tick:""}</span>`;
     return `<div class="tr-row${isDone?" done":due?" due":""}">
-      <span class="tr-box" role="img" aria-label="${isDone?"Done":"To do"}">${isDone?tick:""}</span>
-      <span class="tr-t">${esc(trTask(i, dl))}</span>
+      ${box}
+      <span class="tr-t">${esc(trTask(i, dl))}${isDone&&i.markedBy?`<small class="tr-by">Marked done by ${esc(i.markedBy)}</small>`:""}</span>
       <span class="tr-sp">${i.sp?esc(who):""}</span>
       <span class="tr-d" data-k="${isDone?"Completed":"Due"}">${esc(trDateText(i))}</span>
       <span class="tr-st">${st}</span></div>`;
@@ -1690,7 +1737,7 @@ function renderTransition(){
       ${complete.length?`<div><b>Complete</b>${complete.map(p=>esc(trTag(p.dl))).join("<br>")}</div>`:""}
       ${furthest?`<div><b>Furthest along</b>${esc(trTag(furthest.dl))} — ${furthest.done} of ${furthest.all}</div>`:""}
     </div>
-    <div class="why" style="margin-top:20px"><b>How to read this</b>Each deliverable of the Statement of Work has its own checklist below. Done items show the date completed; to-do items show the date due. DUE NOW means its date has passed. Items marked ${esc(who)} are ${esc(who)}'s own steps. All dates are MM.DD.YYYY.</div>
+    <div class="why" style="margin-top:20px"><b>How to read this</b>Each deliverable of the Statement of Work has its own checklist below. Done items show the date completed; to-do items show the date due. DUE NOW means its date has passed. Items marked ${esc(who)} are ${esc(who)}'s own steps. All dates are MM.DD.YYYY.${t.released===true&&principal?` Tick a box when a step is done — it saves at once, under your name. A box you ticked can be unticked; items we have recorded as done are fixed.`:""}</div>
     <h3 class="docstand" style="margin-top:8px">Progress by deliverable</h3>
     <p class="note" style="margin:0 0 4px">${numbered} deliverables${hasClose?" and the close":""}, in order. Select one to open its checklist.</p>
     <div class="tr-legend"><span><i style="background:var(--brass)"></i>Done</span><span><i style="background:#D9E2DF"></i>To do</span></div>
