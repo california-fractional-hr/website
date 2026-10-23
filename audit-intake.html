@@ -1707,7 +1707,13 @@ function stampMdy(s){ const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(String(s||"")); retu
 function trCounts(items){ items = items||[]; return [items.filter(i=>i.status==="done").length, items.length]; }
 const trIsClose = dl => String(dl.name||"").trim().toLowerCase()==="close";
 const trTag = dl => trIsClose(dl) ? "Close" : `${pad2(dl.n)} ${dl.name}`;
-function trShortName(){ return String(company||"").replace(/,?\s+(LLC|L\.L\.C\.|Inc\.?|Corp\.?|Corporation|Co\.|Company|LLP|Ltd\.?)$/i,"").trim() || "Client"; }
+// The client's short name: the company less its legal suffix. A record kept as "Trade name (Legal Name LLC)"
+// uses the legal name in the parentheses — "Saddlepoint (Saddle Point LLC)" reads "Saddle Point".
+const LEGAL_SUFFIX = /,?\s+(LLC|L\.L\.C\.|Inc\.?|Corp\.?|Corporation|Co\.|Company|LLP|Ltd\.?)$/i;
+function trShortName(){
+  const c = String(company||"").trim(), m = /\(([^()]+)\)$/.exec(c);
+  return ((m && LEGAL_SUFFIX.test(m[1])) ? m[1] : c).replace(LEGAL_SUFFIX,"").trim() || "Client";
+}
 const trWho = i => i.sp ? trShortName() : "CFHR";
 const AG_TYPE = { project:"CHRO Project · Statement of Work", retainer:"CHRO Retainer", audit:"Compliance Audit" };
 const AG_CLOCK = "Dated when the clock starts";
@@ -1731,7 +1737,8 @@ function trTask(i, dl){
 }
 // A moved date never moves quietly: the latest move, then every move one tap away.
 function movesHTML(moves){
-  if (!moves || !moves.length) return "";
+  moves = (moves||[]).filter(m=>m.from);   // an item's first date (a reopened item dated anew) is not a move
+  if (!moves.length) return "";
   const last = moves[moves.length-1];
   return `<small class="tr-mv">Moved from ${esc(last.from||"—")} · ${esc(last.reason)}</small>
     <details class="tr-hist"><summary>Date history</summary><ul>${moves.map(m=>`<li>${esc(m.from||"—")} → ${esc(m.to)} · ${esc(m.reason)}${m.at?` · moved ${esc(stampMdy(m.at))}`:""}</li>`).join("")}</ul></details>`;
