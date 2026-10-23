@@ -368,6 +368,51 @@
   .dashlock b{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:3px;color:var(--brass)}
   .rungs{list-style:none;margin:8px 0 0;padding:0;font-size:12.5px;color:var(--slate)} .rungs li{display:flex;gap:8px;padding:3px 0} .rungs b{font-family:'IBM Plex Mono',monospace;font-weight:500;color:var(--ink);min-width:34px}
   .rungs li.on b{color:var(--brass)}
+  /* W-2 Transition (receiver v2.16) — a project checklist: the outline, then one checklist per
+     deliverable. The marks are the timeline deck's: navy box with a check = done (date completed),
+     open box = to do (date due), DUE NOW in brass once the date has passed, the client's own steps named. */
+  .tr-lead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:16px 0 4px}
+  .tr-lead b{font-family:'Spectral',Georgia,serif;font-weight:500;font-size:clamp(34px,5vw,44px);line-height:1;color:var(--ink);letter-spacing:-.02em}
+  .tr-lead span{font-size:15px;color:var(--slate)}
+  .tr-conv{font-family:'Spectral',Georgia,serif;font-size:19px;line-height:1.35;color:var(--ink);margin:10px 0 0} .tr-conv i{color:var(--brass)}
+  .tr-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 24px;margin:14px 0 0}
+  .tr-facts div{font-size:13.5px;color:#2F3A47;line-height:1.5} .tr-facts b{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);margin-bottom:2px}
+  .tr-bar{position:relative;height:10px;background:#D9E2DF;border-radius:2px;overflow:hidden}
+  .tr-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--brass)}
+  .tr-out{display:grid;grid-template-columns:200px minmax(0,1fr) 64px;column-gap:14px;align-items:center;width:100%;background:none;border:0;border-bottom:1px solid var(--line-lt);padding:10px 2px;font:inherit;text-align:left;cursor:pointer}
+  .tr-out:hover .tr-nm{color:#8F6A1F}
+  .tr-nm{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.02em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tr-ct{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--slate);text-align:right;white-space:nowrap}
+  .tr-out.full .tr-ct{color:var(--ok)}
+  .tr-legend{display:flex;gap:16px;font-size:12px;color:var(--slate);margin:2px 0 6px} .tr-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .tr-prog{display:flex;align-items:center;gap:14px;margin:4px 0 10px} .tr-prog .tr-bar{flex:1}
+  .tr-prog span{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--slate);white-space:nowrap}
+  .tr-hd,.tr-row{display:grid;grid-template-columns:24px minmax(0,1fr) 140px 116px 70px;column-gap:14px;grid-template-areas:"b t sp d s"}
+  .tr-hd{align-items:end;padding:8px 0 7px;border-bottom:2px solid var(--ink);font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--brass)}
+  .tr-row{align-items:center;padding:11px 0;border-bottom:1px solid var(--line-lt)}
+  .tr-hd .h-t,.tr-row .tr-t{grid-area:t} .tr-hd .h-sp,.tr-row .tr-sp{grid-area:sp} .tr-hd .h-d,.tr-row .tr-d{grid-area:d} .tr-hd .h-s,.tr-row .tr-st{grid-area:s} .tr-row .tr-box{grid-area:b}
+  .tr-box{width:20px;height:20px;border:1.5px solid var(--ink);border-radius:2px;background:#fff;display:flex;align-items:center;justify-content:center}
+  .tr-row.done .tr-box{background:var(--ink)} .tr-box svg{width:13px;height:13px}
+  .tr-t{font-size:14.5px;line-height:1.45;color:var(--ink);min-width:0}
+  .tr-row.done .tr-t{color:#6E7C7D}
+  .tr-sp{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;letter-spacing:.06em;color:var(--brass)}
+  .tr-d{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--ink);white-space:nowrap}
+  .tr-row.done .tr-d{color:#6E7C7D} .tr-row:not(.done) .tr-d{font-weight:600}
+  .tr-st{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em;white-space:nowrap;color:var(--ink)}
+  .tr-row.done .tr-st{color:#6E7C7D} .tr-row.due .tr-st{color:var(--brass)}
+  .tr-foot{font-size:12.5px;color:var(--slate);margin:12px 0 0}
+  .tr-disc{font-size:11.5px;line-height:1.5;color:#6B7684;margin:22px 0 0;padding-top:12px;border-top:1px solid var(--line-lt)}
+  @media (max-width:700px){
+    .tr-out{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n c" "b b";row-gap:6px}
+    .tr-out .tr-nm{grid-area:n} .tr-out .tr-ct{grid-area:c} .tr-out .tr-bar{grid-area:b}
+  }
+  /* where the page goes to one column, the task takes the full line; date, status and the client's mark beneath */
+  @media (max-width:860px){
+    .tr-hd{display:none}
+    .tr-row{grid-template-columns:24px minmax(0,1fr) auto;grid-template-areas:"b t t" ". d s" ". sp sp";row-gap:4px;align-items:start}
+    .tr-row .tr-box{margin-top:2px} .tr-row .tr-st{text-align:right}
+    .tr-row .tr-d::before{content:attr(data-k) " ";font-weight:400;color:var(--slate)}
+  }
   .hidden{display:none!important}
 </style>
 </head>
@@ -423,8 +468,9 @@ const ENDPOINT = "https://script.google.com/macros/s/AKfycbxvD_IyGgKoxJ4LZzyOL6i
 // A directly opened local file is an owner/design preview, never a live client route.
 // The deployed HTTPS page still requires its private engagement token unless an
 // explicit preview hash is present.
-const PREVIEW = location.protocol === "file:" || location.hash === "#preview" || location.hash === "#preview-done" || location.hash === "#preview-principal";
-const PREVIEW_DONE = location.hash === "#preview-done" || location.hash === "#preview-principal"; // preview the post-submit (amendment-lane) state
+const PREVIEW_TRANSITION = location.hash === "#preview-transition"; // v2.16: preview the W-2 Transition page (sample data)
+const PREVIEW = location.protocol === "file:" || location.hash === "#preview" || location.hash === "#preview-done" || location.hash === "#preview-principal" || PREVIEW_TRANSITION;
+const PREVIEW_DONE = location.hash === "#preview-done" || location.hash === "#preview-principal" || PREVIEW_TRANSITION; // preview the post-submit (amendment-lane) state
 const PREVIEW_PRINCIPAL = location.hash === "#preview-principal"; // v2.8: preview the principal door (deliverables unlocked)
 const token = new URLSearchParams(location.search).get("t") || "";
 const MAX = 25*1024*1024;
@@ -579,11 +625,13 @@ let metrics = null;                  // Audit Dashboard record (receiver-gated: 
 let findings = null;                 // Findings ledger (v2.7 — principal-only since v2.8; powers the Retainer Dashboard)
 let principal = false;               // v2.8: true only on the principal (CEO) token — unlocks analysis, findings, calendar
 let calendar = null;                 // v2.8: Compliance Calendar entries [{date,lane,label,ref}] — principal-only
+let transition = null;               // v2.16: the W-2 Transition checklist — both doors once released; null = no page
 let company = "", contactSeed = "";
 let step = 0;
 // v2.9 (Troy, 2026-08-24): the deliverables live as rows 5–8 of the Audit Dashboard
 // itself — the retainer-era rail stops (retainer/calendar/repdoc/stepsdoc) are gone.
-const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard"];
+// v2.16: "transition" is appended, never inserted, so a remembered step index keeps its page.
+const steps = ["start", ...SECTIONS.map(s=>s.k), "review", "dashboard", "transition"];
 let dirty = {}, saveTimer = null, activeDropReq = null, pendingNotify = [], notifyTimer = null;
 let pendingAmend = {}, amendTimer = null;   // post-submit changes awaiting the one quiet email
 let needIdentity = false;                   // true once a save or a jump was held for a name
@@ -690,10 +738,13 @@ function renderRail(){
     // v2.9: one dashboard entry on both doors. The principal door's deliverables
     // are rows 5–8 of the dashboard page itself, not separate rail stops — the
     // receiver still never serves the analysis layer to the shared link.
-    {key:"dashboard", label:"Audit Dashboard"}];
+    {key:"dashboard", label:"Audit Dashboard"},
+    // v2.16: the W-2 Transition page — only for an engagement whose record carries one.
+    ...(transition ? [{key:"transition", label:"W-2 Transition"}] : [])];
   const buttons = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
+    if (it.key==="transition"){ const [d,t]=trCounts(transition.items); cnt = `<span class="cnt">${d}/${t}</span>`; }
     // Documents earns its tick the same way a section does — when the count reads
     // full. Full means every active request VERIFIED (v2.3): received is not done.
     if (it.key==="review" && submitted){ const [v,t]=docsVerified(); if (t) cnt = `<span class="cnt">${v}/${t}</span>`; }
@@ -701,7 +752,8 @@ function renderRail(){
     // layer only once the report is in the client's hands, so "delivered" is the state.
     const done = (it.key.length===1 && sectionAnswered(it.key)[0]===sectionAnswered(it.key)[1])
               || (it.key==="review" && submitted && docsComplete())
-              || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)));
+              || (it.key==="dashboard" && !!(metrics && metrics.delivered && Array.isArray(metrics.ratios)))
+              || (it.key==="transition" && (([d,t])=>t>0&&d===t)(trCounts(transition.items)));
     // v2.8: navigate by the key's position in the STATIC steps list, not the item's
     // index — the rail's tail entries are conditional, so positions no longer align.
     const si = steps.indexOf(it.key);
@@ -713,6 +765,7 @@ function renderRail(){
     let count = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); count = ` (${a}/${t})`; }
     if (it.key==="review" && submitted){ const [v,t]=docsVerified(); if (t) count = ` (${v}/${t})`; }
+    if (it.key==="transition"){ const [d,t]=trCounts(transition.items); count = ` (${d}/${t})`; }
     const si = steps.indexOf(it.key);
     return `<option value="${si}" ${si===step?"selected":""}>${esc(it.label+count)}</option>`;
   }).join("");
@@ -1052,11 +1105,14 @@ function render(){
   // A step index remembered from the retainer-era rail can point past the end of
   // the shorter list — land those visitors on the dashboard, not a blank page.
   if (step >= steps.length){ step = steps.indexOf("dashboard"); remember(); }
+  // A remembered W-2 Transition step on a record that no longer carries one lands on the dashboard.
+  if (steps[step] === "transition" && !transition){ step = steps.indexOf("dashboard"); remember(); }
   renderRail();
   const key = steps[step];
   if (key === "start") return renderStart();
   if (key === "review") return renderReview();
   if (key === "dashboard") return renderDashboard();
+  if (key === "transition") return renderTransition();
   const sec = SECTIONS.find(s=>s.k===key);
   const [a,t] = sectionAnswered(key);
   stage.innerHTML = `<div class="card">
@@ -1551,6 +1607,101 @@ function renderDashboard(){
   </div>`;
 }
 
+/* ============ W-2 Transition (receiver v2.16) ============
+   The project's checklist as the timeline deck draws it: the outline (progress by deliverable),
+   then one checklist per deliverable — done items with the date completed, to-do items with the
+   date due, DUE NOW once that date has passed, the client's own steps named. Read-only: items are
+   marked done from the record, never from this page. Dates arrive as MM.DD.YYYY text; a to-do
+   date may be words ("On arrival") with `sort` the MM.DD.YYYY it sorts as. */
+const WEEKDAY = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const pad2 = n => String(n).padStart(2,"0");
+function mdyParts(s){ const m=/^(\d\d)\.(\d\d)\.(\d{4})$/.exec(String(s||"")); return m?{m:+m[1],d:+m[2],y:+m[3]}:null; }
+function mdyKey(s){ const p=mdyParts(s); return p ? p.y*10000+p.m*100+p.d : 99999999; }
+function mdyWeekday(s){ const p=mdyParts(s); return p ? WEEKDAY[new Date(p.y,p.m-1,p.d).getDay()] : ""; }
+function trTodayKey(){   // the date in California, whatever the reader's clock says
+  const f = new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+  const g = t => f.find(x=>x.type===t).value;
+  return +(g("year")+g("month")+g("day"));
+}
+function trCounts(items){ items = items||[]; return [items.filter(i=>i.status==="done").length, items.length]; }
+const trIsClose = dl => String(dl.name||"").trim().toLowerCase()==="close";
+const trTag = dl => trIsClose(dl) ? "Close" : `${pad2(dl.n)} ${dl.name}`;
+function trShortName(){ return String(company||"").replace(/,?\s+(LLC|L\.L\.C\.|Inc\.?|Corp\.?|Corporation|Co\.|Company|LLP|Ltd\.?)$/i,"").trim() || "Client"; }
+function trDateText(i){
+  if (!mdyParts(i.date)) return i.date || "—";                  // words, e.g. "On arrival"
+  return i.status==="done" ? i.date : `${mdyWeekday(i.date).slice(0,3)} ${i.date}`;
+}
+// On its own deliverable's checklist, a "QuickBooks: …" prefix repeats the heading — drop it.
+function trTask(i, dl){
+  const first = String(dl.name||"").split(/\s+/)[0];
+  const m = /^([^:]{2,24}):\s+(.)/.exec(i.task||"");
+  return (m && first && m[1].toLowerCase()===first.toLowerCase()) ? i.task.replace(m[0], m[2].toUpperCase()) : (i.task||"");
+}
+function trOpen(n){
+  const d = document.getElementById("tr-d-"+n);
+  if (d){ d.open = true; d.scrollIntoView({behavior:"smooth", block:"start"}); }
+}
+function renderTransition(){
+  const t = transition, today = trTodayKey();
+  const dls = (t.deliverables||[]).slice().sort((a,b)=>a.n-b.n);
+  const its = t.items||[];
+  const [done, total] = trCounts(its);
+  const per = dls.map(dl=>{ const xs = its.filter(i=>i.d===dl.n); return {dl, done: xs.filter(i=>i.status==="done").length, all: xs.length}; });
+  const complete = per.filter(p=>p.all && p.done===p.all);
+  const furthest = per.filter(p=>p.done && p.done<p.all).sort((a,b)=>b.done/b.all-a.done/a.all || b.done-a.done)[0];
+  const numbered = dls.filter(dl=>!trIsClose(dl)).length;
+  const hasClose = dls.some(trIsClose);
+  const who = trShortName();
+  const tick = '<svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2.5 7.5 L5.8 10.8 L11.8 3.6" stroke="#fff" stroke-width="2.2"/></svg>';
+  const row = (i, dl)=>{
+    const isDone = i.status==="done";
+    const due = !isDone && mdyKey(i.sort||i.date) < today;
+    const st = isDone ? "DONE" : due ? "DUE NOW" : "TO DO";
+    return `<div class="tr-row${isDone?" done":due?" due":""}">
+      <span class="tr-box" role="img" aria-label="${isDone?"Done":"To do"}">${isDone?tick:""}</span>
+      <span class="tr-t">${esc(trTask(i, dl))}</span>
+      <span class="tr-sp">${i.sp?esc(who):""}</span>
+      <span class="tr-d" data-k="${isDone?"Completed":"Due"}">${esc(trDateText(i))}</span>
+      <span class="tr-st">${st}</span></div>`;
+  };
+  const order = (a,b)=> mdyKey(a.sort||a.date)-mdyKey(b.sort||b.date) || a.n-b.n;
+  const sections = per.map(({dl, done:dd, all})=>{
+    const xs = its.filter(i=>i.d===dl.n);
+    const rows = [...xs.filter(i=>i.status==="done").sort(order), ...xs.filter(i=>i.status!=="done").sort(order)];
+    const lead = trIsClose(dl) ? "The close" : `Deliverable ${pad2(dl.n)} of ${pad2(numbered)}`;
+    return secOpen(trIsClose(dl) ? "C" : pad2(dl.n), trIsClose(dl) ? "Close" : dl.name, `${lead} · ${dd} done · ${all-dd} to do`, `${dd} of ${all} done`)
+        .replace("<details ", `<details id="tr-d-${dl.n}" `) + `
+      <div class="tile wide">
+        <div class="tr-prog"><div class="tr-bar"><i style="width:${all?Math.round(100*dd/all):0}%"></i></div><span>${dd} DONE · ${all-dd} TO DO</span></div>
+        <div class="tr-hd"><span class="h-t">Task</span><span class="h-sp">${esc(who)}'s step</span><span class="h-d">Completed / due</span><span class="h-s">Status</span></div>
+        ${rows.map(i=>row(i, dl)).join("")}
+      </div>${secClose()}`;
+  }).join("");
+  const conv = mdyParts(t.conversion) ? `<p class="tr-conv">W-2 employment begins <i>${mdyWeekday(t.conversion)} ${esc(t.conversion)}.</i></p>` : "";
+  stage.innerHTML = `<div class="card">
+    <h2>W-2 Transition</h2>
+    <p class="sub" style="font-size:14px;color:var(--slate);margin-top:6px">${esc(company||"Your company")} · Status as of ${esc(t.asOf||"")}</p>
+    ${t.released===false?`<div class="dashlock" style="margin-top:14px"><b>Not released · preview</b>This page is not yet on the client's links. It appears there only once it is released.</div>`:""}
+    <div class="tr-lead"><b>${done} of ${total}</b><span>items done across the Statement of Work</span></div>
+    ${conv}
+    <div class="tr-facts">
+      ${complete.length?`<div><b>Complete</b>${complete.map(p=>esc(trTag(p.dl))).join("<br>")}</div>`:""}
+      ${furthest?`<div><b>Furthest along</b>${esc(trTag(furthest.dl))} — ${furthest.done} of ${furthest.all}</div>`:""}
+    </div>
+    <div class="why" style="margin-top:20px"><b>How to read this</b>Each deliverable of the Statement of Work has its own checklist below. Done items show the date completed; to-do items show the date due. DUE NOW means its date has passed. Items marked ${esc(who)} are ${esc(who)}'s own steps. All dates are MM.DD.YYYY.</div>
+    <h3 class="docstand" style="margin-top:8px">Progress by deliverable</h3>
+    <p class="note" style="margin:0 0 4px">${numbered} deliverables${hasClose?" and the close":""}, in order. Select one to open its checklist.</p>
+    <div class="tr-legend"><span><i style="background:var(--brass)"></i>Done</span><span><i style="background:#D9E2DF"></i>To do</span></div>
+    ${per.map(({dl, done:dd, all})=>`<button type="button" class="tr-out${all&&dd===all?" full":""}" onclick="trOpen(${dl.n})">
+      <span class="tr-nm">${esc(trTag(dl))}</span>
+      <div class="tr-bar"><i style="width:${all?Math.round(100*dd/all):0}%"></i></div>
+      <span class="tr-ct">${dd} of ${all}</span></button>`).join("")}
+    <div class="secctl" style="margin-top:22px"><button type="button" onclick="setAllSections(true)">Expand all</button><button type="button" onclick="setAllSections(false)">Collapse all</button></div>
+    <div class="dash">${sections}</div>
+    <p class="tr-disc">California Fractional HR provides HR &amp; compliance advisory services. Not a law firm; no legal advice; not a guarantee of compliance.</p>
+  </div>`;
+}
+
 /* ============ input wiring ============ */
 // Every answer box grows to fit its text — on load, on every keystroke, and when the
 // window changes width — so a long answer is read in full, never scrolled inside a
@@ -1841,6 +1992,34 @@ async function completeAll(){
       {id:"R-06", title:"Offer letter template and a recent signed example; wage notice sample", note:"", status:"reviewed", requested:"Aug 12", received:"Aug 13", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"E", statement:"The filed document is verified. Sample Client Co. told us in writing that no signed example exists and that no wage notice exists (08.14.2026).", files_list:[{name:"offer-letter.docx", date:"Aug 13"}]},
       {id:"R-07", title:"Photos of posting boards at each location", note:"", status:"observed", requested:"Aug 12", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"I", statement:"On our visit to 120 Sample Way on 08.15.2026, we did not see a posting board."},
     ];
+    // v2.16: #preview-transition — the W-2 Transition page on sample data. Every date is set
+    // relative to today, so the preview always shows done, to-do and DUE NOW rows. Fictional.
+    if (PREVIEW_TRANSITION){
+      const at = days => { const x=new Date(); x.setDate(x.getDate()+days); return `${pad2(x.getMonth()+1)}.${pad2(x.getDate())}.${x.getFullYear()}`; };
+      const I = (d, status, task, off, extra={}) => ({ d, status, task, date: typeof off==="number" ? at(off) : off, sort:"", sp:false, ...extra });
+      const items = [
+        I(1,"done","First-draft offer letters prepared for each converting worker",-12),
+        I(1,"done","Pay rate and schedule confirmed on each letter",-6),
+        I(1,"todo","Final offer letters issued",-1),
+        I(1,"todo","Offer letters signed and returned",8,{sp:true}),
+        I(2,"done","Pay schedule chosen",-10,{sp:true}),
+        I(2,"done","Payroll: overtime pay types added",-5),
+        I(2,"todo","Payroll: converting workers added (pay type, rate, location)",6),
+        I(2,"todo","Paid sick leave configured for each converting worker",6),
+        I(3,"done","Policy confirmed for the current payroll",-14,{sp:true}),
+        I(3,"todo","Quotes received and compared side by side","On arrival",{sort:at(4)}),
+        I(3,"todo","Carrier chosen; everyone covered from the conversion date",7,{sp:true}),
+        I(4,"done","Required poster set matched to the wage order",-3),
+        I(4,"todo","Posters up at the worksite",-2,{sp:true}),
+        I(5,"todo","First payroll run to preview",25),
+        I(5,"todo","First payroll register approved in writing",25,{sp:true}),
+        I(5,"todo","First payroll submitted",26),
+        I(6,"todo","Completion notice",33) ].map((x,k)=>({n:k+1, ...x}));
+      transition = { released:true, asOf: at(0), conversion: at(14), updated:"", by:"California Fractional HR",
+        deliverables:[{n:1,name:"Offer letters"},{n:2,name:"Payroll setup"},{n:3,name:"Workers' comp"},{n:4,name:"Required posters"},{n:5,name:"First payroll"},{n:6,name:"Close"}],
+        items };
+      step = steps.indexOf("transition");
+    }
     document.getElementById("gate").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
     render(); return;
@@ -1851,7 +2030,7 @@ async function completeAll(){
     const st = await api({action:"state", token});
     if(!st.ok){ gateShow(st.error==="revoked_token" ? "revoked" : "invalid"); return; }
     company = st.company||""; submitted = st.submitted||null; requests = st.requests||[]; metrics = st.metrics||null; findings = st.findings||null;
-    principal = !!st.principal; calendar = st.calendar||null;
+    principal = !!st.principal; calendar = st.calendar||null; transition = st.transition||null;
     Object.entries(st.answers||{}).forEach(([qid,rec])=>{
       try{ state.answers[qid]=JSON.parse(rec.v||"{}"); }catch(e){ state.answers[qid]={text:String(rec.v||"")}; }
       state.meta[qid]={by:rec.by, at:rec.at, amended:!!rec.amended};
@@ -1871,9 +2050,10 @@ async function completeAll(){
     // unsaved work and a focused field both veto the redraw.
     window.addEventListener("focus", async ()=>{
       try{ const f=await api({action:"state", token}); if(f.ok){
-        const changed = JSON.stringify([f.requests,f.metrics,f.findings,f.calendar]) !== JSON.stringify([requests,metrics,findings,calendar]);
+        const changed = JSON.stringify([f.requests,f.metrics,f.findings,f.calendar,f.transition||null]) !== JSON.stringify([requests,metrics,findings,calendar,transition]);
         requests=f.requests||requests; metrics=f.metrics||metrics; findings=f.findings||findings;
         principal = !!f.principal; calendar=f.calendar||calendar;
+        transition = f.transition||null;   // v2.16: taken as served — a page withdrawn from the record leaves the rail
         const ae=document.activeElement;
         const typing = ae && (ae.tagName==="TEXTAREA"||ae.tagName==="INPUT"||ae.tagName==="SELECT");
         if(changed && !Object.keys(dirty).length && !typing) render();
