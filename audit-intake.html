@@ -471,7 +471,7 @@ const ENDPOINT = "https://script.google.com/macros/s/AKfycbxvD_IyGgKoxJ4LZzyOL6i
 const PREVIEW_TRANSITION = location.hash === "#preview-transition"; // v2.16: preview the W-2 Transition page (sample data)
 const PREVIEW = location.protocol === "file:" || location.hash === "#preview" || location.hash === "#preview-done" || location.hash === "#preview-principal" || PREVIEW_TRANSITION;
 const PREVIEW_DONE = location.hash === "#preview-done" || location.hash === "#preview-principal" || PREVIEW_TRANSITION; // preview the post-submit (amendment-lane) state
-const PREVIEW_PRINCIPAL = location.hash === "#preview-principal"; // v2.8: preview the principal door (deliverables unlocked)
+const PREVIEW_PRINCIPAL = location.hash === "#preview-principal" || PREVIEW_TRANSITION; // v2.8: preview the principal door (deliverables unlocked); v2.17: the W-2 Transition preview is the CEO door
 const token = new URLSearchParams(location.search).get("t") || "";
 const MAX = 25*1024*1024;
 
@@ -625,7 +625,7 @@ let metrics = null;                  // Audit Dashboard record (receiver-gated: 
 let findings = null;                 // Findings ledger (v2.7 — principal-only since v2.8; powers the Retainer Dashboard)
 let principal = false;               // v2.8: true only on the principal (CEO) token — unlocks analysis, findings, calendar
 let calendar = null;                 // v2.8: Compliance Calendar entries [{date,lane,label,ref}] — principal-only
-let transition = null;               // v2.16: the W-2 Transition checklist — both doors once released; null = no page
+let transition = null;               // v2.16: the W-2 Transition checklist; v2.17: CEO (principal) door only, once released; null = no page
 let company = "", contactSeed = "";
 let step = 0;
 // v2.9 (Troy, 2026-08-24): the deliverables live as rows 5–8 of the Audit Dashboard
@@ -740,7 +740,9 @@ function renderRail(){
     // receiver still never serves the analysis layer to the shared link.
     {key:"dashboard", label:"Audit Dashboard"},
     // v2.16: the W-2 Transition page — only for an engagement whose record carries one.
-    ...(transition ? [{key:"transition", label:"W-2 Transition"}] : [])];
+    // v2.17 (Troy, 10.22.2026): the CEO's link only — never the shared crew link (the receiver
+    // never sends it there either; this is the page's own guard).
+    ...(transition && principal ? [{key:"transition", label:"W-2 Transition"}] : [])];
   const buttons = items.map((it,i)=>{
     let cnt = "";
     if (it.key.length===1){ const [a,t]=sectionAnswered(it.key); cnt = `<span class="cnt">${a}/${t}</span>`; }
@@ -1106,7 +1108,7 @@ function render(){
   // the shorter list — land those visitors on the dashboard, not a blank page.
   if (step >= steps.length){ step = steps.indexOf("dashboard"); remember(); }
   // A remembered W-2 Transition step on a record that no longer carries one lands on the dashboard.
-  if (steps[step] === "transition" && !transition){ step = steps.indexOf("dashboard"); remember(); }
+  if (steps[step] === "transition" && !(transition && principal)){ step = steps.indexOf("dashboard"); remember(); }
   renderRail();
   const key = steps[step];
   if (key === "start") return renderStart();
@@ -1992,7 +1994,7 @@ async function completeAll(){
       {id:"R-06", title:"Offer letter template and a recent signed example; wage notice sample", note:"", status:"reviewed", requested:"Aug 12", received:"Aug 13", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"E", statement:"The filed document is verified. Sample Client Co. told us in writing that no signed example exists and that no wage notice exists (08.14.2026).", files_list:[{name:"offer-letter.docx", date:"Aug 13"}]},
       {id:"R-07", title:"Photos of posting boards at each location", note:"", status:"observed", requested:"Aug 12", reviewed:"Aug 16", reviewed_by:"California Fractional HR", section:"I", statement:"On our visit to 120 Sample Way on 08.15.2026, we did not see a posting board."},
     ];
-    // v2.16: #preview-transition — the W-2 Transition page on sample data. Every date is set
+    // v2.16: #preview-transition — the W-2 Transition page on sample data, on the CEO door (v2.17). Every date is set
     // relative to today, so the preview always shows done, to-do and DUE NOW rows. Fictional.
     if (PREVIEW_TRANSITION){
       const at = days => { const x=new Date(); x.setDate(x.getDate()+days); return `${pad2(x.getMonth()+1)}.${pad2(x.getDate())}.${x.getFullYear()}`; };
