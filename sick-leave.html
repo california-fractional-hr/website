@@ -63,6 +63,20 @@
   .dl .go{margin-top:auto;padding-top:12px;font-weight:600;font-size:14.5px;color:var(--brass)}
   .dl:hover .go{color:var(--ink)}
 
+  .forms{margin-top:30px;padding-top:24px;border-top:1px solid var(--line-lt)}
+  .forms h2{font-size:1.5rem;font-weight:600;letter-spacing:-.01em}
+  .fnote{color:var(--slate);font-size:.95rem;margin-top:4px}
+  .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:16px}
+  .fcol h3{font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--slate);padding-bottom:8px;border-bottom:1px solid var(--line-lt)}
+  .fcol ul{list-style:none;margin-top:4px}
+  .fcol li{padding:10px 0;border-bottom:1px solid var(--line-lt);font-size:.95rem;line-height:1.45}
+  .fcol li b{font-weight:600}
+  .fcol .fn{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--slate);margin-left:6px;white-space:nowrap}
+  .fcol .lv{display:block;font-size:12.5px;color:var(--slate)}
+  .fcol .gl{display:block;margin-top:3px;font-size:14px}
+  .fcol .gl a{color:var(--brass);font-weight:600}
+  .fcol .gl a:hover{color:var(--ink)}
+  .fcol .sent{color:var(--slate)}
   .fine{padding:10px 0 34px}
   .fine p{font-size:13px;line-height:1.6;color:var(--slate);max-width:900px}
   .next{border-top:1px solid var(--line-lt);padding:26px 0 46px}
@@ -76,6 +90,7 @@
 
   @media (max-width:760px){
     .dls{grid-template-columns:1fr}
+    .fgrid{grid-template-columns:1fr}
   }
   @media (max-width:640px){
     .brand{font-size:17px}
@@ -135,6 +150,37 @@
         <p>Leave paperwork to the employer, pay paperwork to EDD, in order, with who files each and when.</p>
         <span class="go">Open the PDF →</span>
       </a>
+    </div>
+
+    <div class="forms" id="forms">
+      <h2>Official forms</h2>
+      <p class="fnote">Each link goes to the agency that issues the form. Checked at the source on 11.01.2026.</p>
+      <div class="fgrid">
+        <div class="fcol">
+          <h3>Filed by the employee</h3>
+          <ul>
+          <li><b>Disability insurance claim</b> <span class="fn">DE 2501, Part A</span><span class="lv">Own Serious Illness Leave</span><span class="gl"><a href="https://edd.ca.gov/en/disability/SDI_Online/" target="_blank" rel="noopener">SDI Online&nbsp;→</a> · <a href="https://edd.ca.gov/en/disability/how_to_file_a_di_claim_by_mail/" target="_blank" rel="noopener">order the paper form&nbsp;→</a></span></li>
+          </ul>
+        </div>
+        <div class="fcol">
+          <h3>Filed by the health provider</h3>
+          <ul>
+          <li><b>Medical certification</b> <span class="fn">WH-380-E or the CRD form</span><span class="lv">Own Serious Illness Leave</span><span class="gl"><a href="https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WH-380-E.pdf" target="_blank" rel="noopener">DOL WH-380-E (PDF)&nbsp;→</a> · <a href="https://calcivilrights.ca.gov/wp-content/uploads/sites/32/2022/12/CFRA-Certification-Health-Care-Provider_ENG.pdf" target="_blank" rel="noopener">CRD CFRA form (PDF)&nbsp;→</a></span></li>
+          <li><b>Provider’s certification</b> <span class="fn">DE 2501, Part B</span><span class="lv">Own Serious Illness Leave</span><span class="gl"><a href="https://edd.ca.gov/en/disability/SDI_Online/" target="_blank" rel="noopener">SDI Online&nbsp;→</a></span></li>
+          </ul>
+        </div>
+        <div class="fcol">
+          <h3>Filed by the employer</h3>
+          <ul>
+          <li><b>Notice to Employee</b> <span class="fn">Labor Code §2810.5</span><span class="lv">Paid Sick Leave</span><span class="gl"><a href="https://www.dir.ca.gov/dlse/lc_2810.5_notice.pdf" target="_blank" rel="noopener">DIR template (PDF)&nbsp;→</a></span></li>
+          <li><b>Paid sick leave poster</b><span class="lv">Paid Sick Leave</span><span class="gl"><a href="https://www.dir.ca.gov/dlse/publications/paid_sick_days_poster_template_(11_2014).pdf" target="_blank" rel="noopener">DIR poster (PDF)&nbsp;→</a></span></li>
+          <li><b>Disability insurance brochure</b> <span class="fn">DE 2515</span><span class="lv">Own Serious Illness Leave</span><span class="gl"><a href="https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2515.pdf" target="_blank" rel="noopener">EDD brochure (PDF)&nbsp;→</a></span></li>
+          <li><b>Designation as CFRA (or CFRA/FMLA)</b><span class="lv">Own Serious Illness Leave</span><span class="gl"><a href="https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WH-382.pdf" target="_blank" rel="noopener">DOL WH-382 (PDF)&nbsp;→</a></span></li>
+          <li><b>FMLA eligibility notice</b> <span class="fn">WH-381</span><span class="lv">Own Serious Illness Leave</span><span class="gl"><a href="https://www.dol.gov/sites/dolgov/files/WHD/legacy/files/WH-381.pdf" target="_blank" rel="noopener">DOL WH-381 (PDF)&nbsp;→</a></span></li>
+          <li><b>EDD’s notice of the claim</b> <span class="fn">DE 2503</span><span class="lv">Own Serious Illness Leave</span><span class="gl"><span class="sent">Sent by EDD — no blank to download</span> · <a href="https://edd.ca.gov/en/disability/employer_requirements/" target="_blank" rel="noopener">EDD employer page&nbsp;→</a></span></li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 </section>
