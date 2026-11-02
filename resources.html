@@ -70,13 +70,17 @@
   }
 
   .topics{padding:34px 0 18px}
+  .topics + .topics{padding-top:16px}
+  .shead{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 18px;padding-bottom:12px;margin-bottom:20px;border-bottom:1px solid var(--line-lt)}
+  .shead h2{font-size:1.75rem;font-weight:600;letter-spacing:-.01em}
+  .shead p{color:var(--slate);font-size:1rem}
   .tgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
   .topic{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line-lt);border-radius:4px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
   .topic:hover{border-color:var(--brass);box-shadow:0 10px 30px rgba(6,28,46,.06)}
   .topic img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:var(--ink)}
   .topic .tb{display:flex;flex-direction:column;flex:1;padding:18px 22px 20px}
   .topic .kick{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--brass)}
-  .topic h2{margin-top:6px;font-size:1.45rem;font-weight:600;letter-spacing:-.01em}
+  .topic h3{margin-top:6px;font-family:'Spectral',Georgia,serif;font-size:1.45rem;font-weight:600;line-height:1.08;letter-spacing:-.01em}
   .topic p{color:var(--slate);font-size:.98rem;margin-top:6px}
   .topic .when{margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--slate)}
   .topic .go{margin-top:auto;padding-top:14px;font-weight:600;font-size:14.5px;color:var(--brass)}
@@ -109,16 +113,41 @@
   </div>
 </section>
 
-<section class="topics">
+<section class="topics" id="leave">
   <div class="wrap">
+    <div class="shead">
+      <h2>Leave</h2>
+      <p>Who holds the job, who pays, and who files what.</p>
+    </div>
     <div class="tgrid">
       <a class="topic" href="/sick-leave">
         <img src="sick-leave-and-serious-illness-poster.jpg" alt="A two-lane calendar: sick leave does both; a serious illness splits the job and the pay" loading="lazy">
         <div class="tb">
           <span class="kick">Leave</span>
-          <h2>Sick Leave and Serious Illness</h2>
+          <h3>Sick Leave and Serious Illness</h3>
           <p>Paid is not the same as protected. A 4-minute captioned film, one-page step-by-steps for each leave, and the official forms.</p>
           <span class="when">Current as of 10.31.2026</span>
+          <span class="go">Open →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="topics" id="paga">
+  <div class="wrap">
+    <div class="shead">
+      <h2>PAGA</h2>
+      <p>How California's private enforcement law works, and what it costs.</p>
+    </div>
+    <div class="tgrid">
+      <a class="topic" href="/paga">
+        <img src="paga-story-card.jpg" alt="The PAGA Story: the California Fractional HR compass over the film's title" loading="lazy">
+        <div class="tb">
+          <span class="kick">PAGA</span>
+          <h3>The PAGA Story</h3>
+          <p>Why employees can sue on the state's behalf, and the steps that can cap the penalties. A 4-minute captioned film in five parts.</p>
+          <span class="when">Current as of 11.01.2026</span>
           <span class="go">Open →</span>
         </div>
       </a>
