@@ -401,6 +401,15 @@
   .audit-spot .cap{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--brass-2);border:1px solid rgba(216,172,78,.4);border-radius:2px;padding:8px 14px;margin-bottom:26px}
   .audit-spot .spot-cta{margin-top:2px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 
+  /* ---------- free resources band ---------- */
+  .free-res{padding:58px 0;border-top:1px solid var(--line-lt)}
+  .free-res-inner{display:flex;align-items:center;justify-content:space-between;gap:36px}
+  .free-res .eyebrow{margin-bottom:14px}
+  .free-res h2{font-size:clamp(1.6rem,3vw,2.2rem);letter-spacing:-.02em}
+  .free-res p{color:var(--slate);font-size:1.04rem;margin-top:10px;max-width:640px}
+  .free-res .btn{flex:none}
+  @media(max-width:760px){.free-res-inner{flex-direction:column;align-items:flex-start;gap:22px}}
+
   /* ---------- responsive ---------- */
   @media(max-width:1420px) and (min-width:1201px){
     .nav-links{gap:18px}
@@ -483,6 +492,7 @@
         <a href="#method">What we do</a>
         <a href="#sectors">Sectors</a>
         <a href="#about">The Practice</a>
+        <a href="/resources">Free Resources</a>
         <a href="#audit-request" class="btn btn-dark nav-cta">Request an audit</a>
       </nav>
       <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -865,6 +875,18 @@
   </div>
 </section>
 
+<!-- ============ FREE RESOURCES (below the offer, never above it) ============ -->
+<section class="free-res">
+  <div class="wrap free-res-inner reveal">
+    <div>
+      <span class="eyebrow">Free resources · No sign-up</span>
+      <h2>California's rules, one topic at a time.</h2>
+      <p>Short captioned films, one-page step-by-steps and links to the official forms, for HR professionals and executives.</p>
+    </div>
+    <a href="/resources" class="btn btn-dark">Browse free resources <span class="arr">→</span></a>
+  </div>
+</section>
+
 <!-- ============ FOOTER ============ -->
 <footer>
   <div class="wrap">
@@ -886,6 +908,7 @@
         <a href="#method">What we do</a>
         <a href="#sectors">Sectors served</a>
         <a href="#about">The Practice</a>
+        <a href="/resources">Free resources</a>
       </div>
       <div class="foot-col">
         <h5>Service area</h5>
