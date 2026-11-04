@@ -50,10 +50,15 @@
   .page-head p{color:var(--slate-lt);max-width:680px;margin-top:14px;font-size:1.02rem}
 
   .res{padding:34px 0 18px}
-  /* The film is 4:5 (cut for the LinkedIn feed), so it sits beside its contents rather than across the page. */
-  .pgrid{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:34px;align-items:start}
+  /* Two cuts of one film (Troy, 11.04.2026): the widescreen cut runs across the page above 600px, with the
+     parts listed below it; phones get the tall LinkedIn cut. */
+  .pgrid{display:grid;grid-template-columns:1fr;gap:30px;align-items:start}
   .film{background:#fff;border:1px solid var(--line-lt);border-radius:4px;overflow:hidden;box-shadow:0 10px 30px rgba(6,28,46,.06)}
-  .film video{display:block;width:100%;height:auto;background:var(--ink);aspect-ratio:4/5}
+  .film video{display:block;width:100%;height:auto;background:#072942}
+  .film .v-wide{aspect-ratio:16/9}
+  .film .v-tall{aspect-ratio:4/5;display:none}
+  .parts{columns:2;column-gap:34px}
+  .parts li{break-inside:avoid}
   .pside h2{font-size:1.5rem;font-weight:600;letter-spacing:-.01em}
   .meta{display:block;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass)}
   .pside > p{color:var(--slate);font-size:.98rem;margin-top:8px}
@@ -75,8 +80,8 @@
   footer a{color:var(--brass-2)}
 
   @media (max-width:860px){
-    .pgrid{grid-template-columns:1fr;gap:24px}
-    .film{max-width:440px;width:100%;margin:0 auto}
+    .pgrid{gap:24px}
+    .parts{columns:1}
   }
   @media (max-width:640px){
     .brand{font-size:17px}
@@ -84,6 +89,11 @@
     .back{padding:9px 13px;font-size:13.5px;white-space:nowrap}
     .page-head{padding:32px 0 30px}
     .res{padding:24px 0 12px}
+  }
+  @media (max-width:600px){
+    .film{max-width:440px;width:100%;margin:0 auto}
+    .film .v-wide{display:none}
+    .film .v-tall{display:block}
   }
 </style>
 </head>
@@ -115,7 +125,10 @@
 <section class="res">
   <div class="wrap pgrid">
     <div class="film">
-      <video controls preload="metadata" playsinline poster="paga-story-poster.jpg" aria-label="The PAGA Story, a captioned film in five parts">
+      <video class="v-wide" controls preload="none" playsinline poster="paga-story-wide-poster.jpg" aria-label="The PAGA Story, a captioned film in five parts">
+        <source src="paga-story-wide.mp4" type="video/mp4">
+      </video>
+      <video class="v-tall" controls preload="none" playsinline poster="paga-story-poster.jpg" aria-label="The PAGA Story, a captioned film in five parts">
         <source src="paga-story.mp4" type="video/mp4">
       </video>
     </div>
